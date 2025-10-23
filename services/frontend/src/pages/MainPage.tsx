@@ -97,8 +97,8 @@ export const MainPage: React.FC = () => {
                   <p className="text-sm text-gray-600">
                     {searchResults.data?.total_results || 0} results for "{searchQuery}"
                   </p>
-                  {searchResults.data?.results && (
-                    <SearchResults results={searchResults.data.results} query={searchQuery} />
+                  {searchResults.data?.chunks && (
+                    <SearchResults results={searchResults.data.chunks} query={searchQuery} />
                   )}
                 </>
               ) : (
