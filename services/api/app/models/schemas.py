@@ -1,8 +1,21 @@
 """Pydantic schemas for request/response validation."""
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from uuid import UUID
+from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
+
+
+class DocumentType(str, Enum):
+    """Supported document types."""
+    PDF = "pdf"
+    DOCX = "docx"
+    TXT = "txt"
+    MD = "md"
+    CSV = "csv"
+    XLSX = "xlsx"
+    PPTX = "pptx"
+    HTML = "html"
 
 
 # Document Schemas
@@ -28,6 +41,11 @@ class DocumentChunkResponse(BaseModel):
     chunk_index: int
     chunk_text: str
     token_count: Optional[int] = None
+    section_title: Optional[str] = None
+    section_level: Optional[int] = 0
+    page_number: Optional[int] = None
+    chunk_tokens: Optional[int] = None
+    chunk_metadata: Dict[str, Any] = {}
     created_at: datetime
 
 
@@ -91,6 +109,9 @@ class SearchResultItem(BaseModel):
     chunk_text: str
     chunk_index: int
     score: float = Field(..., description="Similarity score")
+    section_title: Optional[str] = None
+    page_number: Optional[int] = None
+    chunk_metadata: Dict[str, Any] = {}
 
 
 class SearchResponse(BaseModel):
