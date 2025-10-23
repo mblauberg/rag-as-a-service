@@ -39,3 +39,25 @@ def test_model_info_valid():
     )
     assert model.name == "llama3.2"
     assert model.size == "2GB"
+
+
+def test_model_info_with_provider_fields():
+    """Model schema includes provider, display_name, description, capabilities"""
+    from app.models.schemas import Model
+
+    model = Model(
+        name="openai:gpt-5",
+        display_name="GPT-5",
+        provider="openai",
+        size="N/A",
+        description="Best intelligence, coding/math excellence",
+        capabilities=["reasoning", "coding", "creative"],
+        modified_at="2025-10-24T10:00:00Z"
+    )
+
+    assert model.name == "openai:gpt-5"
+    assert model.display_name == "GPT-5"
+    assert model.provider == "openai"
+    assert model.description == "Best intelligence, coding/math excellence"
+    assert "reasoning" in model.capabilities
+    assert len(model.capabilities) == 3

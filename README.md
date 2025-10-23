@@ -425,6 +425,26 @@ Visit the API docs for interactive testing:
 - Embedder Service: http://localhost:8001/docs
 - Generator Service: http://localhost:8002/api/v1/docs
 
+## Multi-Provider Model Support
+
+The system supports multiple LLM providers for summary generation:
+
+- **Ollama** (local, default)
+- **OpenAI** (GPT-5, GPT-4.1)
+- **Anthropic** (Claude models)
+- **Google** (Gemini models)
+
+See [Multi-Provider Setup Guide](docs/MULTI_PROVIDER_SETUP.md) for configuration details.
+
+To enable additional providers, set environment variables:
+
+```bash
+export ENABLE_OPENAI=true
+export OPENAI_API_KEY=sk-...
+```
+
+Models from all enabled providers appear automatically in the frontend dropdown.
+
 ## Configuration
 
 ### Environment Variables

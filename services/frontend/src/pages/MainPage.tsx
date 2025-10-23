@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { EnhancedSearchBar } from '../components/search/EnhancedSearchBar';
-import { ModelSelector } from '../components/search/ModelSelector';
 import { UploadModal } from '../components/upload/UploadModal';
 import { Button } from '../components/ui/button';
 import { useSearchWithDebounce } from '../hooks/useSearchWithDebounce';
 import { useDocuments } from '../hooks/useDocuments';
+import { useModels } from '../hooks/useModels';
 import { DocumentCard } from '../components/documents/DocumentCard';
 import { SearchResults } from '../components/search/SearchResults';
 import { motion } from 'framer-motion';
@@ -27,6 +27,7 @@ export const MainPage: React.FC = () => {
 
   const searchResults = useSearchWithDebounce(searchQuery, selectedModel);
   const documents = useDocuments(1, 20);
+  const models = useModels();
 
   const showSearch = searchQuery.length > 0;
   const dataToDisplay = showSearch ? searchResults : documents;
@@ -64,16 +65,14 @@ export const MainPage: React.FC = () => {
 
       {/* Hero Search */}
       <main className="container mx-auto px-4">
-        <div className="py-12 space-y-4">
-          <div className="flex justify-center">
-            <ModelSelector
-              selectedModel={selectedModel}
-              onModelChange={setSelectedModel}
-            />
-          </div>
+        <div className="py-12">
           <EnhancedSearchBar
             value={searchQuery}
             onChange={setSearchQuery}
+            selectedModel={selectedModel}
+            onModelChange={setSelectedModel}
+            models={models.data || []}
+            modelsLoading={models.isLoading}
             autoFocus
           />
         </div>
