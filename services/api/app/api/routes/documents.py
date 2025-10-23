@@ -204,7 +204,9 @@ async def delete_document(
         http_client: HTTP client for embedder service
 
     Raises:
-        HTTPException: If document not found
+        DocumentNotFoundError: If document not found (raised by service)
+        QdrantConnectionError: If vector deletion fails
+        FileOperationError: If file deletion fails
     """
     # Create service instance with injected dependencies
     document_service = DocumentService(
@@ -212,10 +214,5 @@ async def delete_document(
         http_client=http_client
     )
 
-    deleted = await document_service.delete_document(db, document_id)
-
-    if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Document {document_id} not found"
-        )
+    # Service now raises DocumentNotFoundError instead of returning False
+    await document_service.delete_document(db, document_id)
