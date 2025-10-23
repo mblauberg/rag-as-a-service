@@ -220,7 +220,7 @@ test_document_upload() {
     echo "This is a test document for RAAS integration testing. It contains sample text about artificial intelligence, machine learning, and natural language processing." > "$TEST_DOC_PATH"
 
     # Upload document
-    local response=$(curl -s -X POST "$API_URL/api/v1/documents" \
+    local response=$(curl -s -X POST "$API_URL/api/v1/documents/upload" \
         -F "file=@$TEST_DOC_PATH" \
         -F "title=Integration Test Document" \
         -F "description=Test document for integration testing")
