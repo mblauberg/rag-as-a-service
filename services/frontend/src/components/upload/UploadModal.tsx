@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUploadDocument } from '../../hooks/useDocuments';
 import {
   Dialog,
@@ -35,8 +35,16 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const uploadDocument = useUploadDocument();
+
+  // Clear error when modal opens
+  useEffect(() => {
+    if (open) {
+      setError(null);
+    }
+  }, [open]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -61,6 +69,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
+    setError(null);
 
     const files = Array.from(e.dataTransfer.files);
     const validFile = files.find(f =>
@@ -68,16 +77,32 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     );
 
     if (validFile) {
+      const MAX_SIZE = 100 * 1024 * 1024; // 100MB
+      if (validFile.size > MAX_SIZE) {
+        setError('File size must be less than 100MB');
+        return;
+      }
+
       setFile(validFile);
       if (!title) {
         setTitle(validFile.name.replace(/\.[^/.]+$/, ''));
       }
+    } else if (files.length > 0) {
+      setError('Please upload a PDF, DOCX, or TXT file');
     }
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
+      setError(null);
+
+      const MAX_SIZE = 100 * 1024 * 1024; // 100MB
+      if (selectedFile.size > MAX_SIZE) {
+        setError('File size must be less than 100MB');
+        return;
+      }
+
       setFile(selectedFile);
       if (!title) {
         setTitle(selectedFile.name.replace(/\.[^/.]+$/, ''));
@@ -91,6 +116,8 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     if (!file || !title) {
       return;
     }
+
+    setError(null);
 
     try {
       const result = await uploadDocument.mutateAsync({
@@ -108,6 +135,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
       setDescription('');
     } catch (error) {
       console.error('Upload failed:', error);
+      setError(error instanceof Error ? error.message : 'Failed to upload document');
     }
   };
 
@@ -169,6 +197,12 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               </div>
             </label>
           </div>
+
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Title *</label>
