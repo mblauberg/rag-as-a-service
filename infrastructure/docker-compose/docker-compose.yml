@@ -141,12 +141,26 @@ services:
     ports:
       - "8002:8002"
     environment:
+      # Ollama Configuration
       - OLLAMA_URL=http://ollama:11434
       - DEFAULT_MODEL=llama3.2
+      - ENABLE_OLLAMA=true
       - MAX_CHUNKS=5
       - TEMPERATURE=0.1
       - MAX_TOKENS=2000
       - TIMEOUT=30
+
+      # OpenAI (optional)
+      - ENABLE_OPENAI=${ENABLE_OPENAI:-false}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+
+      # Anthropic (optional)
+      - ENABLE_ANTHROPIC=${ENABLE_ANTHROPIC:-false}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+
+      # Google (optional)
+      - ENABLE_GOOGLE=${ENABLE_GOOGLE:-false}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
     depends_on:
       ollama:
         condition: service_healthy
