@@ -227,7 +227,7 @@ test_document_upload() {
 
     # Check if upload was successful
     if echo "$response" | grep -q '"id"'; then
-        DOCUMENT_ID=$(echo "$response" | grep -o '"id":[0-9]*' | grep -o '[0-9]*')
+        DOCUMENT_ID=$(echo "$response" | grep -o '"id": *"[^"]*"' | head -1 | grep -o '"[0-9a-f-]*"' | tr -d '"')
         record_test "Document upload" "PASS"
         print_info "Document ID: $DOCUMENT_ID"
     else
