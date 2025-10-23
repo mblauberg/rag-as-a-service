@@ -40,6 +40,7 @@ class DocumentResponse(DocumentBase):
     file_name: str
     file_type: str
     file_size: int
+    file_path: Optional[str] = None
     upload_status: str
     embedding_status: str
     created_at: datetime

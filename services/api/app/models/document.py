@@ -19,7 +19,7 @@ class Document(Base):
     file_name = Column(String(500), nullable=False)
     file_type = Column(String(50), nullable=False)
     file_size = Column(Integer, nullable=False)
-    file_path = Column(String(500), nullable=True)
+    file_path = Column(String(1000), nullable=True)
     upload_status = Column(String(50), default="pending", nullable=False)
     embedding_status = Column(String(50), default="pending", nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
