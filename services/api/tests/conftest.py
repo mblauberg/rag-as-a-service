@@ -6,6 +6,7 @@ os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("QDRANT_URL", "http://localhost:6333")
 os.environ.setdefault("EMBEDDER_URL", "http://localhost:8001")
 os.environ.setdefault("GENERATOR_URL", "http://localhost:8002")
+os.environ.setdefault("UPLOAD_DIR", "/tmp/raas-test-uploads")
 
 import pytest
 import pytest_asyncio

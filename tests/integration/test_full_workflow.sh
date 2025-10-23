@@ -163,7 +163,7 @@ start_services() {
     print_header "Waiting for Services"
 
     wait_for_service "API Health Check" "$API_URL/api/v1/health" || exit 1
-    wait_for_service "API Ready Check" "$API_URL/api/v1/health/ready" || exit 1
+    wait_for_service "API Ready Check" "$API_URL/api/v1/ready" || exit 1
     wait_for_service "Embedder Health Check" "$EMBEDDER_URL/health" || exit 1
     wait_for_service "Frontend" "$FRONTEND_URL" || exit 1
 
@@ -190,7 +190,7 @@ test_health_endpoints() {
     fi
 
     # Test API ready
-    if curl -s -f "$API_URL/api/v1/health/ready" > /dev/null 2>&1; then
+    if curl -s -f "$API_URL/api/v1/ready" > /dev/null 2>&1; then
         record_test "API ready endpoint" "PASS"
     else
         record_test "API ready endpoint" "FAIL"
