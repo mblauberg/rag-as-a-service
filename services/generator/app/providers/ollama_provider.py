@@ -25,49 +25,15 @@ class OllamaProvider(ModelProvider):
 
     def is_available(self) -> bool:
         """Check if Ollama is accessible."""
-        # For testing purposes, we check if client has check_health method
-        # In production, this would do an actual health check
-        if hasattr(self.client, 'check_health'):
-            import asyncio
-            import inspect
-            # If check_health is a coroutine, we need to handle it
-            try:
-                result = self.client.check_health()
-
-                if inspect.iscoroutine(result):
-                    # Handle async mock or real async function
-                    try:
-                        # Try to get the running loop
-                        loop = asyncio.get_running_loop()
-                        # We're in an async context - use nest_asyncio if available
-                        try:
-                            import nest_asyncio
-                            nest_asyncio.apply()
-                            return loop.run_until_complete(result)
-                        except ImportError:
-                            # Without nest_asyncio, we can't properly wait
-                            # Create task and give loop a chance with _step
-                            task = loop.create_task(result)
-                            # Force the loop to process the task
-                            loop._run_once()  # Private API, but necessary
-                            if task.done():
-                                return task.result()
-                            task.cancel()
-                            return False
-                    except RuntimeError:
-                        # No running loop, we can use run_until_complete
-                        try:
-                            loop = asyncio.get_event_loop()
-                        except RuntimeError:
-                            loop = asyncio.new_event_loop()
-                            asyncio.set_event_loop(loop)
-                        return loop.run_until_complete(result)
-                else:
-                    # Synchronous result
-                    return result
-            except Exception as e:
-                return False
-        return True
+        try:
+            # Simple sync check - try to connect to Ollama
+            import requests
+            response = requests.get(f"{self.base_url}/api/tags", timeout=2)
+            return response.status_code == 200
+        except Exception:
+            # If Ollama is not available, return False
+            # This allows the provider to gracefully not register
+            return False
 
     async def list_models(self) -> List[Model]:
         """
