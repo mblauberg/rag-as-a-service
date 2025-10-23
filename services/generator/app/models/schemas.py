@@ -31,8 +31,15 @@ class ModelInfo(BaseModel):
     modified_at: str = Field(..., description="Last modified timestamp")
 
 
-# Temporary alias for Model (will be replaced in Task 2)
-Model = ModelInfo
+class Model(BaseModel):
+    """Model information with provider details."""
+    name: str  # Unique identifier (e.g., "llama3.3:70b", "openai:gpt-5")
+    display_name: str  # Human-readable name (e.g., "Llama 3.3 70B", "GPT-5")
+    provider: str  # Provider name: "ollama", "openai", "anthropic", "google"
+    size: str  # Model size (e.g., "8B", "70B", "N/A" for API models)
+    description: str = ""  # Capability description
+    capabilities: List[str] = []  # ["reasoning", "coding", "creative"]
+    modified_at: str  # ISO 8601 timestamp
 
 
 class ModelsResponse(BaseModel):
