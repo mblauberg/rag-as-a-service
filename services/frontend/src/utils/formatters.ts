@@ -16,12 +16,19 @@ export function formatDate(dateString: string, includeTime = false): string {
 }
 
 /**
- * Format file size in bytes to human-readable format.
+ * Format bytes to human-readable file size.
  */
-export function formatFileSize(bytes: number): string {
+export function formatBytes(bytes: number): string {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
   return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+
+/**
+ * Capitalize first letter of status string.
+ */
+export function formatStatus(status: string): string {
+  return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
 /**
