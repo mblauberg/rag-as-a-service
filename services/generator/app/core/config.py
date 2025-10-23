@@ -1,4 +1,5 @@
 """Application configuration using Pydantic settings."""
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -15,9 +16,10 @@ class Settings(BaseSettings):
     port: int = 8002
     log_level: str = "INFO"
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file=".env",
+        case_sensitive=False
+    )
 
 
 # Global settings instance

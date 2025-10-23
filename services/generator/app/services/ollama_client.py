@@ -1,6 +1,6 @@
 """Ollama API client wrapper."""
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import ollama
 from app.core.config import settings
 
@@ -35,7 +35,7 @@ class OllamaClient:
         self,
         model: str,
         prompt: str,
-        temperature: float = None
+        temperature: Optional[float] = None
     ) -> Dict[str, Any]:
         """
         Generate text using Ollama model.
