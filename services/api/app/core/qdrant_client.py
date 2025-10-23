@@ -1,33 +1,38 @@
 """Qdrant client wrapper for vector operations."""
 from typing import List, Optional
-from qdrant_client import QdrantClient
+from qdrant_client import AsyncQdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 
 from app.core.config import settings
 
 
 class QdrantClientWrapper:
-    """Wrapper class for Qdrant client operations."""
+    """Wrapper class for Qdrant async client operations."""
 
     def __init__(self):
-        """Initialize Qdrant client."""
-        self.client = QdrantClient(url=settings.qdrant_url)
+        """Initialize async Qdrant client."""
+        self.client = AsyncQdrantClient(url=settings.qdrant_url)
         self.collection_name = "documents"
-        self._ensure_collection()
+        self._initialized = False
 
-    def _ensure_collection(self) -> None:
+    async def _ensure_collection(self) -> None:
         """Ensure the documents collection exists with proper configuration."""
-        collections = self.client.get_collections().collections
-        collection_names = [c.name for c in collections]
+        if self._initialized:
+            return
+
+        collections = await self.client.get_collections()
+        collection_names = [c.name for c in collections.collections]
 
         if self.collection_name not in collection_names:
-            self.client.create_collection(
+            await self.client.create_collection(
                 collection_name=self.collection_name,
                 vectors_config=VectorParams(
                     size=384,  # all-MiniLM-L6-v2 dimension
                     distance=Distance.COSINE
                 )
             )
+
+        self._initialized = True
 
     async def search(
         self,
@@ -48,6 +53,8 @@ class QdrantClientWrapper:
         Returns:
             List of search results with scores and payloads
         """
+        await self._ensure_collection()
+
         query_filter = None
         if document_ids:
             query_filter = {
@@ -59,7 +66,7 @@ class QdrantClientWrapper:
                 ]
             }
 
-        results = self.client.search(
+        results = await self.client.search(
             collection_name=self.collection_name,
             query_vector=query_vector,
             limit=limit,
@@ -84,7 +91,9 @@ class QdrantClientWrapper:
         Args:
             document_id: Document UUID to delete vectors for
         """
-        self.client.delete(
+        await self._ensure_collection()
+
+        await self.client.delete(
             collection_name=self.collection_name,
             points_selector={
                 "filter": {
@@ -98,7 +107,7 @@ class QdrantClientWrapper:
             }
         )
 
-    def health_check(self) -> bool:
+    async def health_check(self) -> bool:
         """
         Check if Qdrant is accessible.
 
@@ -106,7 +115,7 @@ class QdrantClientWrapper:
             True if Qdrant is healthy, False otherwise
         """
         try:
-            self.client.get_collections()
+            await self.client.get_collections()
             return True
         except Exception:
             return False

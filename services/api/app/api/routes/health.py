@@ -60,7 +60,7 @@ async def readiness_check(
 
     # Check Qdrant
     try:
-        if qdrant_client.health_check():
+        if await qdrant_client.health_check():
             services.append(ServiceStatus(
                 name="qdrant",
                 status="ready",
