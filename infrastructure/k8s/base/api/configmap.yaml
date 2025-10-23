@@ -11,7 +11,7 @@ data:
   MAX_UPLOAD_SIZE: "104857600"
   API_HOST: "0.0.0.0"
   API_PORT: "8000"
-  API_WORKERS: "4"
+  API_WORKERS: "2"
   CORS_ORIGINS: '["http://localhost:3000","http://localhost"]'
   LOG_LEVEL: "INFO"
   RERANKER_MODEL: "BAAI/bge-reranker-v2-m3"

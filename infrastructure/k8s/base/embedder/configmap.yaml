@@ -5,9 +5,9 @@ metadata:
   namespace: raas
 data:
   QDRANT_URL: "http://qdrant:6333"
-  MODEL_NAME: "BAAI/bge-m3"
-  MODEL_DIMENSION: "1024"
-  BATCH_SIZE: "16"
+  MODEL_NAME: "sentence-transformers/all-MiniLM-L6-v2"
+  MODEL_DIMENSION: "384"
+  BATCH_SIZE: "32"
   MAX_SEQUENCE_LENGTH: "512"
   API_HOST: "0.0.0.0"
   API_PORT: "8001"
