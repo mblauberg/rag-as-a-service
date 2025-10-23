@@ -4,7 +4,7 @@ import { useDocument, useDeleteDocument } from '../hooks/useDocuments';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
-import { formatBytes, formatDate, formatStatus, getStatusColor } from '../utils/formatting';
+import { formatBytes, formatDate, formatStatus, getStatusColor } from '../utils/formatters';
 
 export const DocumentDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,7 +58,7 @@ export const DocumentDetailPage: React.FC = () => {
   const getStatusBadge = (status: string) => {
     return (
       <span
-        className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(status)}`}
+        className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(status as any)}`}
       >
         {formatStatus(status)}
       </span>
