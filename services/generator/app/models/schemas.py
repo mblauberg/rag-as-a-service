@@ -44,7 +44,7 @@ class Model(BaseModel):
 
 class ModelsResponse(BaseModel):
     """List of available models."""
-    models: List[ModelInfo] = Field(..., description="Available Ollama models")
+    models: List[Model] = Field(..., description="Available models from all providers")
 
 
 class HealthResponse(BaseModel):
