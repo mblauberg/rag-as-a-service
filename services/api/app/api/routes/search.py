@@ -1,4 +1,5 @@
 """Semantic search endpoint."""
+import logging
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +12,9 @@ from app.core.qdrant_client import QdrantClientWrapper
 from app.core.config import settings
 from app.models.document import Document, DocumentChunk
 from app.models.schemas import SearchRequest, SearchResponse, SearchResultItem
+from app.services.generator_client import GeneratorClient
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -78,7 +81,9 @@ async def search_documents(
     if not qdrant_results:
         return SearchResponse(
             query=request.query,
+            summary=None,
             results=[],
+            model_used=None,
             total_results=0
         )
 
@@ -114,8 +119,40 @@ async def search_documents(
                 )
             )
 
+    # Generate summary if model specified
+    summary = None
+    model_used = None
+
+    if request.model and results:
+        generator_client = GeneratorClient()
+
+        # Prepare chunks for generator (top 5)
+        chunks_for_gen = [
+            {
+                "text": result.chunk_text,
+                "document_id": str(result.document_id),
+                "chunk_index": result.chunk_index
+            }
+            for result in results[:5]
+        ]
+
+        gen_response = await generator_client.generate_summary(
+            query=request.query,
+            chunks=chunks_for_gen,
+            model=request.model
+        )
+
+        if gen_response:
+            summary = gen_response.get("summary")
+            model_used = gen_response.get("model_used")
+            logger.info(f"Generated summary using {model_used}")
+        else:
+            logger.warning("Summary generation failed, returning chunks only")
+
     return SearchResponse(
         query=request.query,
+        summary=summary,
         results=results,
+        model_used=model_used,
         total_results=len(results)
     )

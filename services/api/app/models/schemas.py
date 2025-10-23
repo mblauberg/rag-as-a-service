@@ -98,6 +98,7 @@ class SearchRequest(BaseModel):
     query: str = Field(..., min_length=1, description="Search query text")
     limit: int = Field(10, ge=1, le=100, description="Maximum number of results")
     document_ids: Optional[List[UUID]] = Field(None, description="Optional list of document IDs to filter")
+    model: Optional[str] = Field(None, description="LLM model for generation (optional)")
 
 
 class SearchResultItem(BaseModel):
@@ -115,10 +116,12 @@ class SearchResultItem(BaseModel):
 
 
 class SearchResponse(BaseModel):
-    """Schema for search response."""
+    """Schema for search response with optional generation."""
 
     query: str
+    summary: Optional[str] = Field(None, description="Generated summary with citations")
     results: List[SearchResultItem]
+    model_used: Optional[str] = Field(None, description="Model used for generation")
     total_results: int
 
 

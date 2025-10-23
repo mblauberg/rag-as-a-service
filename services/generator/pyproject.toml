@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "raas-generator"
+version = "0.1.0"
+description = "LLM generation service for RAAS"
+authors = ["RAAS Team"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.109.0"
+uvicorn = {extras = ["standard"], version = "^0.27.0"}
+pydantic = "^2.5.3"
+pydantic-settings = "^2.1.0"
+ollama = "^0.1.6"
+httpx = "^0.25.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+pytest-asyncio = "^0.21.1"
+pytest-cov = "^4.1.0"
+httpx = "^0.25.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

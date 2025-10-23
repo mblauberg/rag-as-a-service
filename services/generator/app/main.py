@@ -1,12 +1,11 @@
-"""FastAPI application entrypoint."""
+"""FastAPI application entrypoint for Generator service."""
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.core.database import init_db
-from app.api.routes import documents, search, health, models
+from app.api.routes import generate, models, health
 
 # Configure logging
 logging.basicConfig(
@@ -26,29 +25,22 @@ async def lifespan(app: FastAPI):
         app: FastAPI application instance
     """
     # Startup
-    logger.info("Starting RAAS API service")
-    logger.info(f"Database URL: {settings.database_url.split('@')[1] if '@' in settings.database_url else 'configured'}")
-    logger.info(f"Qdrant URL: {settings.qdrant_url}")
-    logger.info(f"Embedder URL: {settings.embedder_url}")
-    logger.info(f"Generator URL: {settings.generator_url}")
-
-    # Initialize database tables (in production, use proper migrations)
-    try:
-        await init_db()
-        logger.info("Database initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize database: {e}")
+    logger.info("Starting RAAS Generator service")
+    logger.info(f"Ollama URL: {settings.ollama_url}")
+    logger.info(f"Default model: {settings.default_model}")
+    logger.info(f"Max chunks: {settings.max_chunks}")
+    logger.info(f"Temperature: {settings.temperature}")
 
     yield
 
     # Shutdown
-    logger.info("Shutting down RAAS API service")
+    logger.info("Shutting down RAAS Generator service")
 
 
 # Create FastAPI application
 app = FastAPI(
-    title="RAAS API",
-    description="Retrieval-Augmented Generation as a Service - API Gateway",
+    title="RAAS Generator",
+    description="Retrieval-Augmented Generation as a Service - Generator Service",
     version="0.1.0",
     lifespan=lifespan
 )
@@ -65,25 +57,19 @@ app.add_middleware(
 # Include routers
 app.include_router(
     health.router,
-    prefix="/api/v1/health",
+    prefix="/health",
     tags=["health"]
 )
 
 app.include_router(
-    documents.router,
-    prefix="/api/v1/documents",
-    tags=["documents"]
-)
-
-app.include_router(
-    search.router,
-    prefix="/api/v1/search",
-    tags=["search"]
+    generate.router,
+    prefix="/api/v1/generate",
+    tags=["generation"]
 )
 
 app.include_router(
     models.router,
-    prefix="/api/v1",
+    prefix="/api/v1/models",
     tags=["models"]
 )
 
@@ -92,7 +78,7 @@ app.include_router(
 async def root():
     """Root endpoint."""
     return {
-        "message": "RAAS API Gateway",
+        "message": "RAAS Generator Service",
         "version": "0.1.0",
         "docs": "/docs"
     }

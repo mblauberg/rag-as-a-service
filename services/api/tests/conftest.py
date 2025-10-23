@@ -1,4 +1,12 @@
 """Pytest configuration and fixtures for API tests."""
+import os
+
+# Set test environment variables before importing app modules
+os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+os.environ.setdefault("QDRANT_URL", "http://localhost:6333")
+os.environ.setdefault("EMBEDDER_URL", "http://localhost:8001")
+os.environ.setdefault("GENERATOR_URL", "http://localhost:8002")
+
 import pytest
 import pytest_asyncio
 from typing import AsyncGenerator

@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     # Embedder Service Configuration
     embedder_url: str
 
+    # Generator Service Configuration
+    generator_url: str = "http://localhost:8002"
+
     # File Upload Configuration
     upload_dir: str = "/app/uploads"
     max_upload_size: int = 104857600  # 100MB

@@ -55,11 +55,24 @@ RAAS enables intelligent document search through semantic understanding. Upload 
 │  Port 8000  │      │  Port 5432   │      │  Port 6333  │
 └──────┬──────┘      └──────────────┘      └──────┬──────┘
        │                                           ▲
-       ▼                                           │
-┌─────────────┐                                   │
-│  Embedder   │───────────────────────────────────┘
-│  Port 8001  │
-└─────────────┘
+       │                                           │
+       ├──────────────────────────────────────────┘
+       │             ┌─────────────┐
+       │             │  Embedder   │
+       │             │  Port 8001  │
+       │             └─────────────┘
+       │
+       ├──────────────────────────────────┐
+       │             ┌─────────────┐      │
+       └────────────▶│  Generator  │      │
+                     │  Port 8002  │      │
+                     └──────┬──────┘      │
+                            │             │
+                            ▼             │
+                     ┌─────────────┐      │
+                     │   Ollama    │◀─────┘
+                     │ Port 11434  │
+                     └─────────────┘
 ```
 
 ### Technology Stack
@@ -136,7 +149,9 @@ open http://localhost:3000
 - Frontend: http://localhost:3000
 - API: http://localhost:8000/api/v1/docs
 - Embedder: http://localhost:8001/docs
+- Generator: http://localhost:8002/api/v1/docs
 - Qdrant Dashboard: http://localhost:6333/dashboard
+- Ollama: http://localhost:11434
 
 ### Kubernetes Deployment (Local with Kind)
 
@@ -197,6 +212,24 @@ poetry run pytest
 poetry run pytest --cov=app --cov-report=html
 ```
 
+#### Generator Service
+
+```bash
+cd services/generator
+
+# Install dependencies
+poetry install
+
+# Run locally (requires Ollama running)
+poetry run uvicorn app.main:app --reload --port 8002
+
+# Run tests
+poetry run pytest
+
+# Run tests with coverage
+poetry run pytest --cov=app --cov-report=html
+```
+
 #### Frontend
 
 ```bash
@@ -241,11 +274,15 @@ cd services/api && poetry run pytest
 # Backend tests (Embedder)
 cd services/embedder && poetry run pytest
 
+# Backend tests (Generator)
+cd services/generator && poetry run pytest
+
 # Frontend tests
 cd services/frontend && npm test
 
 # Integration tests
 ./tests/integration/test_full_workflow.sh
+./tests/integration/test_generation_flow.sh
 ```
 
 ### Integration Test Suite
@@ -333,8 +370,16 @@ POST /api/v1/search
 Content-Type: application/json
 Body: {
   "query": "search query text",
-  "top_k": 10  // optional, default 10
+  "limit": 10,  // optional, default 10
+  "model": "llama3.2"  // optional, enables generation
 }
+```
+
+#### Models
+
+```bash
+# List available LLM models
+GET /api/v1/models
 ```
 
 ### Response Examples
@@ -357,17 +402,19 @@ Body: {
 **Search Response:**
 ```json
 {
-  "results": [
+  "query": "search query text",
+  "summary": "Generated summary with citations [1] [2].",
+  "chunks": [
     {
-      "document_id": 1,
+      "document_id": "uuid",
       "document_title": "My Document",
-      "chunk_text": "Relevant text chunk...",
+      "text": "Relevant text chunk...",
       "score": 0.85,
       "chunk_index": 0
     }
   ],
-  "query": "search query text",
-  "count": 1
+  "model_used": "llama3.2",
+  "total_results": 1
 }
 ```
 
@@ -376,6 +423,7 @@ Body: {
 Visit the API docs for interactive testing:
 - API Service: http://localhost:8000/api/v1/docs
 - Embedder Service: http://localhost:8001/docs
+- Generator Service: http://localhost:8002/api/v1/docs
 
 ## Configuration
 
@@ -399,6 +447,16 @@ MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
 BATCH_SIZE=32
 COLLECTION_NAME=documents
 VECTOR_SIZE=384
+```
+
+#### Generator Service
+
+```bash
+OLLAMA_URL=http://localhost:11434
+DEFAULT_MODEL=llama3.2
+MAX_CHUNKS=5
+TEMPERATURE=0.1
+LOG_LEVEL=INFO
 ```
 
 #### Frontend
@@ -439,6 +497,17 @@ raas/
 │   │   │   ├── services/      # Embedding logic
 │   │   │   └── main.py        # Application entry point
 │   │   ├── tests/             # Embedder tests
+│   │   ├── pyproject.toml     # Poetry dependencies
+│   │   └── Dockerfile
+│   │
+│   ├── generator/             # LLM generation service
+│   │   ├── app/
+│   │   │   ├── api/           # Route handlers
+│   │   │   ├── core/          # Config and dependencies
+│   │   │   ├── models/        # Pydantic schemas
+│   │   │   ├── services/      # Generation logic
+│   │   │   └── main.py        # Application entry point
+│   │   ├── tests/             # Generator tests
 │   │   ├── pyproject.toml     # Poetry dependencies
 │   │   └── Dockerfile
 │   │

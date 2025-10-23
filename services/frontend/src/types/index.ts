@@ -59,12 +59,25 @@ export interface SearchRequest {
   query: string;
   limit?: number;
   document_ids?: string[];
+  model?: string;  // NEW: Optional model for generation
 }
 
 export interface SearchResponse {
   query: string;
-  results: SearchResult[];
+  summary: string | null;  // NEW: Generated summary
+  chunks: SearchResult[];
+  model_used: string | null;  // NEW: Model that generated summary
   total_results: number;
+}
+
+export interface Model {
+  name: string;
+  size: string;
+  modified_at: string;
+}
+
+export interface ModelsResponse {
+  models: Model[];
 }
 
 export interface HealthStatus {

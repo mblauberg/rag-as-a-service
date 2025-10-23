@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { EnhancedSearchBar } from '../components/search/EnhancedSearchBar';
+import { ModelSelector } from '../components/search/ModelSelector';
 import { UploadModal } from '../components/upload/UploadModal';
 import { Button } from '../components/ui/button';
 import { useSearchWithDebounce } from '../hooks/useSearchWithDebounce';
@@ -21,9 +22,10 @@ import { PlusIcon } from '@radix-ui/react-icons';
  */
 export const MainPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
 
-  const searchResults = useSearchWithDebounce(searchQuery);
+  const searchResults = useSearchWithDebounce(searchQuery, selectedModel);
   const documents = useDocuments(1, 20);
 
   const showSearch = searchQuery.length > 0;
@@ -62,7 +64,13 @@ export const MainPage: React.FC = () => {
 
       {/* Hero Search */}
       <main className="container mx-auto px-4">
-        <div className="py-12">
+        <div className="py-12 space-y-4">
+          <div className="flex justify-center">
+            <ModelSelector
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
+            />
+          </div>
           <EnhancedSearchBar
             value={searchQuery}
             onChange={setSearchQuery}
@@ -97,8 +105,12 @@ export const MainPage: React.FC = () => {
                   <p className="text-sm text-gray-600">
                     {searchResults.data?.total_results || 0} results for "{searchQuery}"
                   </p>
-                  {searchResults.data?.results && (
-                    <SearchResults results={searchResults.data.results} query={searchQuery} />
+                  {searchResults.data?.chunks && (
+                    <SearchResults
+                      results={searchResults.data.chunks}
+                      query={searchQuery}
+                      searchResponse={searchResults.data}
+                    />
                   )}
                 </>
               ) : (
