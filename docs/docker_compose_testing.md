@@ -114,6 +114,4 @@ Integration tests should simulate the end‑to‑end workflow: uploading a docum
 
 ### Load testing
 
-To demonstrate scalability during the final demo, a simple load test script can perform concurrent uploads and search queries.  An example `tests/load-test.sh` is provided in the PRD.  It uploads multiple documents in parallel and issues numerous search requests, verifying that the API remains responsive.
-
-This file gives Claude Code the context necessary to generate the Docker Compose configuration and to scaffold comprehensive tests.  Remember to follow the guidelines for `CLAUDE.md` when documenting bash commands and testing procedures【860557105589140†L48-L61】.
+To demonstrate scalability during the final demo, a simple load test script can perform concurrent uploads and search queries. It uploads multiple documents in parallel and issues numerous search requests, verifying that the API remains responsive.
