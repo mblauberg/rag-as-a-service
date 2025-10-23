@@ -10,6 +10,7 @@ patchesStrategicMerge:
 - replica-patches.yaml
 - resource-patches.yaml
 - storage-patches.yaml
+- hpa-patches.yaml
 
 # Use local images
 images:
