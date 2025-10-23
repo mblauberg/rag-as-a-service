@@ -20,9 +20,20 @@ class SemanticChunker:
         Initialize semantic chunker.
 
         Args:
-            chunk_size: Target chunk size in tokens
-            overlap: Overlap size in tokens
+            chunk_size: Target chunk size in tokens (approximate due to char-to-token estimation)
+            overlap: Overlap size in tokens (approximate)
             separators: List of separators for recursive splitting
+
+        Note:
+            Uses 1:4 character-to-token ratio optimized for English prose.
+            Actual token counts may vary by ±10-20% depending on content type:
+            - Code-heavy documents: ~1:2 ratio (fewer characters per token)
+            - English prose: ~1:4 ratio (average)
+            - Non-English text: May vary significantly
+
+            The chunker applies character-based splitting first, then counts
+            actual tokens for metadata. This means chunk sizes are approximate
+            during splitting but accurately measured after creation.
         """
         self.chunk_size = chunk_size
         self.overlap = overlap

@@ -2,6 +2,7 @@
 from pathlib import Path
 from typing import List
 from docx import Document
+from docx.opc.exceptions import PackageNotFoundError
 from app.services.processors.base_processor import (
     BaseDocumentProcessor,
     DocumentElement,
@@ -25,64 +26,75 @@ class DOCXProcessor(BaseDocumentProcessor):
 
         Returns:
             ProcessedDocument with elements preserving structure
+
+        Raises:
+            ValueError: If DOCX is invalid, corrupt, or cannot be read
         """
-        doc = Document(str(file_path))
-        elements: List[DocumentElement] = []
+        try:
+            doc = Document(str(file_path))
+            elements: List[DocumentElement] = []
 
-        current_section = []
-        section_level = 0
+            current_section = []
+            section_level = 0
 
-        for para in doc.paragraphs:
-            if not para.text.strip():
-                continue
+            for para in doc.paragraphs:
+                if not para.text.strip():
+                    continue
 
-            # Detect headings by style
-            is_heading = para.style.name.startswith('Heading')
+                # Detect headings by style
+                is_heading = para.style.name.startswith('Heading')
 
-            if is_heading:
-                # Extract heading level
-                try:
-                    level = int(para.style.name.split()[-1])
-                except:
-                    level = 1
+                if is_heading:
+                    # Extract heading level
+                    try:
+                        level = int(para.style.name.split()[-1])
+                    except:
+                        level = 1
 
-                current_section = current_section[:level-1] + [para.text.strip()]
-                section_level = level
+                    current_section = current_section[:level-1] + [para.text.strip()]
+                    section_level = level
 
+                    element = DocumentElement(
+                        content=para.text.strip(),
+                        element_type='heading',
+                        metadata={'heading_level': level},
+                        section_level=level,
+                        section_title=' > '.join(current_section)
+                    )
+                else:
+                    # Regular paragraph
+                    element = DocumentElement(
+                        content=para.text.strip(),
+                        element_type='paragraph',
+                        metadata={},
+                        section_title=' > '.join(current_section) if current_section else None,
+                        section_level=section_level
+                    )
+
+                elements.append(element)
+
+            # Extract tables
+            for table_idx, table in enumerate(doc.tables):
+                table_text = self._table_to_markdown(table)
                 element = DocumentElement(
-                    content=para.text.strip(),
-                    element_type='heading',
-                    metadata={'heading_level': level},
-                    section_level=level,
-                    section_title=' > '.join(current_section)
+                    content=table_text,
+                    element_type='table',
+                    metadata={'table_index': table_idx},
+                    section_title=' > '.join(current_section) if current_section else None
                 )
-            else:
-                # Regular paragraph
-                element = DocumentElement(
-                    content=para.text.strip(),
-                    element_type='paragraph',
-                    metadata={},
-                    section_title=' > '.join(current_section) if current_section else None,
-                    section_level=section_level
-                )
+                elements.append(element)
 
-            elements.append(element)
+            metadata = {
+                'num_paragraphs': len(doc.paragraphs),
+                'num_tables': len(doc.tables),
+            }
 
-        # Extract tables
-        for table_idx, table in enumerate(doc.tables):
-            table_text = self._table_to_markdown(table)
-            element = DocumentElement(
-                content=table_text,
-                element_type='table',
-                metadata={'table_index': table_idx},
-                section_title=' > '.join(current_section) if current_section else None
-            )
-            elements.append(element)
-
-        metadata = {
-            'num_paragraphs': len(doc.paragraphs),
-            'num_tables': len(doc.tables),
-        }
+        except PackageNotFoundError:
+            raise ValueError(f"DOCX file not found or invalid: {file_path}")
+        except FileNotFoundError:
+            raise ValueError(f"DOCX file not found: {file_path}")
+        except Exception as e:
+            raise ValueError(f"Error processing DOCX: {e}")
 
         return ProcessedDocument(
             elements=elements,

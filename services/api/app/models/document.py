@@ -1,7 +1,7 @@
 """SQLAlchemy models for documents and chunks."""
 from datetime import datetime
 from uuid import uuid4
-from sqlalchemy import Column, String, Integer, Text, DateTime, ForeignKey
+from sqlalchemy import Column, String, Integer, Text, DateTime, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 
@@ -52,7 +52,7 @@ class DocumentChunk(Base):
     page_number = Column(Integer, nullable=True)
     chunk_tokens = Column(Integer, nullable=True)
     parent_chunk_id = Column(UUID(as_uuid=True), ForeignKey("document_chunks.id", ondelete="CASCADE"), nullable=True)
-    chunk_metadata = Column(JSONB, default={})
+    chunk_metadata = Column(JSONB().with_variant(JSON(), 'sqlite'), default={})
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 

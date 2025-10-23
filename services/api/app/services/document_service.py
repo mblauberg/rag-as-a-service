@@ -126,11 +126,11 @@ class DocumentService:
                     document_id=document.id,
                     chunk_index=idx,
                     chunk_text=chunk_data['content'],
-                    token_count=chunk_data.get('tokens'),
+                    token_count=None,  # Legacy field kept for backward compatibility
                     section_title=chunk_data.get('section_title'),
                     section_level=chunk_data.get('section_level', 0),
                     page_number=chunk_data.get('page_number'),
-                    chunk_tokens=chunk_data.get('tokens'),
+                    chunk_tokens=chunk_data.get('tokens'),  # New semantic chunking token count
                     chunk_metadata=chunk_data.get('metadata', {})
                 )
                 chunk_objects.append(chunk)
@@ -141,7 +141,7 @@ class DocumentService:
             await db.refresh(document)
 
             # Trigger embedding generation asynchronously
-            await self._trigger_embedding(document.id, chunk_objects)
+            await self._trigger_embedding(db, document.id, chunk_objects)
 
             return document, len(chunks_data)
 
@@ -160,13 +160,15 @@ class DocumentService:
 
     async def _trigger_embedding(
         self,
+        db: AsyncSession,
         document_id: UUID,
         chunks: List[DocumentChunk]
     ) -> None:
         """
-        Trigger embedding generation for document chunks.
+        Trigger embedding generation for document chunks and update status.
 
         Args:
+            db: Database session
             document_id: Document UUID
             chunks: List of document chunks
         """
@@ -197,11 +199,40 @@ class DocumentService:
 
                 if success:
                     logger.info(f"Successfully triggered embedding for document {document_id}")
+
+                    # Update document embedding status to completed
+                    query = select(Document).where(Document.id == document_id)
+                    db_result = await db.execute(query)
+                    document = db_result.scalar_one_or_none()
+
+                    if document:
+                        document.embedding_status = "completed"
+                        await db.commit()
+                        logger.info(f"Updated embedding status to completed for document {document_id}")
                 else:
                     logger.error(f"Failed to trigger embedding for document {document_id}")
+                    # Update status to failed
+                    query = select(Document).where(Document.id == document_id)
+                    db_result = await db.execute(query)
+                    document = db_result.scalar_one_or_none()
+
+                    if document:
+                        document.embedding_status = "failed"
+                        await db.commit()
+
                     raise EmbedderServiceError("embed_chunks", Exception("Embedder returned success=false"))
             except httpx.HTTPError as e:
                 logger.error(f"HTTP error communicating with embedder: {e}")
+
+                # Update status to failed
+                query = select(Document).where(Document.id == document_id)
+                db_result = await db.execute(query)
+                document = db_result.scalar_one_or_none()
+
+                if document:
+                    document.embedding_status = "failed"
+                    await db.commit()
+
                 raise EmbedderServiceError("embed_chunks", e)
 
         except EmbedderServiceError as e:
@@ -209,6 +240,18 @@ class DocumentService:
             # Don't re-raise - this is a background operation, document is already saved
         except Exception as e:
             logger.error(f"Unexpected error triggering embeddings: {e}")
+
+            # Update status to failed
+            try:
+                query = select(Document).where(Document.id == document_id)
+                db_result = await db.execute(query)
+                document = db_result.scalar_one_or_none()
+
+                if document:
+                    document.embedding_status = "failed"
+                    await db.commit()
+            except Exception as db_error:
+                logger.error(f"Failed to update embedding status after error: {db_error}")
 
     async def get_documents(
         self,

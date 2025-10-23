@@ -93,7 +93,7 @@ class DocumentProcessingService:
                             'section_title': current_section_title,
                             'section_level': current_section_level,
                             'page_number': current_page,
-                            'metadata': element.metadata
+                            'metadata': {}
                         })
 
                     current_section = []
@@ -105,7 +105,7 @@ class DocumentProcessingService:
             else:
                 # Add to current section
                 current_section.append(element.content)
-                if element.page_number:
+                if element.page_number is not None:
                     current_page = element.page_number
 
         # Flush final section
