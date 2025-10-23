@@ -71,6 +71,16 @@ export const SearchResults: React.FC<SearchResultsProps> = ({ results, query }) 
                 {(result.score * 100).toFixed(1)}% match
               </span>
             </div>
+            {result.section_title && (
+              <div className="text-sm text-blue-600 mb-2">
+                📍 {result.section_title}
+              </div>
+            )}
+            {result.page_number && (
+              <div className="text-sm text-gray-500 mb-2">
+                Page {result.page_number}
+              </div>
+            )}
             <p className="text-gray-700 leading-relaxed">
               {highlightText(result.chunk_text, query)}
             </p>
