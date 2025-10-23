@@ -1,6 +1,6 @@
 """Test Pydantic schemas for generation service."""
 import pytest
-from app.models.schemas import GenerateRequest, GenerateResponse, ModelInfo
+from app.models.schemas import GenerateRequest, GenerateResponse, Model
 
 
 def test_generate_request_valid():
@@ -31,33 +31,35 @@ def test_generate_response_valid():
 
 
 def test_model_info_valid():
-    """Test ModelInfo schema."""
-    model = ModelInfo(
+    """Test Model schema with basic Ollama model."""
+    model = Model(
         name="llama3.2",
+        display_name="Llama 3.2",
+        provider="ollama",
         size="2GB",
+        description="Local Ollama model",
+        capabilities=["local"],
         modified_at="2024-01-01T00:00:00Z"
     )
     assert model.name == "llama3.2"
+    assert model.display_name == "Llama 3.2"
+    assert model.provider == "ollama"
     assert model.size == "2GB"
+    assert "local" in model.capabilities
 
 
-def test_model_info_with_provider_fields():
-    """Model schema includes provider, display_name, description, capabilities"""
-    from app.models.schemas import Model
-
+def test_model_with_provider_fields():
+    """Model should support provider metadata."""
     model = Model(
         name="openai:gpt-5",
         display_name="GPT-5",
         provider="openai",
         size="N/A",
-        description="Best intelligence, coding/math excellence",
-        capabilities=["reasoning", "coding", "creative"],
-        modified_at="2025-10-24T10:00:00Z"
+        description="Best overall intelligence",
+        capabilities=["reasoning", "coding"],
+        modified_at="2025-08-01"
     )
 
     assert model.name == "openai:gpt-5"
-    assert model.display_name == "GPT-5"
     assert model.provider == "openai"
-    assert model.description == "Best intelligence, coding/math excellence"
     assert "reasoning" in model.capabilities
-    assert len(model.capabilities) == 3

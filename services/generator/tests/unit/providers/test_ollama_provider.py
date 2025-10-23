@@ -14,7 +14,8 @@ def ollama_provider():
 async def test_is_available_when_healthy(ollama_provider):
     """is_available returns True when Ollama is healthy"""
     with patch('requests.get') as mock_get:
-        mock_response = type('Response', (), {'status_code': 200})()
+        mock_response = AsyncMock()
+        mock_response.status_code = 200
         mock_get.return_value = mock_response
 
         assert ollama_provider.is_available() is True
