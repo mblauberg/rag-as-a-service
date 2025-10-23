@@ -24,16 +24,20 @@ class GenerateResponse(BaseModel):
     tokens_used: int = Field(..., description="Approximate tokens used")
 
 
-class ModelInfo(BaseModel):
-    """Information about an available model."""
-    name: str = Field(..., description="Model name")
-    size: str = Field(..., description="Model size (e.g., '2GB')")
-    modified_at: str = Field(..., description="Last modified timestamp")
+class Model(BaseModel):
+    """Model information with provider support."""
+    name: str = Field(..., description="Qualified name: 'openai:gpt-5', 'llama3.2'")
+    display_name: str = Field(..., description="Human-readable: 'GPT-5', 'Llama 3.2'")
+    provider: str = Field(..., description="'ollama', 'openai', 'anthropic', 'google'")
+    size: str = Field(..., description="'70B', 'N/A'")
+    description: str = Field(..., description="Capability description")
+    capabilities: List[str] = Field(default_factory=list, description="['reasoning', 'coding']")
+    modified_at: str = Field(default="", description="ISO timestamp")
 
 
 class ModelsResponse(BaseModel):
-    """List of available models."""
-    models: List[ModelInfo] = Field(..., description="Available Ollama models")
+    """Response containing list of available models."""
+    models: List[Model] = Field(..., description="Available models from all providers")
 
 
 class HealthResponse(BaseModel):

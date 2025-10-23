@@ -5,7 +5,7 @@ from app.models.schemas import (
     ChunkInput,
     GenerateResponse,
     ModelsResponse,
-    ModelInfo
+    Model
 )
 from app.services.ollama_client import OllamaClient
 from app.services.prompt_service import PromptService
@@ -77,7 +77,7 @@ class GenerationService:
         """
         raw_models = await self.ollama_client.list_models()
 
-        # Convert to ModelInfo objects
+        # Convert to Model objects
         models = []
         for model in raw_models:
             # Convert size to human-readable format
@@ -85,9 +85,13 @@ class GenerationService:
             size_gb = size_bytes / (1024 ** 3)
             size_str = f"{size_gb:.1f}GB" if size_gb >= 1 else f"{size_bytes / (1024 ** 2):.0f}MB"
 
-            models.append(ModelInfo(
+            models.append(Model(
                 name=model["name"],
+                display_name=model["name"].title(),
+                provider="ollama",
                 size=size_str,
+                description="Local Ollama model",
+                capabilities=["local"],
                 modified_at=model.get("modified_at", "")
             ))
 
