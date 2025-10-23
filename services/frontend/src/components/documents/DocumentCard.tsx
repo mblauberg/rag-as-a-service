@@ -5,7 +5,7 @@ import { Card } from '../common/Card';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { useDeleteDocument } from '../../hooks/useDocuments';
-import { formatBytes, formatDate, formatStatus, getStatusColor } from '../../utils/formatting';
+import { formatBytes, formatDate, formatStatus, getStatusColor } from '../../utils/formatters';
 
 interface DocumentCardProps {
   document: Document;
