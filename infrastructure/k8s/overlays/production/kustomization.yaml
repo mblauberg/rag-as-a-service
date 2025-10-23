@@ -3,13 +3,13 @@ kind: Kustomization
 
 namespace: raas
 
-bases:
+resources:
 - ../../base
 
-patchesStrategicMerge:
-- replica-patches.yaml
-- imagepull-patches.yaml
-- secret-patches.yaml
+patches:
+- path: replica-patches.yaml
+- path: imagepull-patches.yaml
+- path: secret-patches.yaml
 
 # Use production registry images
 images:

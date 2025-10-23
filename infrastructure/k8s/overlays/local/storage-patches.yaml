@@ -43,3 +43,14 @@ spec:
     requests:
       storage: 5Gi
   storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-data
+  namespace: raas
+spec:
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
