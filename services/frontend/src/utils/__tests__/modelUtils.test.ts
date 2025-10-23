@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { abbreviateModelName, groupModelsByProvider } from '../modelUtils';
 import { Model } from '../../types';
 
