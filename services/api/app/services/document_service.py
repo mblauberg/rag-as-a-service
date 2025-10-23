@@ -23,6 +23,8 @@ from app.core.exceptions import (
     FileOperationError,
     TextExtractionError
 )
+from app.services.document_processing_service import DocumentProcessingService
+from app.utils.file_type_detector import FileTypeDetector
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +49,8 @@ class DocumentService:
         self.qdrant_client = qdrant_client
         self.http_client = http_client
         self.embedder_url = settings.embedder_url
+        self.processing_service = DocumentProcessingService()
+        self.file_detector = FileTypeDetector()
 
     async def create_document(
         self,
@@ -57,7 +61,7 @@ class DocumentService:
         description: Optional[str] = None
     ) -> tuple[Document, int]:
         """
-        Create a new document with file upload and chunking.
+        Create a new document with file upload and semantic chunking.
 
         Args:
             db: Database session
@@ -69,6 +73,13 @@ class DocumentService:
         Returns:
             Tuple of (Document, chunk_count)
         """
+        # Detect document type from filename
+        try:
+            document_type = self.file_detector.detect_from_filename(filename)
+        except ValueError as e:
+            logger.error(f"Unsupported file type for {filename}: {e}")
+            raise FileOperationError("detect_file_type", filename, e)
+
         # Generate unique file path
         file_id = uuid4()
         file_extension = Path(filename).suffix
@@ -82,7 +93,7 @@ class DocumentService:
             logger.error(f"Failed to save file {file_path}: {e}")
             raise FileOperationError("write", str(file_path), e)
 
-        # Detect file type
+        # Detect MIME type
         file_type = file_processor.detect_file_type(str(file_path))
         file_size = len(file_content)
 
@@ -94,6 +105,7 @@ class DocumentService:
             file_type=file_type,
             file_size=file_size,
             file_path=str(file_path),
+            document_type=document_type.value,
             upload_status="processing",
             embedding_status="pending"
         )
@@ -101,25 +113,25 @@ class DocumentService:
         await db.flush()  # Get the document ID
 
         try:
-            # Extract text
-            try:
-                text = file_processor.extract_text(str(file_path), file_type)
-            except Exception as e:
-                logger.error(f"Failed to extract text from {file_path}: {e}")
-                raise TextExtractionError(str(file_path), file_type, e)
+            # Process and chunk document using new processing pipeline
+            chunks_data = self.processing_service.process_and_chunk(
+                file_path,
+                document_type
+            )
 
-            # Chunk text
-            chunks = chunking_service.chunk_text(text)
-
-            # Create chunk records
+            # Create chunk records with metadata
             chunk_objects = []
-            for idx, chunk_text in enumerate(chunks):
-                token_count = chunking_service.estimate_token_count(chunk_text)
+            for idx, chunk_data in enumerate(chunks_data):
                 chunk = DocumentChunk(
                     document_id=document.id,
                     chunk_index=idx,
-                    chunk_text=chunk_text,
-                    token_count=token_count
+                    chunk_text=chunk_data['content'],
+                    token_count=chunk_data.get('tokens'),
+                    section_title=chunk_data.get('section_title'),
+                    section_level=chunk_data.get('section_level', 0),
+                    page_number=chunk_data.get('page_number'),
+                    chunk_tokens=chunk_data.get('tokens'),
+                    chunk_metadata=chunk_data.get('metadata', {})
                 )
                 chunk_objects.append(chunk)
                 db.add(chunk)
@@ -131,7 +143,7 @@ class DocumentService:
             # Trigger embedding generation asynchronously
             await self._trigger_embedding(document.id, chunk_objects)
 
-            return document, len(chunks)
+            return document, len(chunks_data)
 
         except (TextExtractionError, FileOperationError) as e:
             # Re-raise custom exceptions as-is
