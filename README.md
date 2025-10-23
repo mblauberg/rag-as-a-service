@@ -816,6 +816,38 @@ refactor: code refactoring
 chore: maintenance
 ```
 
+## Kubernetes Deployment
+
+The RAAS platform can be deployed to Kubernetes for production-grade orchestration, scalability, and reliability.
+
+### Quick Start (Local)
+
+```bash
+# Deploy to local Kind cluster
+./infrastructure/k8s/scripts/deploy-local.sh
+
+# Access services
+kubectl port-forward svc/api 8000:8000 -n raas
+kubectl port-forward svc/frontend 3000:3000 -n raas
+```
+
+### Full Documentation
+
+See [infrastructure/k8s/README.md](infrastructure/k8s/README.md) for:
+- Architecture overview
+- Production deployment
+- Scaling and HPA
+- Rollout and rollback procedures
+- Troubleshooting guide
+
+### Design Documentation
+
+See [docs/plans/2025-10-24-kubernetes-scaffolding-design.md](docs/plans/2025-10-24-kubernetes-scaffolding-design.md) for:
+- Design decisions and rationale
+- Service specifications
+- Type I project compliance
+- Future enhancements
+
 ## License
 
 [Your License Here]
