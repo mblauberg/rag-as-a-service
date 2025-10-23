@@ -74,7 +74,7 @@ async def upload_document(
         )
 
         return DocumentUploadResponse(
-            document=DocumentResponse.model_validate(document),
+            **DocumentResponse.model_validate(document).model_dump(),
             message="Document uploaded and processed successfully",
             chunk_count=chunk_count
         )

@@ -63,10 +63,11 @@ class DocumentListResponse(BaseModel):
     documents: List[DocumentResponse]
 
 
-class DocumentUploadResponse(BaseModel):
-    """Schema for document upload response."""
+class DocumentUploadResponse(DocumentResponse):
+    """Schema for document upload response - extends DocumentResponse."""
 
-    document: DocumentResponse
+    model_config = ConfigDict(from_attributes=True)
+
     message: str
     chunk_count: int
 
