@@ -14,8 +14,10 @@
     "axios": "^1.6.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "lucide-react": "^0.546.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-dropzone": "^14.3.8",
     "react-router-dom": "^6.21.1",
     "tailwind-merge": "^3.3.1"
   },
