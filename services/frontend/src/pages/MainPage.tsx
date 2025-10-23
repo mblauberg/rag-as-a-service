@@ -6,7 +6,7 @@ import { useSearchWithDebounce } from '../hooks/useSearchWithDebounce';
 import { useDocuments } from '../hooks/useDocuments';
 import { DocumentCard } from '../components/documents/DocumentCard';
 import { SearchResults } from '../components/search/SearchResults';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { PlusIcon } from '@radix-ui/react-icons';
 
 /**
@@ -95,17 +95,19 @@ export const MainPage: React.FC = () => {
                 // Search Results
                 <>
                   <p className="text-sm text-gray-600">
-                    {searchResults.data.total_results} results for "{searchQuery}"
+                    {searchResults.data?.total_results || 0} results for "{searchQuery}"
                   </p>
-                  <SearchResults results={searchResults.data.results} query={searchQuery} />
+                  {searchResults.data?.results && (
+                    <SearchResults results={searchResults.data.results} query={searchQuery} />
+                  )}
                 </>
               ) : (
                 // Document Grid
                 <>
                   <p className="text-sm text-gray-600">
-                    {documents.data.total} documents
+                    {documents.data?.total || 0} documents
                   </p>
-                  {documents.data.documents.length === 0 ? (
+                  {documents.data?.documents.length === 0 ? (
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -124,7 +126,7 @@ export const MainPage: React.FC = () => {
                     </motion.div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {documents.data.documents.map((doc) => (
+                      {documents.data?.documents.map((doc) => (
                         <DocumentCard key={doc.id} document={doc} />
                       ))}
                     </div>

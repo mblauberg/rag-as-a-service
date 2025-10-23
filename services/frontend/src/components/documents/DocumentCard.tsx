@@ -5,7 +5,7 @@ import { Card } from '../common/Card';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { useDeleteDocument } from '../../hooks/useDocuments';
-import { formatBytes, formatDate, formatStatus, getStatusColor } from '../../utils/formatters';
+import { formatBytes, formatDate, formatStatus, getStatusColor, type StatusType } from '../../utils/formatters';
 
 interface DocumentCardProps {
   document: Document;
@@ -27,7 +27,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document }) => {
   const getStatusBadge = (status: string) => {
     return (
       <span
-        className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(status)}`}
+        className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(status as StatusType)}`}
       >
         {formatStatus(status)}
       </span>
