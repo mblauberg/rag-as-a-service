@@ -47,12 +47,12 @@ class ApiClient {
 
   // Health endpoints
   async checkHealth(): Promise<HealthStatus> {
-    const response = await this.client.get<HealthStatus>('/api/v1/health/health');
+    const response = await this.client.get<HealthStatus>('/api/v1/health');
     return response.data;
   }
 
   async checkReadiness(): Promise<ReadinessStatus> {
-    const response = await this.client.get<ReadinessStatus>('/api/v1/health/ready');
+    const response = await this.client.get<ReadinessStatus>('/api/v1/ready');
     return response.data;
   }
 
