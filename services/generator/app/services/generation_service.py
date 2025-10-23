@@ -1,17 +1,18 @@
-"""High-level generation service combining Ollama and prompt services."""
+"""High-level generation service using provider registry."""
 import logging
 from typing import List, Optional
 from app.models.schemas import (
     ChunkInput,
     GenerateResponse,
     ModelsResponse,
-    Model
 )
-from app.services.ollama_client import OllamaClient
 from app.services.prompt_service import PromptService
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+# Global registry (initialized in main.py)
+provider_registry = None
 
 
 class GenerationService:
@@ -19,7 +20,6 @@ class GenerationService:
 
     def __init__(self):
         """Initialize generation service."""
-        self.ollama_client = OllamaClient()
         self.prompt_service = PromptService()
 
     async def generate_summary(
@@ -29,12 +29,12 @@ class GenerationService:
         model: Optional[str] = None
     ) -> GenerateResponse:
         """
-        Generate summary from chunks using LLM.
+        Generate summary from chunks using provider registry.
 
         Args:
             query: User's search query
             chunks: Retrieved document chunks
-            model: Ollama model to use (defaults to settings.default_model)
+            model: Model to use (defaults to settings.default_model)
 
         Returns:
             GenerateResponse with summary and metadata
@@ -45,54 +45,27 @@ class GenerationService:
         # Build RAG prompt
         prompt = self.prompt_service.build_rag_prompt(query, chunks)
 
-        # Generate with Ollama
-        logger.info(f"Generating summary with {model_to_use}")
-        ollama_response = await self.ollama_client.generate(
-            model=model_to_use,
-            prompt=prompt
-        )
+        # Build context from chunks
+        context = "\n\n".join([chunk.text for chunk in chunks])
 
-        # Extract summary
-        summary = ollama_response["response"].strip()
+        # Generate via registry
+        logger.info(f"Generating with {model_to_use}")
+        summary, provider_name = await provider_registry.generate(model_to_use, prompt, context)
 
-        # Estimate tokens used
-        prompt_tokens = ollama_response.get("prompt_eval_count", 0)
-        completion_tokens = ollama_response.get("eval_count", 0)
-        total_tokens = prompt_tokens + completion_tokens
-
-        logger.info(f"Generated summary with {total_tokens} tokens")
+        logger.info(f"Generated summary using {provider_name} provider")
 
         return GenerateResponse(
             summary=summary,
             model_used=model_to_use,
-            tokens_used=total_tokens
+            tokens_used=0  # Token tracking not implemented yet
         )
 
     async def list_available_models(self) -> ModelsResponse:
         """
-        List available Ollama models.
+        List models from all registered providers.
 
         Returns:
             ModelsResponse with list of models
         """
-        raw_models = await self.ollama_client.list_models()
-
-        # Convert to Model objects
-        models = []
-        for model in raw_models:
-            # Convert size to human-readable format
-            size_bytes = model.get("size", 0)
-            size_gb = size_bytes / (1024 ** 3)
-            size_str = f"{size_gb:.1f}GB" if size_gb >= 1 else f"{size_bytes / (1024 ** 2):.0f}MB"
-
-            models.append(Model(
-                name=model["name"],
-                display_name=model["name"].title(),
-                provider="ollama",
-                size=size_str,
-                description="Local Ollama model",
-                capabilities=["local"],
-                modified_at=model.get("modified_at", "")
-            ))
-
+        models = await provider_registry.list_all_models()
         return ModelsResponse(models=models)

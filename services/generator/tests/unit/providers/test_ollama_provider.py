@@ -13,8 +13,10 @@ def ollama_provider():
 @pytest.mark.asyncio
 async def test_is_available_when_healthy(ollama_provider):
     """is_available returns True when Ollama is healthy"""
-    with patch.object(ollama_provider.client, 'check_health', new_callable=AsyncMock) as mock_health:
-        mock_health.return_value = True
+    with patch('requests.get') as mock_get:
+        mock_response = AsyncMock()
+        mock_response.status_code = 200
+        mock_get.return_value = mock_response
 
         assert ollama_provider.is_available() is True
 
@@ -22,8 +24,8 @@ async def test_is_available_when_healthy(ollama_provider):
 @pytest.mark.asyncio
 async def test_is_available_when_unhealthy(ollama_provider):
     """is_available returns False when Ollama is unhealthy"""
-    with patch.object(ollama_provider.client, 'check_health', new_callable=AsyncMock) as mock_health:
-        mock_health.return_value = False
+    with patch('requests.get') as mock_get:
+        mock_get.side_effect = Exception("Connection failed")
 
         assert ollama_provider.is_available() is False
 
