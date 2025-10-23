@@ -5,7 +5,7 @@ ADD COLUMN section_level INTEGER DEFAULT 0,
 ADD COLUMN page_number INTEGER,
 ADD COLUMN chunk_tokens INTEGER,
 ADD COLUMN parent_chunk_id UUID REFERENCES document_chunks(id) ON DELETE CASCADE,
-ADD COLUMN metadata JSONB DEFAULT '{}';
+ADD COLUMN chunk_metadata JSONB DEFAULT '{}';
 
 -- Add index for section queries
 CREATE INDEX idx_chunks_section_title ON document_chunks(section_title);

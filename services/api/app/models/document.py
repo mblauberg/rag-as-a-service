@@ -2,7 +2,7 @@
 from datetime import datetime
 from uuid import uuid4
 from sqlalchemy import Column, String, Integer, Text, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
@@ -20,6 +20,7 @@ class Document(Base):
     file_type = Column(String(50), nullable=False)
     file_size = Column(Integer, nullable=False)
     file_path = Column(String(1000), nullable=True)
+    document_type = Column(String(50), nullable=True)  # pdf, docx, txt, md, csv, etc.
     upload_status = Column(String(50), default="pending", nullable=False)
     embedding_status = Column(String(50), default="pending", nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -44,6 +45,15 @@ class DocumentChunk(Base):
     chunk_text = Column(Text, nullable=False)
     qdrant_point_id = Column(UUID(as_uuid=True), nullable=True)
     token_count = Column(Integer, nullable=True)
+
+    # New metadata fields for semantic chunking
+    section_title = Column(Text, nullable=True)
+    section_level = Column(Integer, default=0)
+    page_number = Column(Integer, nullable=True)
+    chunk_tokens = Column(Integer, nullable=True)
+    parent_chunk_id = Column(UUID(as_uuid=True), ForeignKey("document_chunks.id", ondelete="CASCADE"), nullable=True)
+    chunk_metadata = Column(JSONB, default={})
+
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Relationship to document
