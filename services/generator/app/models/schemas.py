@@ -31,6 +31,10 @@ class ModelInfo(BaseModel):
     modified_at: str = Field(..., description="Last modified timestamp")
 
 
+# Temporary alias for Model (will be replaced in Task 2)
+Model = ModelInfo
+
+
 class ModelsResponse(BaseModel):
     """List of available models."""
     models: List[ModelInfo] = Field(..., description="Available Ollama models")
