@@ -19,6 +19,11 @@ export interface DocumentChunk {
   chunk_index: number;
   chunk_text: string;
   token_count: number | null;
+  section_title?: string;
+  section_level?: number;
+  page_number?: number;
+  chunk_tokens?: number;
+  chunk_metadata?: Record<string, any>;
   created_at: string;
 }
 
@@ -45,6 +50,9 @@ export interface SearchResult {
   chunk_text: string;
   chunk_index: number;
   score: number;
+  section_title?: string;
+  page_number?: number;
+  chunk_metadata?: Record<string, any>;
 }
 
 export interface SearchRequest {
