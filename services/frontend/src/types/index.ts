@@ -26,17 +26,9 @@ export interface DocumentDetail extends Document {
   chunks: DocumentChunk[];
 }
 
-export interface DocumentUploadResponse {
-  id: string;
-  title: string;
-  description: string | null;
-  file_name: string;
-  file_type: string;
-  file_size: number;
+export interface DocumentUploadResponse extends Document {
+  message: string;
   chunk_count: number;
-  upload_status: string;
-  embedding_status: string;
-  created_at: string;
 }
 
 export interface PaginatedDocuments {
