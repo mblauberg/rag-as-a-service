@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     # Service Configuration
     port: int = 8002
     log_level: str = "INFO"
+    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:8000"]
 
     model_config = ConfigDict(
         env_file=".env",

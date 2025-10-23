@@ -34,3 +34,14 @@ class ModelInfo(BaseModel):
 class ModelsResponse(BaseModel):
     """List of available models."""
     models: List[ModelInfo] = Field(..., description="Available Ollama models")
+
+
+class HealthResponse(BaseModel):
+    """Health check response."""
+    status: str = Field(..., description="Health status")
+
+
+class ReadinessResponse(BaseModel):
+    """Readiness check response."""
+    status: str = Field(..., description="Readiness status")
+    ollama_connected: bool = Field(..., description="Ollama connectivity status")
