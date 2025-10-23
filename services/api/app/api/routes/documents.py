@@ -2,9 +2,12 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+import httpx
 
 from app.core.database import get_db
-from app.services.document_service import document_service
+from app.core.dependencies import get_qdrant_client, get_http_client
+from app.core.qdrant_client import QdrantClientWrapper
+from app.services.document_service import DocumentService
 from app.models.schemas import (
     DocumentUploadResponse,
     DocumentListResponse,
@@ -20,7 +23,9 @@ async def upload_document(
     file: UploadFile = File(..., description="File to upload"),
     title: str = Form(..., description="Document title"),
     description: str = Form(None, description="Optional document description"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    qdrant_client: QdrantClientWrapper = Depends(get_qdrant_client),
+    http_client: httpx.AsyncClient = Depends(get_http_client)
 ):
     """
     Upload a document file.
@@ -33,6 +38,8 @@ async def upload_document(
         title: Document title
         description: Optional description
         db: Database session
+        qdrant_client: Qdrant client for vector operations
+        http_client: HTTP client for embedder service
 
     Returns:
         Document details and processing status
@@ -62,6 +69,12 @@ async def upload_document(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File is empty"
         )
+
+    # Create service instance with injected dependencies
+    document_service = DocumentService(
+        qdrant_client=qdrant_client,
+        http_client=http_client
+    )
 
     # Process document
     try:
@@ -95,7 +108,9 @@ async def upload_document(
 async def list_documents(
     page: int = 1,
     limit: int = 20,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    qdrant_client: QdrantClientWrapper = Depends(get_qdrant_client),
+    http_client: httpx.AsyncClient = Depends(get_http_client)
 ):
     """
     Get paginated list of documents.
@@ -104,6 +119,8 @@ async def list_documents(
         page: Page number (1-indexed)
         limit: Items per page
         db: Database session
+        qdrant_client: Qdrant client for vector operations
+        http_client: HTTP client for embedder service
 
     Returns:
         Paginated list of documents
@@ -120,13 +137,21 @@ async def list_documents(
             detail="Limit must be between 1 and 100"
         )
 
+    # Create service instance with injected dependencies
+    document_service = DocumentService(
+        qdrant_client=qdrant_client,
+        http_client=http_client
+    )
+
     return await document_service.get_documents(db, page=page, limit=limit)
 
 
 @router.get("/{document_id}", response_model=DocumentDetailResponse)
 async def get_document(
     document_id: UUID,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    qdrant_client: QdrantClientWrapper = Depends(get_qdrant_client),
+    http_client: httpx.AsyncClient = Depends(get_http_client)
 ):
     """
     Get detailed document information including chunks.
@@ -134,6 +159,8 @@ async def get_document(
     Args:
         document_id: Document UUID
         db: Database session
+        qdrant_client: Qdrant client for vector operations
+        http_client: HTTP client for embedder service
 
     Returns:
         Document details with chunks
@@ -141,6 +168,12 @@ async def get_document(
     Raises:
         HTTPException: If document not found
     """
+    # Create service instance with injected dependencies
+    document_service = DocumentService(
+        qdrant_client=qdrant_client,
+        http_client=http_client
+    )
+
     document = await document_service.get_document_detail(db, document_id)
 
     if not document:
@@ -155,7 +188,9 @@ async def get_document(
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_document(
     document_id: UUID,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    qdrant_client: QdrantClientWrapper = Depends(get_qdrant_client),
+    http_client: httpx.AsyncClient = Depends(get_http_client)
 ):
     """
     Delete a document and all associated data.
@@ -165,10 +200,18 @@ async def delete_document(
     Args:
         document_id: Document UUID
         db: Database session
+        qdrant_client: Qdrant client for vector operations
+        http_client: HTTP client for embedder service
 
     Raises:
         HTTPException: If document not found
     """
+    # Create service instance with injected dependencies
+    document_service = DocumentService(
+        qdrant_client=qdrant_client,
+        http_client=http_client
+    )
+
     deleted = await document_service.delete_document(db, document_id)
 
     if not deleted:

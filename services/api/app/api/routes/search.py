@@ -3,10 +3,12 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+import httpx
 
 from app.core.database import get_db
-from app.core.qdrant_client import qdrant_client
-from app.services.embedder_client import embedder_client
+from app.core.dependencies import get_qdrant_client, get_http_client
+from app.core.qdrant_client import QdrantClientWrapper
+from app.core.config import settings
 from app.models.document import Document, DocumentChunk
 from app.models.schemas import SearchRequest, SearchResponse, SearchResultItem
 
@@ -16,7 +18,9 @@ router = APIRouter()
 @router.post("", response_model=SearchResponse)
 async def search_documents(
     request: SearchRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    qdrant_client: QdrantClientWrapper = Depends(get_qdrant_client),
+    http_client: httpx.AsyncClient = Depends(get_http_client)
 ):
     """
     Perform semantic search across documents.
@@ -27,6 +31,8 @@ async def search_documents(
     Args:
         request: Search request with query and optional filters
         db: Database session
+        qdrant_client: Qdrant client for vector operations
+        http_client: HTTP client for embedder service
 
     Returns:
         Search results with document metadata and similarity scores
@@ -34,9 +40,16 @@ async def search_documents(
     Raises:
         HTTPException: If embedding generation or search fails
     """
-    # Generate query embedding
+    # Generate query embedding using embedder service
     try:
-        query_embedding = await embedder_client.embed_query(request.query)
+        response = await http_client.post(
+            f"{settings.embedder_url}/embed-query",
+            json={"query": request.query},
+            timeout=30.0
+        )
+        response.raise_for_status()
+        result = response.json()
+        query_embedding = result["embedding"]
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
