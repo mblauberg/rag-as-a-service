@@ -13,7 +13,7 @@ from app.models.schemas import HealthResponse, ReadinessResponse, ServiceStatus
 router = APIRouter()
 
 
-@router.get("/health", response_model=HealthResponse)
+@router.get("/", response_model=HealthResponse)
 async def health_check():
     """
     Basic health check endpoint.
