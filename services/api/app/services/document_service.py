@@ -8,14 +8,14 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 import logging
+import httpx
 
 from app.models.document import Document, DocumentChunk
 from app.models.schemas import DocumentResponse, DocumentDetailResponse, DocumentListResponse
 from app.services.chunking_service import chunking_service
-from app.services.embedder_client import embedder_client
 from app.utils.file_processing import file_processor
 from app.core.config import settings
-from app.core.qdrant_client import qdrant_client
+from app.core.qdrant_client import QdrantClientWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +23,23 @@ logger = logging.getLogger(__name__)
 class DocumentService:
     """Service for document operations."""
 
-    def __init__(self):
-        """Initialize document service."""
+    def __init__(
+        self,
+        qdrant_client: QdrantClientWrapper,
+        http_client: httpx.AsyncClient
+    ):
+        """
+        Initialize document service with injected dependencies.
+
+        Args:
+            qdrant_client: Qdrant client wrapper for vector operations
+            http_client: HTTP client for embedder service communication
+        """
         self.upload_dir = Path(settings.upload_dir)
         self.upload_dir.mkdir(parents=True, exist_ok=True)
+        self.qdrant_client = qdrant_client
+        self.http_client = http_client
+        self.embedder_url = settings.embedder_url
 
     async def create_document(
         self,
@@ -137,8 +150,15 @@ class DocumentService:
                 for chunk in chunks
             ]
 
-            # Send to embedder service
-            success = await embedder_client.embed_chunks(chunks_data)
+            # Send to embedder service using injected HTTP client
+            response = await self.http_client.post(
+                f"{self.embedder_url}/embed",
+                json={"chunks": chunks_data},
+                timeout=300.0  # 5 minutes for large batches
+            )
+            response.raise_for_status()
+            result = response.json()
+            success = result.get("success", False)
 
             if success:
                 logger.info(f"Successfully triggered embedding for document {document_id}")
@@ -240,7 +260,7 @@ class DocumentService:
 
         # Delete vectors from Qdrant
         try:
-            await qdrant_client.delete_by_document_id(str(document_id))
+            await self.qdrant_client.delete_by_document_id(str(document_id))
         except Exception as e:
             logger.error(f"Error deleting vectors from Qdrant: {e}")
 
@@ -270,7 +290,3 @@ class DocumentService:
         await db.commit()
 
         return True
-
-
-# Global document service instance
-document_service = DocumentService()
