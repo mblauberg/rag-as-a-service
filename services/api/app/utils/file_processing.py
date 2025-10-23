@@ -1,5 +1,9 @@
 """File type detection and text extraction utilities."""
-import magic
+try:
+    import magic
+    MAGIC_AVAILABLE = True
+except ImportError:
+    MAGIC_AVAILABLE = False
 from pathlib import Path
 from typing import Tuple
 import logging
@@ -21,19 +25,23 @@ class FileProcessor:
         Returns:
             MIME type string
         """
-        try:
-            mime = magic.Magic(mime=True)
-            return mime.from_file(file_path)
-        except Exception as e:
-            logger.warning(f"Could not detect file type: {e}")
-            # Fallback to extension-based detection
-            suffix = Path(file_path).suffix.lower()
-            mime_map = {
-                '.txt': 'text/plain',
-                '.pdf': 'application/pdf',
-                '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                '.doc': 'application/msword',
-            }
+        # Fallback to extension-based detection
+        suffix = Path(file_path).suffix.lower()
+        mime_map = {
+            '.txt': 'text/plain',
+            '.pdf': 'application/pdf',
+            '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            '.doc': 'application/msword',
+        }
+
+        if MAGIC_AVAILABLE:
+            try:
+                mime = magic.Magic(mime=True)
+                return mime.from_file(file_path)
+            except Exception as e:
+                logger.warning(f"Could not detect file type with magic: {e}")
+                return mime_map.get(suffix, 'application/octet-stream')
+        else:
             return mime_map.get(suffix, 'application/octet-stream')
 
     @staticmethod
