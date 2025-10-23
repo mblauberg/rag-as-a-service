@@ -63,13 +63,15 @@ export interface HealthStatus {
   timestamp: string;
 }
 
+export interface ServiceStatus {
+  name: string;
+  status: string;
+  details?: string;
+}
+
 export interface ReadinessStatus {
-  status: 'ready' | 'not_ready';
-  services: {
-    database: boolean;
-    qdrant: boolean;
-    embedder: boolean;
-  };
+  status: string;
+  services: ServiceStatus[];
 }
 
 // API error type
