@@ -69,6 +69,7 @@ class DocumentService:
             file_name=filename,
             file_type=file_type,
             file_size=file_size,
+            file_path=str(file_path),
             upload_status="processing",
             embedding_status="pending"
         )
@@ -244,12 +245,25 @@ class DocumentService:
             logger.error(f"Error deleting vectors from Qdrant: {e}")
 
         # Delete file from disk
-        file_path = self.upload_dir / f"{document_id}*"
-        for file in self.upload_dir.glob(f"{document_id}*"):
+        if document.file_path:
+            file_path = Path(document.file_path)
             try:
-                file.unlink()
+                if file_path.exists():
+                    file_path.unlink()
+                    logger.info(f"Deleted file: {file_path}")
+                else:
+                    logger.warning(f"File not found at stored path: {file_path}")
             except Exception as e:
-                logger.error(f"Error deleting file: {e}")
+                logger.error(f"Error deleting file {file_path}: {e}")
+        else:
+            # Fallback for old records without file_path - use glob pattern
+            logger.warning(f"Document {document_id} has no file_path, attempting glob pattern fallback")
+            for file in self.upload_dir.glob(f"{document_id}*"):
+                try:
+                    file.unlink()
+                    logger.info(f"Deleted file via glob pattern: {file}")
+                except Exception as e:
+                    logger.error(f"Error deleting file via glob: {e}")
 
         # Delete from database (cascades to chunks)
         await db.delete(document)
