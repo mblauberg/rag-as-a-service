@@ -39,11 +39,12 @@ export interface PaginatedDocuments {
 }
 
 export interface SearchResult {
+  chunk_id: string;
   document_id: string;
   document_title: string;
   chunk_text: string;
   chunk_index: number;
-  similarity_score: number;
+  score: number;
 }
 
 export interface SearchRequest {

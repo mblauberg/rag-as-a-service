@@ -68,7 +68,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({ results, query }) 
                 {result.document_title}
               </Link>
               <span className="ml-2 px-2 py-1 text-xs font-medium bg-primary-100 text-primary-800 rounded-full">
-                {(result.similarity_score * 100).toFixed(1)}% match
+                {(result.score * 100).toFixed(1)}% match
               </span>
             </div>
             <p className="text-gray-700 leading-relaxed">
