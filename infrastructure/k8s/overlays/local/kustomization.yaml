@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: raas
+
+bases:
+- ../../base
+
+# Patches will be added as we implement services
+patchesStrategicMerge: []
+
+# Local-specific config overrides
+configMapGenerator:
+- name: frontend-config
+  behavior: merge
+  literals:
+  - VITE_API_URL=http://localhost:8000
+
+# Use local images
+images:
+- name: raas-api
+  newTag: latest
+- name: raas-embedder
+  newTag: latest
+- name: raas-frontend
+  newTag: latest
+- name: raas-generator
+  newTag: latest

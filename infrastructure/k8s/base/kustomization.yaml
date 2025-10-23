@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: raas
+
+resources:
+- namespace.yaml
+- postgres/statefulset.yaml
+- postgres/service.yaml
+- postgres/configmap.yaml
+- postgres/secret.yaml
+- postgres/pvc.yaml
+- qdrant/statefulset.yaml
+- qdrant/service.yaml
+- qdrant/configmap.yaml
+- qdrant/pvc.yaml
+- api/deployment.yaml
+- api/service.yaml
+- api/configmap.yaml
+- api/hpa.yaml
+- api/pvc.yaml
+- embedder/deployment.yaml
+- embedder/service.yaml
+- embedder/configmap.yaml
+- embedder/hpa.yaml
+- embedder/pvc.yaml
+- frontend/deployment.yaml
+- frontend/service.yaml
+- frontend/configmap.yaml
+- generator/deployment.yaml
+- generator/service.yaml
+- generator/configmap.yaml
+- generator/hpa.yaml
+- ollama/deployment.yaml
+- ollama/service.yaml
+- ollama/pvc.yaml
+- ingress.yaml

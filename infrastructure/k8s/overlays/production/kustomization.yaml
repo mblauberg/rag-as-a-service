@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: raas
+
+bases:
+- ../../base
+
+# Patches will be added as we implement services
+patchesStrategicMerge: []
+
+# Production-specific config overrides
+configMapGenerator:
+- name: frontend-config
+  behavior: merge
+  literals:
+  - VITE_API_URL=https://raas.example.com
+
+# Use production registry images
+images:
+- name: raas-api
+  newName: gcr.io/your-project/raas-api
+  newTag: v1.0.0
+- name: raas-embedder
+  newName: gcr.io/your-project/raas-embedder
+  newTag: v1.0.0
+- name: raas-frontend
+  newName: gcr.io/your-project/raas-frontend
+  newTag: v1.0.0
+- name: raas-generator
+  newName: gcr.io/your-project/raas-generator
+  newTag: v1.0.0
