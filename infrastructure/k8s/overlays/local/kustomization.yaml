@@ -6,15 +6,10 @@ namespace: raas
 bases:
 - ../../base
 
-# Patches will be added as we implement services
-patchesStrategicMerge: []
-
-# Local-specific config overrides
-configMapGenerator:
-- name: frontend-config
-  behavior: merge
-  literals:
-  - VITE_API_URL=http://localhost:8000
+patchesStrategicMerge:
+- replica-patches.yaml
+- resource-patches.yaml
+- storage-patches.yaml
 
 # Use local images
 images:
