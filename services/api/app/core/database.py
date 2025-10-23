@@ -30,16 +30,23 @@ Base = declarative_base()
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
-    Dependency that provides an async database session.
+    Dependency that provides an async database session with transaction management.
+
+    This dependency ensures that:
+    - Each request gets its own database session
+    - Transactions are committed on success (explicit commit required in service layer)
+    - Transactions are rolled back on error
+    - Sessions are properly closed
 
     Yields:
-        AsyncSession: Database session
+        AsyncSession: Database session for the request
     """
     async with AsyncSessionLocal() as session:
         try:
             yield session
-        finally:
-            await session.close()
+        except Exception:
+            await session.rollback()
+            raise
 
 
 async def init_db() -> None:

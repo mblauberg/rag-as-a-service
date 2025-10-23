@@ -8,14 +8,21 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 import logging
+import httpx
 
 from app.models.document import Document, DocumentChunk
 from app.models.schemas import DocumentResponse, DocumentDetailResponse, DocumentListResponse
 from app.services.chunking_service import chunking_service
-from app.services.embedder_client import embedder_client
 from app.utils.file_processing import file_processor
 from app.core.config import settings
-from app.core.qdrant_client import qdrant_client
+from app.core.qdrant_client import QdrantClientWrapper
+from app.core.exceptions import (
+    DocumentNotFoundError,
+    QdrantConnectionError,
+    EmbedderServiceError,
+    FileOperationError,
+    TextExtractionError
+)
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +30,23 @@ logger = logging.getLogger(__name__)
 class DocumentService:
     """Service for document operations."""
 
-    def __init__(self):
-        """Initialize document service."""
+    def __init__(
+        self,
+        qdrant_client: QdrantClientWrapper,
+        http_client: httpx.AsyncClient
+    ):
+        """
+        Initialize document service with injected dependencies.
+
+        Args:
+            qdrant_client: Qdrant client wrapper for vector operations
+            http_client: HTTP client for embedder service communication
+        """
         self.upload_dir = Path(settings.upload_dir)
         self.upload_dir.mkdir(parents=True, exist_ok=True)
+        self.qdrant_client = qdrant_client
+        self.http_client = http_client
+        self.embedder_url = settings.embedder_url
 
     async def create_document(
         self,
@@ -55,8 +75,12 @@ class DocumentService:
         file_path = self.upload_dir / f"{file_id}{file_extension}"
 
         # Save file to disk
-        async with aiofiles.open(file_path, 'wb') as f:
-            await f.write(file_content)
+        try:
+            async with aiofiles.open(file_path, 'wb') as f:
+                await f.write(file_content)
+        except Exception as e:
+            logger.error(f"Failed to save file {file_path}: {e}")
+            raise FileOperationError("write", str(file_path), e)
 
         # Detect file type
         file_type = file_processor.detect_file_type(str(file_path))
@@ -69,6 +93,7 @@ class DocumentService:
             file_name=filename,
             file_type=file_type,
             file_size=file_size,
+            file_path=str(file_path),
             upload_status="processing",
             embedding_status="pending"
         )
@@ -77,7 +102,11 @@ class DocumentService:
 
         try:
             # Extract text
-            text = file_processor.extract_text(str(file_path), file_type)
+            try:
+                text = file_processor.extract_text(str(file_path), file_type)
+            except Exception as e:
+                logger.error(f"Failed to extract text from {file_path}: {e}")
+                raise TextExtractionError(str(file_path), file_type, e)
 
             # Chunk text
             chunks = chunking_service.chunk_text(text)
@@ -104,8 +133,15 @@ class DocumentService:
 
             return document, len(chunks)
 
-        except Exception as e:
+        except (TextExtractionError, FileOperationError) as e:
+            # Re-raise custom exceptions as-is
             logger.error(f"Error processing document: {e}")
+            document.upload_status = "failed"
+            await db.commit()
+            raise
+        except Exception as e:
+            # Wrap unexpected exceptions
+            logger.error(f"Unexpected error processing document: {e}")
             document.upload_status = "failed"
             await db.commit()
             raise
@@ -136,16 +172,31 @@ class DocumentService:
                 for chunk in chunks
             ]
 
-            # Send to embedder service
-            success = await embedder_client.embed_chunks(chunks_data)
+            # Send to embedder service using injected HTTP client
+            try:
+                response = await self.http_client.post(
+                    f"{self.embedder_url}/embed",
+                    json={"chunks": chunks_data},
+                    timeout=300.0  # 5 minutes for large batches
+                )
+                response.raise_for_status()
+                result = response.json()
+                success = result.get("success", False)
 
-            if success:
-                logger.info(f"Successfully triggered embedding for document {document_id}")
-            else:
-                logger.error(f"Failed to trigger embedding for document {document_id}")
+                if success:
+                    logger.info(f"Successfully triggered embedding for document {document_id}")
+                else:
+                    logger.error(f"Failed to trigger embedding for document {document_id}")
+                    raise EmbedderServiceError("embed_chunks", Exception("Embedder returned success=false"))
+            except httpx.HTTPError as e:
+                logger.error(f"HTTP error communicating with embedder: {e}")
+                raise EmbedderServiceError("embed_chunks", e)
 
-        except Exception as e:
+        except EmbedderServiceError as e:
             logger.error(f"Error triggering embeddings: {e}")
+            # Don't re-raise - this is a background operation, document is already saved
+        except Exception as e:
+            logger.error(f"Unexpected error triggering embeddings: {e}")
 
     async def get_documents(
         self,
@@ -218,7 +269,7 @@ class DocumentService:
         self,
         db: AsyncSession,
         document_id: UUID
-    ) -> bool:
+    ) -> None:
         """
         Delete document and associated resources.
 
@@ -226,8 +277,10 @@ class DocumentService:
             db: Database session
             document_id: Document UUID
 
-        Returns:
-            True if deleted, False if not found
+        Raises:
+            DocumentNotFoundError: If document doesn't exist
+            QdrantConnectionError: If vector deletion fails
+            FileOperationError: If file deletion fails
         """
         # Get document
         query = select(Document).where(Document.id == document_id)
@@ -235,28 +288,38 @@ class DocumentService:
         document = result.scalar_one_or_none()
 
         if not document:
-            return False
+            raise DocumentNotFoundError(str(document_id))
 
         # Delete vectors from Qdrant
         try:
-            await qdrant_client.delete_by_document_id(str(document_id))
+            await self.qdrant_client.delete_by_document_id(str(document_id))
         except Exception as e:
             logger.error(f"Error deleting vectors from Qdrant: {e}")
+            raise QdrantConnectionError("delete_by_document_id", e)
 
         # Delete file from disk
-        file_path = self.upload_dir / f"{document_id}*"
-        for file in self.upload_dir.glob(f"{document_id}*"):
+        if document.file_path:
+            file_path = Path(document.file_path)
             try:
-                file.unlink()
+                if file_path.exists():
+                    file_path.unlink()
+                    logger.info(f"Deleted file: {file_path}")
+                else:
+                    logger.warning(f"File not found at stored path: {file_path}")
             except Exception as e:
-                logger.error(f"Error deleting file: {e}")
+                logger.error(f"Error deleting file {file_path}: {e}")
+                raise FileOperationError("delete", str(file_path), e)
+        else:
+            # Fallback for old records without file_path - use glob pattern
+            logger.warning(f"Document {document_id} has no file_path, attempting glob pattern fallback")
+            for file in self.upload_dir.glob(f"{document_id}*"):
+                try:
+                    file.unlink()
+                    logger.info(f"Deleted file via glob pattern: {file}")
+                except Exception as e:
+                    logger.error(f"Error deleting file via glob: {e}")
+                    raise FileOperationError("delete", str(file), e)
 
         # Delete from database (cascades to chunks)
         await db.delete(document)
         await db.commit()
-
-        return True
-
-
-# Global document service instance
-document_service = DocumentService()

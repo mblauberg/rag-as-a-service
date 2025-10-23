@@ -2,10 +2,12 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
+import httpx
 
 from app.core.database import get_db
-from app.core.qdrant_client import qdrant_client
-from app.services.embedder_client import embedder_client
+from app.core.dependencies import get_qdrant_client, get_http_client
+from app.core.qdrant_client import QdrantClientWrapper
+from app.core.config import settings
 from app.models.schemas import HealthResponse, ReadinessResponse, ServiceStatus
 
 router = APIRouter()
@@ -23,12 +25,18 @@ async def health_check():
 
 
 @router.get("/ready", response_model=ReadinessResponse)
-async def readiness_check(db: AsyncSession = Depends(get_db)):
+async def readiness_check(
+    db: AsyncSession = Depends(get_db),
+    qdrant_client: QdrantClientWrapper = Depends(get_qdrant_client),
+    http_client: httpx.AsyncClient = Depends(get_http_client)
+):
     """
     Readiness check that validates connectivity to dependencies.
 
     Args:
         db: Database session
+        qdrant_client: Qdrant client for vector operations
+        http_client: HTTP client for embedder service
 
     Returns:
         Readiness status with service details
@@ -52,7 +60,7 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
 
     # Check Qdrant
     try:
-        if qdrant_client.health_check():
+        if await qdrant_client.health_check():
             services.append(ServiceStatus(
                 name="qdrant",
                 status="ready",
@@ -73,7 +81,11 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
 
     # Check embedder service
     try:
-        if await embedder_client.health_check():
+        response = await http_client.get(
+            f"{settings.embedder_url}/health",
+            timeout=5.0
+        )
+        if response.status_code == 200:
             services.append(ServiceStatus(
                 name="embedder",
                 status="ready",

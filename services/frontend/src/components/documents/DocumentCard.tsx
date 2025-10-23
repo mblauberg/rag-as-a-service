@@ -5,6 +5,7 @@ import { Card } from '../common/Card';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { useDeleteDocument } from '../../hooks/useDocuments';
+import { formatBytes, formatDate, formatStatus, getStatusColor } from '../../utils/formatting';
 
 interface DocumentCardProps {
   document: Document;
@@ -23,35 +24,12 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document }) => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-  };
-
   const getStatusBadge = (status: string) => {
-    const statusColors = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      processing: 'bg-blue-100 text-blue-800',
-      completed: 'bg-green-100 text-green-800',
-      failed: 'bg-red-100 text-red-800',
-    };
-
     return (
       <span
-        className={`px-2 py-1 text-xs font-medium rounded-full ${
-          statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'
-        }`}
+        className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(status)}`}
       >
-        {status}
+        {formatStatus(status)}
       </span>
     );
   };
@@ -115,7 +93,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document }) => {
                   d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
                 />
               </svg>
-              {formatFileSize(document.file_size)}
+              {formatBytes(document.file_size)}
             </div>
             <div className="flex items-center">
               <svg

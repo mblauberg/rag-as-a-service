@@ -40,6 +40,7 @@ class DocumentResponse(DocumentBase):
     file_name: str
     file_type: str
     file_size: int
+    file_path: Optional[str] = None
     upload_status: str
     embedding_status: str
     created_at: datetime
@@ -63,10 +64,11 @@ class DocumentListResponse(BaseModel):
     documents: List[DocumentResponse]
 
 
-class DocumentUploadResponse(BaseModel):
-    """Schema for document upload response."""
+class DocumentUploadResponse(DocumentResponse):
+    """Schema for document upload response - extends DocumentResponse."""
 
-    document: DocumentResponse
+    model_config = ConfigDict(from_attributes=True)
+
     message: str
     chunk_count: int
 
