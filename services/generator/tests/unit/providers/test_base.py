@@ -45,3 +45,20 @@ def test_model_provider_requires_is_available():
 
     with pytest.raises(TypeError):
         IncompleteProvider()
+
+
+def test_complete_provider_can_be_instantiated():
+    """Subclass with all methods implemented can be instantiated"""
+    class CompleteProvider(ModelProvider):
+        async def list_models(self):
+            return []
+
+        async def generate(self, model: str, prompt: str, context: str) -> str:
+            return "test"
+
+        def is_available(self) -> bool:
+            return True
+
+    # Should not raise
+    provider = CompleteProvider()
+    assert isinstance(provider, ModelProvider)
