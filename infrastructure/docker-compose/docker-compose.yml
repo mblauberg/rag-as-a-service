@@ -114,11 +114,28 @@ services:
     networks:
       - raas-network
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: raas-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - raas-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
 volumes:
   postgres_data:
   qdrant_data:
   upload_data:
   model_cache:
+  ollama-data:
 
 networks:
   raas-network:
