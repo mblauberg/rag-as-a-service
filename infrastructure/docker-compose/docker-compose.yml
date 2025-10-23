@@ -1,0 +1,119 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: raas-postgres
+    environment:
+      POSTGRES_DB: raasdb
+      POSTGRES_USER: raasuser
+      POSTGRES_PASSWORD: raaspass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../services/api/app/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U raasuser -d raasdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - raas-network
+
+  qdrant:
+    image: qdrant/qdrant:v1.7.4
+    container_name: raas-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    networks:
+      - raas-network
+
+  api:
+    build:
+      context: ../../services/api
+      dockerfile: Dockerfile
+    container_name: raas-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://raasuser:raaspass@postgres:5432/raasdb
+      - QDRANT_URL=http://qdrant:6333
+      - EMBEDDER_URL=http://embedder:8001
+      - UPLOAD_DIR=/app/uploads
+      - MAX_UPLOAD_SIZE=104857600
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - API_WORKERS=4
+      - CORS_ORIGINS=["http://localhost:3000", "http://localhost"]
+      - LOG_LEVEL=INFO
+    volumes:
+      - ../../services/api:/app
+      - upload_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - raas-network
+
+  embedder:
+    build:
+      context: ../../services/embedder
+      dockerfile: Dockerfile
+    container_name: raas-embedder
+    ports:
+      - "8001:8001"
+    environment:
+      - QDRANT_URL=http://qdrant:6333
+      - MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
+      - MODEL_DIMENSION=384
+      - BATCH_SIZE=32
+      - API_HOST=0.0.0.0
+      - API_PORT=8001
+      - API_WORKERS=2
+      - COLLECTION_NAME=documents
+      - LOG_LEVEL=INFO
+    volumes:
+      - ../../services/embedder:/app
+      - model_cache:/root/.cache/torch
+    depends_on:
+      qdrant:
+        condition: service_started
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    networks:
+      - raas-network
+
+  frontend:
+    build:
+      context: ../../services/frontend
+      dockerfile: Dockerfile.dev
+    container_name: raas-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ../../services/frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    networks:
+      - raas-network
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  upload_data:
+  model_cache:
+
+networks:
+  raas-network:
+    driver: bridge
