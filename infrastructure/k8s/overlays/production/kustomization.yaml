@@ -6,15 +6,10 @@ namespace: raas
 bases:
 - ../../base
 
-# Patches will be added as we implement services
-patchesStrategicMerge: []
-
-# Production-specific config overrides
-configMapGenerator:
-- name: frontend-config
-  behavior: merge
-  literals:
-  - VITE_API_URL=https://raas.example.com
+patchesStrategicMerge:
+- replica-patches.yaml
+- imagepull-patches.yaml
+- secret-patches.yaml
 
 # Use production registry images
 images:
