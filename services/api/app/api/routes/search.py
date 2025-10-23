@@ -107,7 +107,10 @@ async def search_documents(
                     document_title=document.title,
                     chunk_text=chunk.chunk_text,
                     chunk_index=chunk.chunk_index,
-                    score=qdrant_result["score"]
+                    score=qdrant_result["score"],
+                    section_title=chunk.section_title,
+                    page_number=chunk.page_number,
+                    chunk_metadata=chunk.chunk_metadata or {}
                 )
             )
 
