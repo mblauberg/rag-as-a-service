@@ -4,6 +4,7 @@ import { useDocument, useDeleteDocument } from '../hooks/useDocuments';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
+import { formatBytes, formatDate, formatStatus, getStatusColor } from '../utils/formatting';
 
 export const DocumentDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,37 +55,12 @@ export const DocumentDetailPage: React.FC = () => {
     );
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-  };
-
   const getStatusBadge = (status: string) => {
-    const statusColors = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      processing: 'bg-blue-100 text-blue-800',
-      completed: 'bg-green-100 text-green-800',
-      failed: 'bg-red-100 text-red-800',
-    };
-
     return (
       <span
-        className={`px-3 py-1 text-sm font-medium rounded-full ${
-          statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'
-        }`}
+        className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(status)}`}
       >
-        {status}
+        {formatStatus(status)}
       </span>
     );
   };
@@ -118,7 +94,7 @@ export const DocumentDetailPage: React.FC = () => {
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">File Size</dt>
-                <dd className="mt-1 text-sm text-gray-900">{formatFileSize(document.file_size)}</dd>
+                <dd className="mt-1 text-sm text-gray-900">{formatBytes(document.file_size)}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Chunks</dt>
@@ -134,11 +110,11 @@ export const DocumentDetailPage: React.FC = () => {
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Created</dt>
-                <dd className="mt-1 text-sm text-gray-900">{formatDate(document.created_at)}</dd>
+                <dd className="mt-1 text-sm text-gray-900">{formatDate(document.created_at, true)}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Updated</dt>
-                <dd className="mt-1 text-sm text-gray-900">{formatDate(document.updated_at)}</dd>
+                <dd className="mt-1 text-sm text-gray-900">{formatDate(document.updated_at, true)}</dd>
               </div>
             </dl>
           </div>
