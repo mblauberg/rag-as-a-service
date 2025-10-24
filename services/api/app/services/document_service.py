@@ -12,7 +12,6 @@ import httpx
 
 from app.models.document import Document, DocumentChunk
 from app.models.schemas import DocumentResponse, DocumentDetailResponse, DocumentListResponse
-from app.services.chunking_service import chunking_service
 from app.utils.file_processing import file_processor
 from app.core.config import settings
 from app.core.qdrant_client import QdrantClientWrapper
