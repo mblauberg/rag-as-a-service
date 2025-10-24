@@ -25,15 +25,16 @@ fi
 # Load images into Kind (if using Kind)
 if kubectl config current-context | grep -q "kind"; then
     echo "📥 Loading images into Kind..."
-    kind load docker-image raas-api:latest || echo "⚠️  Failed to load raas-api"
-    kind load docker-image raas-embedder:latest || echo "⚠️  Failed to load raas-embedder"
-    kind load docker-image raas-generator:latest || echo "⚠️  Failed to load raas-generator"
-    kind load docker-image raas-frontend:latest || echo "⚠️  Failed to load raas-frontend"
+    kind load docker-image raas-api:latest --name raas-cluster || echo "⚠️  Failed to load raas-api"
+    kind load docker-image raas-embedder:latest --name raas-cluster || echo "⚠️  Failed to load raas-embedder"
+    kind load docker-image raas-generator:latest --name raas-cluster || echo "⚠️  Failed to load raas-generator"
+    kind load docker-image raas-frontend:latest --name raas-cluster || echo "⚠️  Failed to load raas-frontend"
 fi
 
 # Deploy with kustomize
 echo "🎯 Deploying resources..."
-kubectl apply -k ../overlays/local/
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+kubectl apply -k "${SCRIPT_DIR}/../overlays/local/"
 
 # Wait for deployments
 echo "⏳ Waiting for deployments to be ready..."
