@@ -69,7 +69,7 @@ ehthumbs.db
 Thumbs.db
 
 # Claude Code
-.claude/settings.local*.json
+.claude/
 
 # Logs
 *.log
