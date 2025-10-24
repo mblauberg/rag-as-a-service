@@ -6,6 +6,7 @@ Uses Reciprocal Rank Fusion to combine results from:
 - Vector: Qdrant similarity search for semantic matching
 """
 import asyncio
+import logging
 from typing import List, Dict, Any, Optional
 from uuid import UUID
 import httpx
@@ -16,6 +17,8 @@ from app.services.fusion import reciprocal_rank_fusion
 from app.models.document import DocumentChunk
 from app.core.qdrant_client import QdrantClientWrapper
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class VectorSearchService:
@@ -64,7 +67,7 @@ class VectorSearchService:
             query_embedding = result["embedding"]
         except Exception as e:
             # Log error but don't fail - return empty results
-            print(f"Embedder service error: {e}")
+            logger.error(f"Embedder service error: {e}", exc_info=True)
             return []
 
         # Search Qdrant
@@ -80,22 +83,25 @@ class VectorSearchService:
                 document_ids=document_ids_str
             )
         except Exception as e:
-            print(f"Qdrant search error: {e}")
+            logger.error(f"Qdrant search error: {e}", exc_info=True)
             return []
 
         # Convert Qdrant results to DocumentChunk objects
-        # Note: We're creating minimal chunks with just ID and score
-        # The actual chunk data would need to be fetched from DB if needed
+        # SAFETY: Creating minimal chunks with placeholder data is safe here because:
+        # 1. RRF (Reciprocal Rank Fusion) only uses chunk.id for ranking
+        # 2. The /search/hybrid endpoint fetches full chunk data from DB after fusion
+        # 3. Placeholder fields (document_id, chunk_text, etc.) are never used in ranking
+        # 4. This avoids N database queries during the search phase
         chunks = []
         for qdrant_result in qdrant_results:
             chunk = DocumentChunk(
                 id=UUID(qdrant_result["id"]),
                 document_id=UUID("00000000-0000-0000-0000-000000000000"),  # Placeholder
                 chunk_index=0,
-                chunk_text="",  # Will be filled by endpoint if needed
+                chunk_text="",  # Placeholder - fetched later by endpoint
                 token_count=0
             )
-            # Store vector score as metadata
+            # Store vector score as metadata for RRF fusion
             chunk.vector_score = qdrant_result.get("score", 0.0)
             chunks.append(chunk)
 
@@ -146,7 +152,7 @@ class HybridSearchService:
         """
         # Execute BM25 and vector searches in parallel
         bm25_task = asyncio.create_task(
-            self.bm25_service.search(query, limit=bm25_limit)
+            self.bm25_service.search(query, limit=bm25_limit, document_ids=document_ids)
         )
         vector_task = asyncio.create_task(
             self.vector_service.search(query, limit=vector_limit, document_ids=document_ids)

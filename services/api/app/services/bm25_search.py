@@ -25,7 +25,7 @@ class BM25SearchService:
         self,
         query: str,
         limit: int = 20,
-        document_id: Optional[UUID] = None
+        document_ids: Optional[List[UUID]] = None
     ) -> List[DocumentChunk]:
         """
         Search chunks using BM25-like ranking.
@@ -33,7 +33,7 @@ class BM25SearchService:
         Args:
             query: Search query (natural language)
             limit: Maximum results to return
-            document_id: Optional filter by document ID
+            document_ids: Optional filter by document IDs
 
         Returns:
             List of DocumentChunk objects ranked by relevance
@@ -44,16 +44,16 @@ class BM25SearchService:
 
         if is_postgres:
             # Use PostgreSQL full-text search with ts_rank
-            return await self._search_postgres(query, limit, document_id)
+            return await self._search_postgres(query, limit, document_ids)
         else:
             # Fallback to simple LIKE search for SQLite (testing)
-            return await self._search_sqlite(query, limit, document_id)
+            return await self._search_sqlite(query, limit, document_ids)
 
     async def _search_postgres(
         self,
         query: str,
         limit: int,
-        document_id: Optional[UUID]
+        document_ids: Optional[List[UUID]]
     ) -> List[DocumentChunk]:
         """
         PostgreSQL full-text search implementation.
@@ -73,15 +73,17 @@ class BM25SearchService:
             WHERE text_search_vector @@ plainto_tsquery('english', :query)
         """
 
-        if document_id:
-            sql += " AND document_id = :document_id"
+        params = {"query": query, "limit": limit}
+
+        if document_ids:
+            # Convert UUIDs to strings for SQL query
+            doc_ids_str = [str(doc_id) for doc_id in document_ids]
+            sql += " AND document_id = ANY(:document_ids)"
+            params["document_ids"] = doc_ids_str
 
         sql += " ORDER BY rank DESC LIMIT :limit"
 
         # Execute query
-        params = {"query": query, "limit": limit}
-        if document_id:
-            params["document_id"] = str(document_id)
 
         result = await self.db_session.execute(text(sql), params)
         rows = result.fetchall()
@@ -106,7 +108,7 @@ class BM25SearchService:
         self,
         query: str,
         limit: int,
-        document_id: Optional[UUID]
+        document_ids: Optional[List[UUID]]
     ) -> List[DocumentChunk]:
         """
         SQLite fallback implementation using LIKE for testing.
@@ -122,8 +124,8 @@ class BM25SearchService:
 
         # Add LIKE conditions for each term (simple scoring)
         # In SQLite, we'll do client-side scoring
-        if document_id:
-            stmt = stmt.where(DocumentChunk.document_id == document_id)
+        if document_ids:
+            stmt = stmt.where(DocumentChunk.document_id.in_(document_ids))
 
         stmt = stmt.limit(limit * 5)  # Get more results for filtering
 

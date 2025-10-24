@@ -115,7 +115,7 @@ async def test_bm25_search_filters_by_document_id(db_session):
     bm25_service = BM25SearchService(db_session)
 
     # Search with document filter
-    results = await bm25_service.search("kubernetes", limit=5, document_id=doc_id_1)
+    results = await bm25_service.search("kubernetes", limit=5, document_ids=[doc_id_1])
 
     # Should only return chunk from doc_id_1
     assert len(results) == 1
