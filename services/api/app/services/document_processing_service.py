@@ -1,6 +1,7 @@
 """Document processing service coordinating processors and chunking."""
+import asyncio
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Any
 from app.models.schemas import DocumentType
 from app.services.processors.base_processor import BaseDocumentProcessor, ProcessedDocument
 from app.services.processors.pdf_processor import PDFProcessor
@@ -8,6 +9,66 @@ from app.services.processors.docx_processor import DOCXProcessor
 from app.services.processors.text_processor import TextProcessor
 from app.services.processors.csv_processor import CSVProcessor
 from app.services.chunking.semantic_chunker import SemanticChunker
+from app.services.chunking.semantic_chunker_v2 import SemanticChunkerV2
+from app.core.config import settings
+from app.utils.token_counter import TokenCounter
+
+
+class SemanticChunkerV2Wrapper:
+    """
+    Wrapper for SemanticChunkerV2 to match the interface of legacy SemanticChunker.
+
+    This wrapper provides synchronous methods that internally run async operations,
+    allowing seamless integration with existing code while using the new semantic chunker.
+    """
+
+    def __init__(
+        self,
+        min_chunk_size: int = 128,
+        max_chunk_size: int = 512,
+        breakpoint_percentile: float = 95.0
+    ):
+        """Initialize the wrapper with a SemanticChunkerV2 instance."""
+        self.chunker = SemanticChunkerV2(
+            min_chunk_size=min_chunk_size,
+            max_chunk_size=max_chunk_size,
+            breakpoint_percentile=breakpoint_percentile
+        )
+        self.token_counter = TokenCounter()
+
+    def chunk_with_metadata(
+        self,
+        text: str,
+        section_context: str = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Chunk text and return with metadata (synchronous wrapper for async method).
+
+        Args:
+            text: Text to chunk
+            section_context: Optional section context (not used in v2 but kept for compatibility)
+
+        Returns:
+            List of dicts with 'content' and 'tokens' keys
+        """
+        # Run async method in event loop
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        chunks = loop.run_until_complete(self.chunker.chunk_text(text))
+
+        # Convert to expected format
+        result = []
+        for chunk in chunks:
+            result.append({
+                'content': chunk.text,
+                'tokens': chunk.token_count or len(chunk.text.split())
+            })
+
+        return result
 
 
 class DocumentProcessingService:
@@ -17,7 +78,7 @@ class DocumentProcessingService:
     """
 
     def __init__(self):
-        """Initialize with all available processors."""
+        """Initialize with all available processors and appropriate chunker based on config."""
         self.processors: Dict[DocumentType, BaseDocumentProcessor] = {
             DocumentType.PDF: PDFProcessor(),
             DocumentType.DOCX: DOCXProcessor(),
@@ -26,10 +87,20 @@ class DocumentProcessingService:
             DocumentType.CSV: CSVProcessor(),
         }
 
-        self.chunker = SemanticChunker(
-            chunk_size=400,
-            overlap=80
-        )
+        # Select chunking strategy based on configuration
+        if settings.CHUNKING_STRATEGY == "semantic":
+            # Use new semantic chunker with percentile-based breakpoints
+            self.chunker = SemanticChunkerV2Wrapper(
+                min_chunk_size=settings.SEMANTIC_MIN_CHUNK_SIZE,
+                max_chunk_size=settings.SEMANTIC_MAX_CHUNK_SIZE,
+                breakpoint_percentile=settings.SEMANTIC_BREAKPOINT_PERCENTILE
+            )
+        else:
+            # Use legacy recursive chunker
+            self.chunker = SemanticChunker(
+                chunk_size=settings.CHUNK_SIZE,
+                overlap=settings.CHUNK_OVERLAP
+            )
 
     def get_processor(self, document_type: DocumentType) -> BaseDocumentProcessor:
         """
