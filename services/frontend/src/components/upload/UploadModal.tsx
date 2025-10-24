@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '../ui/dialog';
-import { Button } from '../ui/button';
+import { Button } from '../common/Button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { cn } from '../../lib/utils';
@@ -231,7 +231,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           <div className="flex justify-end space-x-3">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               onClick={onClose}
               disabled={uploadDocument.isPending}
             >

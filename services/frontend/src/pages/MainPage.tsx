@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { EnhancedSearchBar } from '../components/search/EnhancedSearchBar';
 import { UploadModal } from '../components/upload/UploadModal';
-import { Button } from '../components/ui/button';
+import { Button } from '../components/common/Button';
 import { useSearchWithDebounce } from '../hooks/useSearchWithDebounce';
 import { useDocuments } from '../hooks/useDocuments';
 import { useModels } from '../hooks/useModels';
