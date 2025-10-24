@@ -15,29 +15,18 @@ spec:
       labels:
         app: ollama
     spec:
-      initContainers:
-      - name: init-models
-        image: curlimages/curl:latest
-        command: ["/bin/sh"]
-        args:
-          - -c
-          - |
-            echo "Waiting for Ollama to be ready..."
-            until curl -sf http://localhost:11434/api/tags > /dev/null; do
-              echo "Waiting..."
-              sleep 5
-            done
-
-            echo "Pulling default model: llama3.2"
-            curl -X POST http://localhost:11434/api/pull \
-              -H "Content-Type: application/json" \
-              -d '{"name": "llama3.2"}' \
-              --max-time 600
-
-            echo "Model pulled successfully"
       containers:
       - name: ollama
         image: ollama/ollama:latest
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - |
+                sleep 15 && curl -X POST http://localhost:11434/api/pull \
+                  -d '{"name":"llama3.2"}' || true
         ports:
         - containerPort: 11434
           name: http

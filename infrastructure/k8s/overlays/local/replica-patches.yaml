@@ -1,0 +1,33 @@
+# Reduce replicas to 1 for local development
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: raas
+spec:
+  replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: embedder
+  namespace: raas
+spec:
+  replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: raas
+spec:
+  replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generator
+  namespace: raas
+spec:
+  replicas: 1
