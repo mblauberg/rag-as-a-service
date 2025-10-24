@@ -8,7 +8,7 @@ RAAS (Retrieval-Augmented Generation as a Service) is a microservices-based plat
 
 ### Architecture
 
-The platform consists of three microservices that communicate asynchronously:
+The platform consists of four microservices that communicate asynchronously:
 
 1. **API Service** (`services/api/`) - FastAPI gateway (port 8000)
    - Handles document uploads, metadata storage in PostgreSQL
@@ -20,7 +20,12 @@ The platform consists of three microservices that communicate asynchronously:
    - Stores embeddings in Qdrant vector database
    - Processes chunks in batches (default 32) for optimal performance
 
-3. **Frontend** (`services/frontend/`) - React SPA (port 3000)
+3. **Generator Service** (`services/generator/`) - RAG summary generation (port 8002)
+   - Multi-provider LLM support (OpenAI, Anthropic, Google, Ollama)
+   - Generates summaries from retrieved document chunks
+   - Configurable models with graceful degradation
+
+4. **Frontend** (`services/frontend/`) - React SPA (port 3000)
    - Built with React 18, TypeScript, Vite, Tailwind CSS
    - Uses React Query for state management and caching
    - Served via NGINX in production
@@ -109,6 +114,20 @@ poetry run uvicorn app.main:app --reload --port 8001
 poetry run pytest
 ```
 
+#### Generator Service
+```bash
+cd services/generator
+
+# Install dependencies
+poetry install
+
+# Run locally
+poetry run uvicorn app.main:app --reload --port 8002
+
+# Run tests
+poetry run pytest
+```
+
 #### Frontend
 ```bash
 cd services/frontend
@@ -150,7 +169,7 @@ psql -U raasuser -d raasdb -f services/api/app/migrations/001_initial.sql
 - **Async-first**: Uses `asyncpg` with SQLAlchemy for non-blocking database operations
 - **Database schema**: Two main tables (`documents` and `document_chunks`) with cascading deletes
 - **Status tracking**: Documents have `upload_status` and `embedding_status` fields
-- **Chunking**: Text is split into manageable chunks (implementation in `services/chunking_service.py`)
+- **Chunking**: Text is split into manageable chunks using SemanticChunker (implementation in `services/api/app/services/chunking/`)
 - **Error handling**: Returns proper HTTP status codes with descriptive error messages
 - **Logging**: JSON-formatted logs to stdout
 
@@ -171,6 +190,15 @@ psql -U raasuser -d raasdb -f services/api/app/migrations/001_initial.sql
 - **Routing**: React Router for SPA navigation
 - **Styling**: Tailwind CSS with semantic HTML and ARIA labels
 
+### Generator Service Architecture
+
+- **Multi-provider support**: Abstraction layer supporting OpenAI, Anthropic, Google, and Ollama
+- **Provider registry**: Dynamic registration based on available API keys and configuration
+- **Model selection**: Configurable default model with per-request overrides
+- **Graceful degradation**: Falls back to Ollama when API providers unavailable
+- **Prompt engineering**: Structured prompts combining query context with retrieved chunks
+- **Configuration**: Environment-based provider enablement with `.env` files
+
 ### Kubernetes Deployment
 
 - **Namespace**: All resources deployed to `raas` namespace
@@ -184,8 +212,9 @@ psql -U raasuser -d raasdb -f services/api/app/migrations/001_initial.sql
 
 Each service expects specific environment variables. Examples are provided in `.env.example` files:
 
-- **API**: `DATABASE_URL`, `QDRANT_URL`, `EMBEDDER_URL`, `UPLOAD_DIR`
+- **API**: `DATABASE_URL`, `QDRANT_URL`, `EMBEDDER_URL`, `GENERATOR_URL`, `UPLOAD_DIR`
 - **Embedder**: `QDRANT_URL`, `MODEL_NAME`, `BATCH_SIZE`
+- **Generator**: `DEFAULT_MODEL`, `ENABLE_OPENAI`, `OPENAI_API_KEY`, `ENABLE_OLLAMA`, `OLLAMA_URL`, `ENABLE_ANTHROPIC`, `ANTHROPIC_API_KEY`, `ENABLE_GOOGLE`, `GOOGLE_API_KEY`
 - **Frontend**: `VITE_API_URL`
 
 ## Common Tasks
