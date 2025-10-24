@@ -80,6 +80,10 @@ docker run -p 8000:8000 --env-file .env raas-api:latest
 
 - `POST /api/v1/search` - Perform semantic search
 
+### Models
+
+- `GET /api/v1/models` - List available LLM models
+
 ### Health
 
 - `GET /api/v1/health` - Health check
@@ -113,7 +117,8 @@ Required variables:
 - `DATABASE_URL` - PostgreSQL connection string
 - `QDRANT_URL` - Qdrant server URL
 - `EMBEDDER_URL` - Embedder service URL
+- `GENERATOR_URL` - Generator service URL (for RAG responses)
 
 ## Architecture
 
-See `docs/api_service.md` for detailed architecture documentation.
+For comprehensive architecture details, see the root [README.md](../../README.md).

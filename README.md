@@ -147,20 +147,17 @@ open http://localhost:3000
 
 **Service URLs:**
 - Frontend: http://localhost:3000
-- API: http://localhost:8000/api/v1/docs
+- API: http://localhost:8000/docs
 - Embedder: http://localhost:8001/docs
-- Generator: http://localhost:8002/api/v1/docs
+- Generator: http://localhost:8002/docs
 - Qdrant Dashboard: http://localhost:6333/dashboard
 - Ollama: http://localhost:11434
 
 ### Kubernetes Deployment (Local with Kind)
 
 ```bash
-# Create local Kind cluster
-./infrastructure/scripts/setup-kind.sh
-
-# Build and deploy all services
-./infrastructure/scripts/build-and-deploy.sh v1
+# Create local Kind cluster and deploy all services
+./infrastructure/scripts/setup-kind-full.sh
 
 # Check deployment status
 kubectl get pods -n raas
@@ -421,26 +418,38 @@ GET /api/v1/models
 ### Interactive Documentation
 
 Visit the API docs for interactive testing:
-- API Service: http://localhost:8000/api/v1/docs
+- API Service: http://localhost:8000/docs
 - Embedder Service: http://localhost:8001/docs
-- Generator Service: http://localhost:8002/api/v1/docs
+- Generator Service: http://localhost:8002/docs
 
 ## Multi-Provider Model Support
 
 The system supports multiple LLM providers for summary generation:
 
-- **Ollama** (local, default)
-- **OpenAI** (GPT-5, GPT-4.1)
+- **OpenAI** (GPT-4o, GPT-4o-mini, default)
+- **Ollama** (local models - llama3.2, mistral, etc.)
 - **Anthropic** (Claude models)
 - **Google** (Gemini models)
 
-See [Multi-Provider Setup Guide](docs/MULTI_PROVIDER_SETUP.md) for configuration details.
-
-To enable additional providers, set environment variables:
+To enable additional providers, configure environment variables in `services/generator/.env`:
 
 ```bash
-export ENABLE_OPENAI=true
-export OPENAI_API_KEY=sk-...
+# OpenAI (recommended, enabled by default)
+ENABLE_OPENAI=true
+OPENAI_API_KEY=sk-...
+DEFAULT_MODEL=openai:gpt-4o-mini
+
+# Ollama (optional, for local models)
+ENABLE_OLLAMA=true
+OLLAMA_URL=http://localhost:11434
+
+# Anthropic (optional)
+ENABLE_ANTHROPIC=true
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Google (optional)
+ENABLE_GOOGLE=true
+GOOGLE_API_KEY=...
 ```
 
 Models from all enabled providers appear automatically in the frontend dropdown.
@@ -452,30 +461,43 @@ Models from all enabled providers appear automatically in the frontend dropdown.
 #### API Service
 
 ```bash
-DATABASE_URL=postgresql+asyncpg://user:pass@localhost:5432/raasdb
-QDRANT_URL=http://localhost:6333
-EMBEDDER_URL=http://localhost:8001
-UPLOAD_DIR=/app/data/uploads
+DATABASE_URL=postgresql+asyncpg://raasuser:raaspass@postgres:5432/raasdb
+QDRANT_URL=http://qdrant:6333
+EMBEDDER_URL=http://embedder:8001
+UPLOAD_DIR=/app/uploads
+MAX_UPLOAD_SIZE=104857600
 CORS_ORIGINS=["http://localhost:3000"]
+LOG_LEVEL=INFO
 ```
 
 #### Embedder Service
 
 ```bash
-QDRANT_URL=http://localhost:6333
+QDRANT_URL=http://qdrant:6333
 MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
+MODEL_DIMENSION=384
 BATCH_SIZE=32
 COLLECTION_NAME=documents
-VECTOR_SIZE=384
+LOG_LEVEL=INFO
 ```
 
 #### Generator Service
 
 ```bash
+# OpenAI Configuration (default)
+ENABLE_OPENAI=true
+OPENAI_API_KEY=your-openai-api-key-here
+DEFAULT_MODEL=openai:gpt-4o-mini
+
+# Ollama Configuration (optional)
 OLLAMA_URL=http://localhost:11434
-DEFAULT_MODEL=llama3.2
+ENABLE_OLLAMA=false
+
+# Generation Settings
 MAX_CHUNKS=5
 TEMPERATURE=0.1
+MAX_TOKENS=2000
+TIMEOUT=30
 LOG_LEVEL=INFO
 ```
 
@@ -551,16 +573,24 @@ raas/
 │   │   └── .env.example
 │   ├── k8s/                   # Kubernetes manifests
 │   │   ├── base/              # Base configurations
-│   │   └── overlays/          # Environment overlays
-│   │       ├── local/
-│   │       └── gcp/
-│   └── scripts/               # Deployment scripts
-│       ├── setup-kind.sh
-│       └── build-and-deploy.sh
+│   │   ├── overlays/          # Environment overlays
+│   │   │   ├── local/
+│   │   │   └── production/
+│   │   └── scripts/           # Deployment scripts
+│   │       └── deploy-local.sh
+│   ├── kind/                  # Kind cluster config
+│   │   └── kind-config.yaml
+│   └── scripts/               # Infrastructure scripts
+│       ├── init-ollama.sh
+│       ├── setup-kind-full.sh
+│       ├── test-rollout-rollback.sh
+│       ├── test-scalability-reliability.sh
+│       └── verify-type1-requirements.sh
 │
 ├── tests/
 │   └── integration/           # Integration tests
-│       └── test_full_workflow.sh
+│       ├── test_full_workflow.sh
+│       └── test_generation_flow.sh
 │
 ├── docs/                      # Documentation
 ├── data/                      # Data directory
@@ -859,14 +889,6 @@ See [infrastructure/k8s/README.md](infrastructure/k8s/README.md) for:
 - Scaling and HPA
 - Rollout and rollback procedures
 - Troubleshooting guide
-
-### Design Documentation
-
-See [docs/plans/2025-10-24-kubernetes-scaffolding-design.md](docs/plans/2025-10-24-kubernetes-scaffolding-design.md) for:
-- Design decisions and rationale
-- Service specifications
-- Type I project compliance
-- Future enhancements
 
 ## License
 

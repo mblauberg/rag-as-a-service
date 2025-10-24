@@ -83,7 +83,7 @@ logs/
 node_modules/
 
 # Project specific
-data/uploads/*
+data/
 !data/uploads/.gitkeep
 .kind-cluster/
 .worktrees/
