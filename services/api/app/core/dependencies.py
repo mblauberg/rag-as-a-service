@@ -3,6 +3,7 @@ from typing import AsyncGenerator
 import httpx
 
 from app.core.qdrant_client import qdrant_client, QdrantClientWrapper
+from app.services.generator_client import GeneratorClient
 
 
 def get_qdrant_client() -> QdrantClientWrapper:
@@ -37,3 +38,17 @@ async def get_http_client() -> AsyncGenerator[httpx.AsyncClient, None]:
     """
     async with httpx.AsyncClient(timeout=30.0) as client:
         yield client
+
+
+def get_generator_client() -> GeneratorClient:
+    """
+    Provide Generator service client instance.
+
+    Returns a new GeneratorClient instance for each request. The client
+    handles communication with the Generator service for LLM-based tasks
+    such as query expansion and summary generation.
+
+    Returns:
+        GeneratorClient: Generator service client
+    """
+    return GeneratorClient()

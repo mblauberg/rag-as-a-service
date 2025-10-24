@@ -65,6 +65,47 @@ class GeneratorClient:
             logger.error(f"Generator request failed: {e}")
             return None
 
+    async def generate(
+        self,
+        prompt: str,
+        max_tokens: int = 150,
+        temperature: float = 0.3
+    ) -> Optional[Any]:
+        """
+        Generate text from a prompt using the generator service.
+
+        Args:
+            prompt: Text prompt for generation
+            max_tokens: Maximum tokens to generate
+            temperature: Sampling temperature (0.0-1.0)
+
+        Returns:
+            Generation response object with 'text' attribute, or None if failed
+        """
+        url = f"{self.base_url}/api/v1/generate"
+
+        payload = {
+            "prompt": prompt,
+            "max_tokens": max_tokens,
+            "temperature": temperature
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
+                response = await client.post(url, json=payload)
+
+                if response.status_code == 200:
+                    result = response.json()
+                    # Return object with 'text' attribute for compatibility
+                    return type('GenerateResponse', (), {'text': result.get('text', '')})()
+                else:
+                    logger.warning(f"Generator returned {response.status_code}")
+                    return None
+
+        except Exception as e:
+            logger.error(f"Generator request failed: {e}")
+            return None
+
     async def list_models(self) -> List[Dict[str, Any]]:
         """
         List available models from Generator.

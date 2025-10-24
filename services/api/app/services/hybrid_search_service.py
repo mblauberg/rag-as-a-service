@@ -13,7 +13,8 @@ import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.bm25_search import BM25SearchService
-from app.services.fusion import reciprocal_rank_fusion
+from app.services.fusion import reciprocal_rank_fusion, reciprocal_rank_fusion_multi
+from app.services.query_expansion import QueryExpansionService
 from app.models.document import DocumentChunk
 from app.core.qdrant_client import QdrantClientWrapper
 from app.core.config import settings
@@ -120,7 +121,8 @@ class HybridSearchService:
         self,
         db_session: AsyncSession,
         qdrant_client: QdrantClientWrapper,
-        http_client: httpx.AsyncClient
+        http_client: httpx.AsyncClient,
+        generator_client=None
     ):
         self.bm25_service = BM25SearchService(db_session)
         self.vector_service = VectorSearchService(
@@ -128,6 +130,11 @@ class HybridSearchService:
             qdrant_client,
             http_client
         )
+        # Initialize query expansion service if generator client provided
+        if generator_client:
+            self.expansion_service = QueryExpansionService(generator_client)
+        else:
+            self.expansion_service = None
 
     async def search(
         self,
@@ -178,5 +185,65 @@ class HybridSearchService:
                 "bm25_count": len(bm25_results),
                 "vector_count": len(vector_results),
                 "overlap_count": overlap_count
+            }
+        }
+
+    async def search_with_expansion(
+        self,
+        query: str,
+        limit: int = 10,
+        document_ids: Optional[List[UUID]] = None
+    ) -> Dict[str, Any]:
+        """
+        Advanced search with query expansion.
+
+        Pipeline:
+        1. Expand query into 3 variants (original + 2 alternatives)
+        2. For each variant: hybrid search (BM25 + vector + RRF)
+        3. Merge all results with multi-set RRF
+
+        Args:
+            query: Original query
+            limit: Number of final results
+            document_ids: Optional filter by document IDs
+
+        Returns:
+            Dictionary with results, expanded queries, and metadata
+        """
+        # Step 1: Expand query
+        if self.expansion_service:
+            try:
+                expanded_queries = await self.expansion_service.expand_query(query)
+            except Exception as e:
+                logger.error(f"Query expansion failed: {e}", exc_info=True)
+                # Fallback: use original query only
+                expanded_queries = [query]
+        else:
+            # No expansion service configured
+            expanded_queries = [query]
+
+        logger.info(f"Expanded query '{query}' into {len(expanded_queries)} variants")
+
+        # Step 2: Search with each query variant (parallel)
+        search_tasks = [
+            self.search(q, limit=15, document_ids=document_ids)
+            for q in expanded_queries
+        ]
+        all_results = await asyncio.gather(*search_tasks)
+
+        # Step 3: Extract result chunks from each search
+        result_sets = [result["results"] for result in all_results]
+
+        # Step 4: Apply multi-set RRF
+        merged_results = reciprocal_rank_fusion_multi(result_sets)
+
+        # Step 5: Return top-K
+        return {
+            "results": merged_results[:limit],
+            "retrieval_method": "hybrid_with_expansion",
+            "expanded_queries": expanded_queries,
+            "metadata": {
+                "query_count": len(expanded_queries),
+                "total_candidates": sum(len(rs) for rs in result_sets)
             }
         }
