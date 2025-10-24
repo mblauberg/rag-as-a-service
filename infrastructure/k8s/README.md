@@ -50,9 +50,26 @@ brew install kustomize
 
 ### Local Deployment (Kind)
 
+**Option 1: Automated Setup (Recommended)**
+
+```bash
+# From project root - creates cluster, builds images, and deploys everything
+./infrastructure/scripts/setup-kind-full.sh
+```
+
+The script will:
+- Create Kind cluster named `raas-cluster`
+- Build all Docker images
+- Load images into Kind
+- Install NGINX Ingress
+- Deploy all services to `raas` namespace
+- Display access instructions
+
+**Option 2: Manual Setup**
+
 **1. Create Kind cluster:**
 ```bash
-kind create cluster --name raas-local
+kind create cluster --name raas-cluster --config infrastructure/kind/kind-config.yaml
 ```
 
 **2. Load images into Kind:**
@@ -64,10 +81,10 @@ docker build -t raas-generator:latest ./services/generator
 docker build -t raas-frontend:latest ./services/frontend
 
 # Load into Kind
-kind load docker-image raas-api:latest --name raas-local
-kind load docker-image raas-embedder:latest --name raas-local
-kind load docker-image raas-generator:latest --name raas-local
-kind load docker-image raas-frontend:latest --name raas-local
+kind load docker-image raas-api:latest --name raas-cluster
+kind load docker-image raas-embedder:latest --name raas-cluster
+kind load docker-image raas-generator:latest --name raas-cluster
+kind load docker-image raas-frontend:latest --name raas-cluster
 ```
 
 **3. Install NGINX Ingress:**
@@ -97,7 +114,7 @@ kubectl get ingress -n raas
 ```bash
 # Port-forward to access locally
 kubectl port-forward svc/api 8000:8000 -n raas &
-kubectl port-forward svc/frontend 3000:3000 -n raas &
+kubectl port-forward svc/frontend 3000:80 -n raas &
 
 # Or use Ingress (requires /etc/hosts entry)
 echo "127.0.0.1 raas.local" | sudo tee -a /etc/hosts
@@ -265,7 +282,8 @@ All services include liveness and readiness probes:
 | qdrant | HTTP / :6333 | HTTP / :6333 | 10s / 15s |
 | api | HTTP /api/v1/health :8000 | HTTP /api/v1/health/ready :8000 | 15s / 20s |
 | embedder | HTTP /health :8001 | HTTP /ready :8001 | 20s / 30s |
-| frontend | HTTP / :3000 | HTTP / :3000 | 10s / 5s |
+| generator | HTTP /health :8002 | HTTP /health/ready :8002 | 15s / 20s |
+| frontend | HTTP / :80 | HTTP / :80 | 10s / 5s |
 
 ## Monitoring
 
@@ -314,7 +332,7 @@ kubectl describe pod <pod-name> -n raas
 kubectl describe deployment/api -n raas
 
 # Local (Kind): Ensure image loaded
-kind load docker-image raas-api:latest --name raas-local
+kind load docker-image raas-api:latest --name raas-cluster
 
 # Production: Check registry authentication
 kubectl get secret -n raas
@@ -374,7 +392,7 @@ kubectl delete -k infrastructure/k8s/overlays/local/
 kubectl delete namespace raas
 
 # Delete Kind cluster
-kind delete cluster --name raas-local
+kind delete cluster --name raas-cluster
 ```
 
 ### Production
@@ -472,5 +490,6 @@ This scaffolding satisfies INFS3208 Type I requirements:
 
 For issues or questions:
 1. Check troubleshooting section above
-2. Review design doc: `docs/plans/2025-10-24-kubernetes-scaffolding-design.md`
+2. Review root README: `../../README.md`
 3. Check Kubernetes logs: `kubectl logs -f <pod-name> -n raas`
+4. Run verification script: `./infrastructure/scripts/verify-type1-requirements.sh`
