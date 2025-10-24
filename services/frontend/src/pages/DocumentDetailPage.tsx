@@ -18,7 +18,7 @@ export const DocumentDetailPage: React.FC = () => {
     if (window.confirm(`Are you sure you want to delete "${document?.title}"? This action cannot be undone.`)) {
       try {
         await deleteDocument.mutateAsync(id);
-        navigate('/documents');
+        navigate('/');
       } catch (error) {
         console.error('Failed to delete document:', error);
       }
@@ -27,30 +27,42 @@ export const DocumentDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <Spinner size="lg" />
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-center py-12">
+            <Spinner size="lg" />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-600">Error loading document: {error.message}</p>
-        <Link to="/documents" className="mt-4 inline-block">
-          <Button variant="secondary">Back to Documents</Button>
-        </Link>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-12">
+            <p className="text-red-600 mb-4">Error loading document: {error.message}</p>
+            <Link to="/" className="inline-block">
+              <Button variant="secondary">Back to Home</Button>
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!document) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">Document not found</p>
-        <Link to="/documents" className="mt-4 inline-block">
-          <Button variant="secondary">Back to Documents</Button>
-        </Link>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-12">
+            <p className="text-gray-600 mb-4">Document not found</p>
+            <Link to="/" className="inline-block">
+              <Button variant="secondary">Back to Home</Button>
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -66,18 +78,23 @@ export const DocumentDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <Link to="/documents" className="text-primary-600 hover:text-primary-800 text-sm mb-2 inline-block">
-            ← Back to Documents
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900">{document.title}</h1>
-        </div>
-        <Button variant="danger" onClick={handleDelete} isLoading={deleteDocument.isPending}>
-          Delete Document
-        </Button>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <Link to="/" className="text-primary-600 hover:text-primary-800 text-sm mb-2 inline-block flex items-center gap-1">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Home
+              </Link>
+              <h1 className="text-3xl font-bold text-gray-900">{document.title}</h1>
+            </div>
+            <Button variant="danger" onClick={handleDelete} isLoading={deleteDocument.isPending}>
+              Delete Document
+            </Button>
+          </div>
 
       <Card>
         <div className="space-y-4">
@@ -128,37 +145,39 @@ export const DocumentDetailPage: React.FC = () => {
         </div>
       </Card>
 
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Document Chunks ({document.chunks?.length || 0})
-        </h2>
-        {document.chunks && document.chunks.length > 0 ? (
-          <div className="space-y-4">
-            {document.chunks.map((chunk) => (
-              <Card key={chunk.id}>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-500">
-                      Chunk {chunk.chunk_index + 1}
-                    </span>
-                    {chunk.token_count && (
-                      <span className="text-xs text-gray-500">
-                        {chunk.token_count} tokens
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {chunk.chunk_text}
-                  </p>
-                </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Document Chunks ({document.chunks?.length || 0})
+            </h2>
+            {document.chunks && document.chunks.length > 0 ? (
+              <div className="space-y-4">
+                {document.chunks.map((chunk) => (
+                  <Card key={chunk.id}>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-500">
+                          Chunk {chunk.chunk_index + 1}
+                        </span>
+                        {chunk.token_count && (
+                          <span className="text-xs text-gray-500">
+                            {chunk.token_count} tokens
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                        {chunk.chunk_text}
+                      </p>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <p className="text-gray-500 text-center">No chunks available</p>
               </Card>
-            ))}
+            )}
           </div>
-        ) : (
-          <Card>
-            <p className="text-gray-500 text-center">No chunks available</p>
-          </Card>
-        )}
+        </div>
       </div>
     </div>
   );

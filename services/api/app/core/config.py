@@ -1,5 +1,6 @@
 """Configuration settings loaded from environment variables."""
 from typing import List
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -32,6 +33,20 @@ class Settings(BaseSettings):
 
     # Logging
     log_level: str = "INFO"
+
+    # Reranker settings
+    RERANKER_MODEL: str = Field(
+        default="BAAI/bge-reranker-v2-m3",
+        description="Cross-encoder model for reranking"
+    )
+    RERANKER_TOP_K: int = Field(
+        default=10,
+        description="Number of results to return after reranking"
+    )
+    RERANKER_CANDIDATE_MULTIPLIER: int = Field(
+        default=5,
+        description="Retrieve N*top_k candidates before reranking"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",

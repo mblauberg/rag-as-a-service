@@ -7,7 +7,7 @@ from app.models.schemas import Model
 
 
 class OpenAIProvider(ModelProvider):
-    """Provider for OpenAI models (GPT-5, GPT-4.1, etc)."""
+    """Provider for OpenAI models (GPT-5, GPT-5 Mini, GPT-4o, GPT-4o Mini)."""
 
     # Predefined OpenAI models (2025)
     MODELS = [
@@ -26,11 +26,18 @@ class OpenAIProvider(ModelProvider):
             "capabilities": ["reasoning", "coding", "fast"]
         },
         {
-            "name": "openai:gpt-4.1",
-            "display_name": "GPT-4.1",
+            "name": "openai:gpt-4o",
+            "display_name": "GPT-4o",
             "size": "N/A",
-            "description": "1M context, excellent long-form comprehension",
-            "capabilities": ["reasoning", "long-context", "coding"]
+            "description": "Fast multimodal model, excellent for vision and text",
+            "capabilities": ["reasoning", "coding", "multimodal", "fast"]
+        },
+        {
+            "name": "openai:gpt-4o-mini",
+            "display_name": "GPT-4o Mini",
+            "size": "N/A",
+            "description": "Cost-effective, fast responses",
+            "capabilities": ["reasoning", "coding", "fast", "cost-effective"]
         }
     ]
 
@@ -104,8 +111,7 @@ Provide a concise, accurate summary."""
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": user_message}
                 ],
-                temperature=0.3,
-                max_tokens=500
+                max_completion_tokens=500
             )
 
             return response.choices[0].message.content

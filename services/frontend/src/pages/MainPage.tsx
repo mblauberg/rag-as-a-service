@@ -90,7 +90,7 @@ export const MainPage: React.FC = () => {
 
           {dataToDisplay.error && (
             <div className="text-center py-12">
-              <p className="text-red-600">
+              <p className="text-red-600" role="alert">
                 Error: {dataToDisplay.error.message}
               </p>
             </div>

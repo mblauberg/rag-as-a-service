@@ -82,7 +82,7 @@ async def search_documents(
         return SearchResponse(
             query=request.query,
             summary=None,
-            results=[],
+            chunks=[],
             model_used=None,
             total_results=0
         )
@@ -152,7 +152,7 @@ async def search_documents(
     return SearchResponse(
         query=request.query,
         summary=summary,
-        results=results,
+        chunks=results,
         model_used=model_used,
         total_results=len(results)
     )

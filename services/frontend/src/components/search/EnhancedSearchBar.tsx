@@ -69,7 +69,9 @@ export const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
   return (
     <div className="relative w-full max-w-3xl mx-auto">
       <div className="relative">
-        <MagnifyingGlassIcon className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <div className="absolute left-6 top-1/2 -translate-y-1/2 z-10">
+          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" style={{ width: '20px', height: '20px' }} />
+        </div>
 
         <input
           ref={inputRef}
@@ -78,6 +80,7 @@ export const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           autoFocus={autoFocus}
+          aria-label="Search documents by content or title"
           className="
             w-full pl-14 pr-48 py-4 text-lg
             bg-white/70 backdrop-blur-md

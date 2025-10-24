@@ -51,7 +51,7 @@ class GeneratorClient:
         }
 
         try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
+            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
                 response = await client.post(url, json=payload)
 
                 if response.status_code == 200:
@@ -75,7 +75,7 @@ class GeneratorClient:
         url = f"{self.base_url}/api/v1/models"
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
                 response = await client.get(url)
 
                 if response.status_code == 200:

@@ -44,9 +44,13 @@ async def generate_summary(request: GenerateRequest):
 
         logger.info(f"Generated summary using {provider_used} provider")
 
+        # Estimate tokens used (rough approximation: 1 token ≈ 4 characters)
+        tokens_estimate = (len(request.query) + len(context) + len(summary)) // 4
+
         return GenerateResponse(
             summary=summary,
-            model_used=request.model
+            model_used=request.model,
+            tokens_used=tokens_estimate
         )
 
     except ValueError as e:

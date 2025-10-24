@@ -1,19 +1,23 @@
 -- Initial database schema for RAAS
+-- Consolidated migration including all schema changes
+
 -- Documents table
 CREATE TABLE IF NOT EXISTS documents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(500) NOT NULL,
     description TEXT,
     file_name VARCHAR(500) NOT NULL,
-    file_type VARCHAR(50) NOT NULL,
+    file_type VARCHAR(255) NOT NULL,
     file_size INTEGER NOT NULL,
+    file_path VARCHAR(1000),
+    document_type VARCHAR(50),
     upload_status VARCHAR(50) DEFAULT 'pending',
     embedding_status VARCHAR(50) DEFAULT 'pending',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Chunks table
+-- Document chunks table
 CREATE TABLE IF NOT EXISTS document_chunks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
@@ -21,17 +25,28 @@ CREATE TABLE IF NOT EXISTS document_chunks (
     chunk_text TEXT NOT NULL,
     qdrant_point_id UUID,
     token_count INTEGER,
+    section_title TEXT,
+    section_level INTEGER DEFAULT 0,
+    page_number INTEGER,
+    chunk_tokens INTEGER,
+    parent_chunk_id UUID REFERENCES document_chunks(id) ON DELETE CASCADE,
+    chunk_metadata JSONB DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(document_id, chunk_index)
 );
 
--- Indexes for efficient queries
+-- Indexes for efficient queries on documents table
 CREATE INDEX IF NOT EXISTS idx_documents_created_at ON documents(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(embedding_status);
+
+-- Indexes for efficient queries on document_chunks table
 CREATE INDEX IF NOT EXISTS idx_chunks_document_id ON document_chunks(document_id);
 CREATE INDEX IF NOT EXISTS idx_chunks_qdrant_id ON document_chunks(qdrant_point_id);
+CREATE INDEX IF NOT EXISTS idx_chunks_section_title ON document_chunks(section_title);
+CREATE INDEX IF NOT EXISTS idx_chunks_parent ON document_chunks(parent_chunk_id);
+CREATE INDEX IF NOT EXISTS idx_chunks_page_number ON document_chunks(page_number);
 
--- Trigger to update the `updated_at` column
+-- Trigger function to update the `updated_at` column
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -40,5 +55,6 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+-- Trigger to automatically update documents.updated_at
 CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON documents
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

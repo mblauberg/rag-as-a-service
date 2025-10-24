@@ -120,7 +120,7 @@ class SearchResponse(BaseModel):
 
     query: str
     summary: Optional[str] = Field(None, description="Generated summary with citations")
-    results: List[SearchResultItem]
+    chunks: List[SearchResultItem]
     model_used: Optional[str] = Field(None, description="Model used for generation")
     total_results: int
 
