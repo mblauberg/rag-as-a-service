@@ -2,8 +2,10 @@
 
 **Date:** 2025-10-24
 **Type:** Maintenance & Quality Improvement
-**Status:** Approved
+**Status:** Ready to Execute
 **Scope:** All services (API, Embedder, Frontend) + Documentation
+**Branch:** `feature/cleanup-and-refactoring`
+**Parallel Work:** `feature/critical-rag-optimizations` (independent RAG improvements)
 
 ## Executive Summary
 
@@ -44,17 +46,22 @@ This design addresses project cleanup (junk files, outdated documentation) and S
 
 ## Current State Assessment
 
+**Last Updated:** 2025-10-24
+
+**Note on Parallel Work:**
+The `feature/critical-rag-optimizations` branch is running in parallel implementing RAG improvements (BGE-M3 embeddings upgrade, BM25 sparse search, reciprocal rank fusion). This work is independent and can be merged separately. This cleanup and refactoring work is focused solely on code quality, organization, and testing.
+
 ### Issues Identified
 
 **File Organization:**
-- 2 test files at project root (`test_upload_search.py`, `test_webapp.py`)
-- Generated files tracked in git (`htmlcov/`, `.pytest_cache/`, `__pycache__/`)
-- Duplicate Claude settings file (`.claude/settings.local 2.json`)
+- 7 test files at project root (various Playwright/integration tests)
+- Generated files may still be tracked in git (need verification)
+- Duplicate Claude settings file may exist (`.claude/settings.local 2.json`)
 
 **Documentation:**
-- 8 outdated plan files from completed/merged features
-- 2 large analysis docs that may be outdated (ENHANCEMENT_PRIORITIZATION_PLAN.md, RAG_OPTIMIZATION_ANALYSIS.md)
-- Only 2 plans still relevant (RAG optimization work)
+- Previous cleanup (commit f53bc98) removed some outdated plans
+- Current plan documents in docs/plans/ need review
+- RAG optimization plan files are active for parallel work
 
 **Code Quality (SOLID Violations):**
 - `document_service.py` at 380 lines violates Single Responsibility Principle

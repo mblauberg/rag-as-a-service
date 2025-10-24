@@ -10,47 +10,76 @@
 
 **Design Reference:** `docs/plans/2025-10-24-cleanup-and-refactoring-design.md`
 
+**Current State (2025-10-24):**
+- Previous cleanup (commit f53bc98) removed worktrees and some docs
+- 7 test files currently at project root need relocation
+- `document_service.py` is 380 lines and needs splitting
+- Frontend has minimal test coverage (1 test file)
+- Parallel work in `feature/critical-rag-optimizations` is independent
+
 ---
 
 ## Track A: Immediate Safe Cleanup
 
 ### Task A1: Relocate Misplaced Test Files
 
-**Context:** Two test files exist at project root instead of proper test directory.
+**Context:** Seven test/debug files exist at project root instead of proper test directory.
 
-**Files:**
+**Verified Files (as of 2025-10-24):**
 - Move: `test_upload_search.py` → `tests/integration/test_upload_search.py`
 - Move: `test_webapp.py` → `tests/integration/test_webapp.py`
+- Move: `test_documents_page.py` → `tests/integration/test_documents_page.py`
+- Move: `test_raas_webapp.py` → `tests/integration/test_raas_webapp.py`
+- Move: `test_ai_summary_placement.py` → `tests/integration/test_ai_summary_placement.py`
+- Move: `test_summary_fix.py` → `tests/integration/test_summary_fix.py`
+- Move: `test_httpx_redirects.py` → `tests/integration/test_httpx_redirects.py`
+- Move: `debug_dom_structure.py` → `tests/debug/debug_dom_structure.py`
+- Move: `upload_test_corpus.py` → `tests/integration/upload_test_corpus.py`
 
 **Step 1: Verify test files exist**
 
-Run: `ls -la test_*.py`
+Run: `ls -la test_*.py debug_*.py upload_test_corpus.py`
 
-Expected: Both files present at project root
+Expected: All 9 files present at project root
 
-**Step 2: Move files to integration test directory**
+**Step 2: Move files to appropriate test directories**
 
 ```bash
 mkdir -p tests/integration
+mkdir -p tests/debug
+
+# Move integration test files
 mv test_upload_search.py tests/integration/
 mv test_webapp.py tests/integration/
+mv test_documents_page.py tests/integration/
+mv test_raas_webapp.py tests/integration/
+mv test_ai_summary_placement.py tests/integration/
+mv test_summary_fix.py tests/integration/
+mv test_httpx_redirects.py tests/integration/
+mv upload_test_corpus.py tests/integration/
+
+# Move debug file
+mv debug_dom_structure.py tests/debug/
 ```
 
-**Step 3: Verify tests still work**
+**Step 3: Verify tests can be discovered**
 
 Run: `pytest tests/integration/ -v --collect-only`
 
-Expected: Both test files discovered and collected
+Expected: Test files discovered (may have import errors, that's ok for now)
 
 **Step 4: Commit**
 
 ```bash
-git add tests/integration/test_upload_search.py tests/integration/test_webapp.py
-git add test_upload_search.py test_webapp.py  # Register deletion
-git commit -m "chore: move integration tests to proper directory
+git add tests/integration/ tests/debug/
+git add test_*.py debug_*.py upload_test_corpus.py  # Register deletions
+git commit -m "chore: move test and debug files to proper directories
 
-Move test_upload_search.py and test_webapp.py from project root to tests/integration/
-for better organization and discoverability."
+Move 8 test files and 1 debug file from project root to organized directories:
+- tests/integration/ - Integration and end-to-end tests
+- tests/debug/ - Debug utilities
+
+Improves project organization and test discoverability."
 ```
 
 ---
@@ -149,21 +178,23 @@ Keep only the proper 'settings.local.json' file."
 
 **Context:** 8 plan documents for completed/merged features should be removed.
 
-**Files:**
-- Delete: `docs/plans/2025-10-23-comprehensive-quality-improvements-design.md`
-- Delete: `docs/plans/2025-10-23-comprehensive-quality-improvements.md`
-- Delete: `docs/plans/2025-10-24-complete-phase4-frontend-refactor.md`
-- Delete: `docs/plans/2025-10-24-kubernetes-scaffolding-design.md`
-- Delete: `docs/plans/2025-10-24-kubernetes-scaffolding-implementation.md`
-- Delete: `docs/plans/2025-10-24-kubernetes-scalability-resilience-design.md`
-- Delete: `docs/plans/2025-10-24-project-cleanup-design.md`
-- Delete: `docs/plans/2025-10-24-semantic-chunking-remaining-tasks.md`
+**Verified State:** 11 plan files currently exist in master (as of 2025-10-24). The previous cleanup (f53bc98) did not remove these plan files.
+
+**Files to Delete:**
+- Delete: `docs/plans/2025-10-23-comprehensive-quality-improvements-design.md` (merged)
+- Delete: `docs/plans/2025-10-23-comprehensive-quality-improvements.md` (merged)
+- Delete: `docs/plans/2025-10-24-complete-phase4-frontend-refactor.md` (completed)
+- Delete: `docs/plans/2025-10-24-kubernetes-scaffolding-design.md` (merged)
+- Delete: `docs/plans/2025-10-24-kubernetes-scaffolding-implementation.md` (merged)
+- Delete: `docs/plans/2025-10-24-kubernetes-scalability-resilience-design.md` (completed)
+- Delete: `docs/plans/2025-10-24-project-cleanup-design.md` (completed, superseded by this plan)
+- Delete: `docs/plans/2025-10-24-semantic-chunking-remaining-tasks.md` (completed)
 
 **Step 1: List current plan files**
 
 Run: `ls -1 docs/plans/*.md`
 
-Expected: Shows 10 plan files
+Expected: Shows 11 plan files
 
 **Step 2: Delete outdated plans**
 
@@ -180,11 +211,14 @@ rm 2025-10-24-semantic-chunking-remaining-tasks.md
 cd ../..
 ```
 
-**Step 3: Verify only RAG plans remain**
+**Step 3: Verify only active plans remain**
 
 Run: `ls -1 docs/plans/*.md`
 
-Expected: Shows only 4 files (2 RAG plans + 2 new plans for cleanup)
+Expected: Shows only 3 files:
+- `2025-01-24-critical-rag-optimizations.md` (active work)
+- `2025-10-24-cleanup-and-refactoring-design.md` (this plan's design)
+- `2025-10-24-rag-optimization-implementation.md` (future work)
 
 **Step 4: Commit**
 
@@ -193,14 +227,17 @@ git add docs/plans/
 git commit -m "chore: remove outdated plan documents
 
 Delete 8 plan documents for completed/merged features:
-- Comprehensive quality improvements (completed)
-- Phase 4 frontend refactor (completed)
-- Kubernetes scaffolding (merged)
-- Kubernetes scalability/resilience (completed)
-- Project cleanup (superseded by this work)
-- Semantic chunking tasks (completed)
+- 2025-10-23 comprehensive quality improvements (merged to master)
+- 2025-10-24 complete phase 4 frontend refactor (completed)
+- 2025-10-24 kubernetes scaffolding design + implementation (merged)
+- 2025-10-24 kubernetes scalability/resilience (completed)
+- 2025-10-24 project cleanup design (completed in f53bc98)
+- 2025-10-24 semantic chunking tasks (completed)
 
-Preserve RAG optimization plans (future work)."
+Preserve active plans:
+- 2025-01-24 critical RAG optimizations (in progress)
+- 2025-10-24 cleanup and refactoring design (this work)
+- 2025-10-24 RAG optimization implementation (future work)"
 ```
 
 ---
@@ -387,21 +424,21 @@ Prevents future accidental tracking of generated files."
 
 **Step 1: Verify test files relocated**
 
-Run: `ls tests/integration/test_*.py`
+Run: `ls tests/integration/test_*.py tests/debug/debug_*.py`
 
-Expected: Both test files present in integration directory
+Expected: 8 test files in integration/ and 1 debug file in debug/
 
 **Step 2: Verify no generated files tracked**
 
 Run: `git ls-files | grep -E "(htmlcov|\.pytest_cache|__pycache__|\.pyc$)" | wc -l`
 
-Expected: `0`
+Expected: `0` (or minimal)
 
 **Step 3: Verify plan documents cleaned**
 
 Run: `ls -1 docs/plans/*.md | wc -l`
 
-Expected: `4` (2 RAG plans + 2 new cleanup plans)
+Expected: `3` (critical-rag-optimizations + cleanup design + rag-optimization-implementation)
 
 **Step 4: Verify .gitignore updated**
 
