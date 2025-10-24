@@ -17,6 +17,17 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     cors_origins: list[str] = ["http://localhost:3000", "http://localhost:8000"]
 
+    # Provider Toggles
+    enable_ollama: bool = True
+    enable_openai: bool = False
+    enable_anthropic: bool = False
+    enable_google: bool = False
+
+    # API Keys (optional)
+    openai_api_key: str = ""
+    anthropic_api_key: str = ""
+    google_api_key: str = ""
+
     model_config = ConfigDict(
         env_file=".env",
         case_sensitive=False

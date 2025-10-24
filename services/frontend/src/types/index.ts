@@ -71,9 +71,13 @@ export interface SearchResponse {
 }
 
 export interface Model {
-  name: string;
-  size: string;
-  modified_at: string;
+  name: string;              // Unique identifier (e.g., "llama3.3:70b", "openai:gpt-5")
+  display_name: string;      // Human-readable name (e.g., "Llama 3.3 70B")
+  provider: string;          // "ollama", "openai", "anthropic", "google"
+  size: string;              // "8B", "70B", "N/A"
+  description: string;       // Capability description
+  capabilities: string[];    // ["reasoning", "coding"]
+  modified_at: string;       // ISO timestamp
 }
 
 export interface ModelsResponse {

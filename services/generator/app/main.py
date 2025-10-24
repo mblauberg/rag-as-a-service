@@ -6,6 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.api.routes import generate, models, health
+from app.providers.registry import ProviderRegistry
+from app.providers.ollama_provider import OllamaProvider
+from app.providers.openai_provider import OpenAIProvider
+from app.providers.anthropic_provider import AnthropicProvider
+from app.providers.google_provider import GoogleProvider
+import app.services.generation_service as gen_service
 
 # Configure logging
 logging.basicConfig(
@@ -14,6 +20,18 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 logger = logging.getLogger(__name__)
+
+# Initialize provider registry
+provider_registry = ProviderRegistry()
+provider_registry.register("ollama", OllamaProvider())
+provider_registry.register("openai", OpenAIProvider())
+provider_registry.register("anthropic", AnthropicProvider())
+provider_registry.register("google", GoogleProvider())
+
+# Set global registry
+gen_service.provider_registry = provider_registry
+
+logger.info(f"Registered providers: {list(provider_registry.providers.keys())}")
 
 
 @asynccontextmanager
