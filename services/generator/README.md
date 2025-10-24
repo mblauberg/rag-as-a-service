@@ -4,10 +4,10 @@ RAG summary generation with multi-provider LLM support.
 
 ## Supported Providers
 
-- **Ollama** (local inference) - Default, enabled automatically
-- **OpenAI** (GPT-5, GPT-5 Mini, GPT-4.1) - Requires API key
-- **Anthropic** (Claude Opus/Sonnet/Haiku 4.x) - Requires API key
-- **Google** (Gemini 2.5 Pro/Flash) - Requires API key
+- **OpenAI** (GPT-4o, GPT-4o Mini, GPT-5, GPT-5 Mini) - Recommended for production, requires API key
+- **Ollama** (local models like llama3.2, mistral) - Good for development, no API key needed
+- **Anthropic** (Claude Opus 4.1, Claude Sonnet 4.5) - Requires API key
+- **Google** (Gemini 2.5 Pro, Gemini 2.5 Flash) - Requires API key
 
 ## Quick Start
 
@@ -64,13 +64,13 @@ Response:
       "modified_at": "2025-10-01T12:00:00Z"
     },
     {
-      "name": "openai:gpt-5",
-      "display_name": "GPT-5",
+      "name": "openai:gpt-4o-mini",
+      "display_name": "GPT-4o Mini",
       "provider": "openai",
       "size": "N/A",
-      "description": "Best intelligence, coding/math excellence",
-      "capabilities": ["reasoning", "coding", "creative"],
-      "modified_at": "2025-08-01"
+      "description": "Cost-effective, fast responses",
+      "capabilities": ["reasoning", "coding", "fast", "cost-effective"],
+      "modified_at": "2025-10-24T12:00:00Z"
     }
   ]
 }
@@ -83,13 +83,13 @@ POST /api/v1/generate
 {
   "query": "What is cloud computing?",
   "chunks": [...],
-  "model": "openai:gpt-5"  # Optional, defaults to DEFAULT_MODEL
+  "model": "openai:gpt-4o-mini"  # Optional, defaults to DEFAULT_MODEL
 }
 
 Response:
 {
   "summary": "Cloud computing provides...",
-  "model_used": "openai:gpt-5",
+  "model_used": "openai:gpt-4o-mini",
   "tokens_used": 0
 }
 ```
@@ -98,17 +98,21 @@ Response:
 
 Environment variables:
 
-| Variable | Default | Description |
+| Variable | Default (.env.example) | Description |
 |----------|---------|-------------|
+| `DEFAULT_MODEL` | `openai:gpt-4o-mini` | Default model if not specified in request |
+| `ENABLE_OPENAI` | `true` | Enable OpenAI provider (recommended for production) |
+| `OPENAI_API_KEY` | Required | OpenAI API key |
+| `ENABLE_OLLAMA` | `false` | Enable Ollama provider (local inference) |
 | `OLLAMA_URL` | `http://localhost:11434` | Ollama server URL |
-| `DEFAULT_MODEL` | `llama3.2` | Default model if not specified |
-| `ENABLE_OLLAMA` | `true` | Enable Ollama provider |
-| `ENABLE_OPENAI` | `false` | Enable OpenAI provider |
-| `OPENAI_API_KEY` | `""` | OpenAI API key |
 | `ENABLE_ANTHROPIC` | `false` | Enable Anthropic provider |
-| `ANTHROPIC_API_KEY` | `""` | Anthropic API key |
+| `ANTHROPIC_API_KEY` | `""` | Anthropic API key (optional) |
 | `ENABLE_GOOGLE` | `false` | Enable Google provider |
-| `GOOGLE_API_KEY` | `""` | Google API key |
+| `GOOGLE_API_KEY` | `""` | Google API key (optional) |
+| `MAX_CHUNKS` | `5` | Maximum document chunks to include in context |
+| `TEMPERATURE` | `0.1` | Generation temperature (0.0-1.0) |
+| `MAX_TOKENS` | `2000` | Maximum tokens in generated response |
+| `TIMEOUT` | `30` | Request timeout in seconds |
 
 ## Architecture
 
@@ -136,7 +140,7 @@ The `ProviderRegistry` manages all providers:
 Models are identified by qualified names:
 
 - **Ollama models**: Simple name (e.g., `llama3.2`, `mistral`)
-- **API models**: Prefixed with provider (e.g., `openai:gpt-5`, `anthropic:claude-opus-4`)
+- **API models**: Prefixed with provider (e.g., `openai:gpt-4o-mini`, `anthropic:claude-sonnet-4-5`)
 
 The registry routes requests to the appropriate provider based on the prefix.
 
@@ -174,14 +178,15 @@ poetry run pytest tests/integration/ -v
 
 ### OpenAI Provider
 
-- **Models**: GPT-5, GPT-5 Mini, GPT-4.1
+- **Models**: GPT-4o, GPT-4o Mini, GPT-5, GPT-5 Mini
 - **Authentication**: Requires `OPENAI_API_KEY`
 - **API**: Uses official `openai` Python SDK
 - **Rate limits**: Handled by SDK with exponential backoff
+- **Recommended**: Default for production deployments
 
 ### Anthropic Provider
 
-- **Models**: Claude Opus/Sonnet/Haiku 4.x series
+- **Models**: Claude Opus 4.1, Claude Sonnet 4.5
 - **Authentication**: Requires `ANTHROPIC_API_KEY`
 - **API**: Uses official `anthropic` Python SDK
 - **Streaming**: Not currently implemented
@@ -265,7 +270,7 @@ Ensure environment variables are set correctly and service is restarted.
 
 ### Generation failures
 
-1. Check model name is correctly prefixed (e.g., `openai:gpt-5`)
+1. Check model name is correctly prefixed (e.g., `openai:gpt-4o-mini`)
 2. Verify API key has sufficient credits/quota
 3. Review logs for detailed error messages
 4. Test with Ollama first to isolate provider issues
