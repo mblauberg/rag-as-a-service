@@ -34,6 +34,16 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
 
+    # Chunking Configuration
+    CHUNKING_STRATEGY: str = "semantic"  # semantic | recursive
+    SEMANTIC_MIN_CHUNK_SIZE: int = 128
+    SEMANTIC_MAX_CHUNK_SIZE: int = 512
+    SEMANTIC_BREAKPOINT_PERCENTILE: float = 95.0
+
+    # Legacy chunking (for backward compatibility)
+    CHUNK_SIZE: int = 400
+    CHUNK_OVERLAP: int = 80
+
     # Reranker settings
     RERANKER_MODEL: str = Field(
         default="BAAI/bge-reranker-v2-m3",
