@@ -1,18 +1,36 @@
-"""Text chunking service for splitting documents into manageable chunks."""
+"""Text chunking service for splitting documents into manageable chunks.
+
+.. deprecated::
+    This class is deprecated. Use :class:`app.services.chunking.semantic_chunker.SemanticChunker` instead,
+    which provides better semantic coherence using recursive splitting.
+"""
+import warnings
 from typing import List
 
 
 class ChunkingService:
-    """Service for chunking text into smaller segments."""
+    """Service for chunking text into smaller segments.
+
+    .. deprecated::
+        Use SemanticChunker instead for better semantic coherence.
+    """
 
     def __init__(self, chunk_size: int = 512, chunk_overlap: int = 50):
         """
         Initialize chunking service.
 
+        .. deprecated::
+            Use SemanticChunker instead.
+
         Args:
             chunk_size: Maximum number of characters per chunk
             chunk_overlap: Number of overlapping characters between chunks
         """
+        warnings.warn(
+            "ChunkingService is deprecated. Use SemanticChunker instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
