@@ -4,9 +4,18 @@ metadata:
   name: generator-config
   namespace: raas
 data:
+  # Ollama Configuration
   OLLAMA_URL: "http://ollama:11434"
   DEFAULT_MODEL: "llama3.2"
+  ENABLE_OLLAMA: "true"
+
+  # Generation Settings
   MAX_CHUNKS: "5"
   TEMPERATURE: "0.1"
   MAX_TOKENS: "2000"
   TIMEOUT: "30"
+
+  # External Provider Flags (API keys in secret)
+  ENABLE_OPENAI: "false"
+  ENABLE_ANTHROPIC: "false"
+  ENABLE_GOOGLE: "false"

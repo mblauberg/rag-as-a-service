@@ -30,6 +30,7 @@ resources:
 - generator/deployment.yaml
 - generator/service.yaml
 - generator/configmap.yaml
+- generator/secret.yaml
 - generator/hpa.yaml
 - ollama/deployment.yaml
 - ollama/service.yaml

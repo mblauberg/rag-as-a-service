@@ -25,6 +25,8 @@ spec:
         envFrom:
         - configMapRef:
             name: generator-config
+        - secretRef:
+            name: generator-api-keys
         resources:
           requests:
             cpu: 500m
