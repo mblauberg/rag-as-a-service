@@ -288,9 +288,9 @@ test_search_functionality() {
     # Perform search
     local response=$(curl -s -X POST "$API_URL/api/v1/search" \
         -H "Content-Type: application/json" \
-        -d '{"query":"artificial intelligence machine learning","top_k":5}')
+        -d '{"query":"artificial intelligence machine learning","limit":5}')
 
-    if echo "$response" | grep -q '"results"'; then
+    if echo "$response" | grep -q '"chunks"'; then
         record_test "Search query execution" "PASS"
 
         # Check if results contain our document
