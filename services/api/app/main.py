@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import init_db
 from app.api.routes import documents, search, health, models
+from app.api.routes import hexagonal_documents, hexagonal_search
 
 # Configure logging
 logging.basicConfig(
@@ -85,6 +86,19 @@ app.include_router(
     models.router,
     prefix="/api/v1",
     tags=["models"]
+)
+
+# Hexagonal architecture routes (new clean architecture implementation)
+app.include_router(
+    hexagonal_documents.router,
+    prefix="/api/v1/hexagonal/documents",
+    tags=["hexagonal-documents"]
+)
+
+app.include_router(
+    hexagonal_search.router,
+    prefix="/api/v1/hexagonal/search",
+    tags=["hexagonal-search"]
 )
 
 
