@@ -124,3 +124,107 @@ class TextExtractionError(Exception):
         self.file_path = file_path
         self.file_type = file_type
         self.original_error = original_error
+
+
+# Alias for consistency with service port naming
+EmbeddingServiceError = EmbedderServiceError
+
+
+class VectorStoreError(Exception):
+    """
+    Exception raised when vector store operations fail.
+
+    This exception is raised when vector database operations fail,
+    such as search, upsert, or delete operations.
+    """
+
+    def __init__(self, operation: str, original_error: Exception = None):
+        """
+        Initialize VectorStoreError.
+
+        Args:
+            operation: Description of the operation that failed
+            original_error: The original exception that was caught
+        """
+        message = f"Vector store operation failed: {operation}"
+        if original_error:
+            message += f" - {str(original_error)}"
+        super().__init__(message)
+        self.operation = operation
+        self.original_error = original_error
+
+
+class GenerationServiceError(Exception):
+    """
+    Exception raised when LLM generation service operations fail.
+
+    This exception is raised when the generation service is unreachable
+    or returns an error response.
+    """
+
+    def __init__(self, operation: str, original_error: Exception = None):
+        """
+        Initialize GenerationServiceError.
+
+        Args:
+            operation: Description of the operation that failed
+            original_error: The original exception that was caught
+        """
+        message = f"Generation service operation failed: {operation}"
+        if original_error:
+            message += f" - {str(original_error)}"
+        super().__init__(message)
+        self.operation = operation
+        self.original_error = original_error
+
+
+class FileProcessingError(Exception):
+    """
+    Exception raised when file processing operations fail.
+
+    This exception is raised when file processing operations such as
+    text extraction or validation fail.
+    """
+
+    def __init__(self, operation: str, file_path: str = None, original_error: Exception = None):
+        """
+        Initialize FileProcessingError.
+
+        Args:
+            operation: Description of the operation that failed
+            file_path: Optional path to the file that caused the error
+            original_error: The original exception that was caught
+        """
+        message = f"File processing operation failed: {operation}"
+        if file_path:
+            message += f" for {file_path}"
+        if original_error:
+            message += f" - {str(original_error)}"
+        super().__init__(message)
+        self.operation = operation
+        self.file_path = file_path
+        self.original_error = original_error
+
+
+class ChunkingError(Exception):
+    """
+    Exception raised when text chunking operations fail.
+
+    This exception is raised when the text chunker cannot split
+    text into semantic segments.
+    """
+
+    def __init__(self, operation: str, original_error: Exception = None):
+        """
+        Initialize ChunkingError.
+
+        Args:
+            operation: Description of the operation that failed
+            original_error: The original exception that was caught
+        """
+        message = f"Chunking operation failed: {operation}"
+        if original_error:
+            message += f" - {str(original_error)}"
+        super().__init__(message)
+        self.operation = operation
+        self.original_error = original_error
