@@ -43,17 +43,18 @@ describe('fileValidation', () => {
     });
 
     it('should reject file exceeding size limit', () => {
-      const largeContent = new Array(101 * 1024 * 1024).fill('a').join('');
-      const file = new File([largeContent], 'large.pdf', { type: 'application/pdf' });
+      // Create a mock file with size > 100MB
+      const file = new File(['content'], 'large.pdf', { type: 'application/pdf' });
+      Object.defineProperty(file, 'size', { value: 101 * 1024 * 1024 });
       const result = validateUploadFile(file);
       expect(result.valid).toBe(false);
       expect(result.error).toBe('File size must be less than 100MB');
     });
 
     it('should accept file at size limit', () => {
-      // Create file just under 100MB
-      const content = new Array(50 * 1024 * 1024).fill('a').join('');
-      const file = new File([content], 'medium.pdf', { type: 'application/pdf' });
+      // Create a mock file with size just under 100MB
+      const file = new File(['content'], 'medium.pdf', { type: 'application/pdf' });
+      Object.defineProperty(file, 'size', { value: 50 * 1024 * 1024 });
       const result = validateUploadFile(file);
       expect(result.valid).toBe(true);
     });
