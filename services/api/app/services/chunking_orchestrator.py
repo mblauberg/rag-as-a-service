@@ -33,7 +33,7 @@ class ChunkingOrchestrator:
         """
         self.processing_service = DocumentProcessingService()
         self.metadata_service = metadata_service
-        self.embedder_url = settings.embedder_url
+        self.embedder_url = settings.embedder.url
 
     async def process_and_chunk(
         self,

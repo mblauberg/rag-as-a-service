@@ -81,7 +81,7 @@ async def readiness_check(
     # Check embedder service
     try:
         async with httpx.AsyncClient(timeout=5.0) as http_client:
-            response = await http_client.get(f"{settings.embedder_url}/health")
+            response = await http_client.get(f"{settings.embedder.url}/health")
             if response.status_code == 200:
                 services.append(ServiceStatus(
                     name="embedder",
