@@ -192,3 +192,30 @@ class FusionService(ABC):
             Single fused and ranked list
         """
         pass
+
+
+class QueryAugmenter(ABC):
+    """Port for query expansion and augmentation.
+
+    Generates alternative phrasings or related queries
+    to improve retrieval coverage.
+    """
+
+    @abstractmethod
+    async def expand(
+        self,
+        query: str,
+        num_variants: int = 2,
+        method: str = "llm"
+    ) -> list[str]:
+        """Expand query into multiple variants.
+
+        Args:
+            query: Original query
+            num_variants: Number of variants to generate (default 2)
+            method: Expansion method ("llm", "synonyms", etc.)
+
+        Returns:
+            List containing original + variant queries
+        """
+        pass
