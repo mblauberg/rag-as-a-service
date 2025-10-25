@@ -43,6 +43,17 @@ psql -U raasuser -d raasdb -f app/migrations/001_initial.sql
 
 Or let the application create tables automatically on startup (development only).
 
+## Database Migrations
+
+To add full-text search support for hybrid search:
+
+```bash
+cd services/api
+DATABASE_URL="postgresql+asyncpg://user:pass@localhost/db" poetry run python scripts/run_migration.py add_fts_index.sql
+```
+
+This adds a `text_search_vector` column and GIN index to `document_chunks` table for BM25-like lexical search.
+
 ## Running
 
 ### Development

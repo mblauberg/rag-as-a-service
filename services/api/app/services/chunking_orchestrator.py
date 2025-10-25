@@ -58,7 +58,7 @@ class ChunkingOrchestrator:
             FileOperationError: If file operations fail
         """
         # Process and chunk document using processing pipeline
-        chunks_data = self.processing_service.process_and_chunk(
+        chunks_data = await self.processing_service.process_and_chunk(
             file_path,
             document_type
         )
