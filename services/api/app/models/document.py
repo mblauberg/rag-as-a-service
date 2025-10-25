@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
+from app.core.enums import UploadStatus, EmbeddingStatus
 
 
 class Document(Base):
@@ -22,8 +23,19 @@ class Document(Base):
     file_size = Column(Integer, nullable=False)
     file_path = Column(String(1000), nullable=True)
     document_type = Column(String(50), nullable=True)  # pdf, docx, txt, md, csv, etc.
-    upload_status = Column(String(50), default="pending", nullable=False)
-    embedding_status = Column(String(50), default="pending", nullable=False)
+
+    # Status fields using enums
+    upload_status = Column(
+        String(50),
+        default=UploadStatus.PENDING.value,  # Use enum value
+        nullable=False
+    )
+    embedding_status = Column(
+        String(50),
+        default=EmbeddingStatus.PENDING.value,  # Use enum value
+        nullable=False
+    )
+
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
