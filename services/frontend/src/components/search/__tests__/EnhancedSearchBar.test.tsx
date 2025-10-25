@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EnhancedSearchBar } from '../EnhancedSearchBar';
-import type { Model } from '../../../types';
+import type { Model } from '@/types';
 
 const mockModels: Model[] = [
   {

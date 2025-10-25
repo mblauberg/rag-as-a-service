@@ -23,28 +23,3 @@ export function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
   return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
 }
-
-/**
- * Capitalize first letter of status string.
- */
-export function formatStatus(status: string): string {
-  return status.charAt(0).toUpperCase() + status.slice(1);
-}
-
-/**
- * Status type for documents.
- */
-export type StatusType = 'pending' | 'processing' | 'completed' | 'failed';
-
-/**
- * Get Tailwind CSS classes for status badge.
- */
-export function getStatusColor(status: StatusType): string {
-  const colors: Record<StatusType, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    processing: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
-    failed: 'bg-red-100 text-red-800',
-  };
-  return colors[status] || 'bg-gray-100 text-gray-800';
-}

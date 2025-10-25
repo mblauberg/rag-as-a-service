@@ -1,7 +1,7 @@
 import React from 'react';
 import { PlusIcon } from '@radix-ui/react-icons';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/common/Button';
+import { Button } from '@/components/ui/button';
 
 interface UploadFABProps {
   onClick: () => void;

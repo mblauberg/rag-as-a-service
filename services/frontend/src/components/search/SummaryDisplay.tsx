@@ -3,13 +3,11 @@ import React from 'react';
 interface SummaryDisplayProps {
   summary: string;
   modelUsed: string;
-  onCitationClick?: (citationNumber: number) => void;
 }
 
 export const SummaryDisplay: React.FC<SummaryDisplayProps> = ({
   summary,
-  modelUsed,
-  onCitationClick
+  modelUsed
 }) => {
   // Parse citations and create clickable links
   const renderSummaryWithCitations = () => {
@@ -25,17 +23,16 @@ export const SummaryDisplay: React.FC<SummaryDisplayProps> = ({
         parts.push(summary.substring(lastIndex, match.index));
       }
 
-      // Add clickable citation
+      // Add citation
       const citationNum = parseInt(match[1]);
       parts.push(
-        <button
+        <span
           key={`citation-${match.index}`}
-          onClick={() => onCitationClick?.(citationNum)}
-          className="inline-flex items-center px-1.5 py-0.5 mx-0.5 text-xs font-medium text-blue-700 bg-blue-100 rounded hover:bg-blue-200 transition-colors"
-          aria-label={`Go to source ${citationNum}`}
+          className="inline-flex items-center px-1.5 py-0.5 mx-0.5 text-xs font-medium text-blue-700 bg-blue-100 rounded"
+          aria-label={`Source ${citationNum}`}
         >
           {match[0]}
-        </button>
+        </span>
       );
 
       lastIndex = match.index + match[0].length;

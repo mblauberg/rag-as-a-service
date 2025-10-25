@@ -8,7 +8,7 @@ import type { Document } from '@/types';
 import { formatBytes, formatDate } from '@/utils/formatters';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/common/Button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,

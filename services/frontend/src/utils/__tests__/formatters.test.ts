@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatDate, formatBytes, formatStatus, getStatusColor, type StatusType } from '../formatters';
+import { formatDate, formatBytes } from '../formatters';
 
 describe('formatDate', () => {
   describe('Basic Formatting', () => {
@@ -151,124 +151,7 @@ describe('formatBytes', () => {
   });
 });
 
-describe('formatStatus', () => {
-  it('should capitalize first letter of status', () => {
-    expect(formatStatus('pending')).toBe('Pending');
-    expect(formatStatus('processing')).toBe('Processing');
-    expect(formatStatus('completed')).toBe('Completed');
-    expect(formatStatus('failed')).toBe('Failed');
-  });
-
-  it('should handle single character status', () => {
-    expect(formatStatus('a')).toBe('A');
-  });
-
-  it('should handle empty string', () => {
-    expect(formatStatus('')).toBe('');
-  });
-
-  it('should preserve rest of the string', () => {
-    expect(formatStatus('test_status')).toBe('Test_status');
-  });
-
-  it('should not affect already capitalized strings', () => {
-    expect(formatStatus('Already')).toBe('Already');
-  });
-});
-
-describe('getStatusColor', () => {
-  describe('Status Colors', () => {
-    it('should return yellow for pending status', () => {
-      const result = getStatusColor('pending');
-      expect(result).toBe('bg-yellow-100 text-yellow-800');
-    });
-
-    it('should return blue for processing status', () => {
-      const result = getStatusColor('processing');
-      expect(result).toBe('bg-blue-100 text-blue-800');
-    });
-
-    it('should return green for completed status', () => {
-      const result = getStatusColor('completed');
-      expect(result).toBe('bg-green-100 text-green-800');
-    });
-
-    it('should return red for failed status', () => {
-      const result = getStatusColor('failed');
-      expect(result).toBe('bg-red-100 text-red-800');
-    });
-  });
-
-  describe('Default/Fallback', () => {
-    it('should return gray for unknown status', () => {
-      // @ts-expect-error: Testing invalid status
-      const result = getStatusColor('unknown');
-      expect(result).toBe('bg-gray-100 text-gray-800');
-    });
-
-    it('should return gray for empty string', () => {
-      // @ts-expect-error: Testing invalid status
-      const result = getStatusColor('');
-      expect(result).toBe('bg-gray-100 text-gray-800');
-    });
-
-    it('should return gray for null/undefined', () => {
-      // @ts-expect-error: Testing invalid status
-      const result = getStatusColor(null);
-      expect(result).toBe('bg-gray-100 text-gray-800');
-    });
-  });
-
-  describe('Type Safety', () => {
-    it('should accept all valid StatusType values', () => {
-      const statuses: StatusType[] = ['pending', 'processing', 'completed', 'failed'];
-      statuses.forEach((status) => {
-        const result = getStatusColor(status);
-        expect(result).toBeTruthy();
-        expect(result).toContain('bg-');
-        expect(result).toContain('text-');
-      });
-    });
-
-    it('should return consistent Tailwind class format', () => {
-      const statuses: StatusType[] = ['pending', 'processing', 'completed', 'failed'];
-      statuses.forEach((status) => {
-        const result = getStatusColor(status);
-        expect(result).toMatch(/^bg-\w+-\d+ text-\w+-\d+$/);
-      });
-    });
-  });
-
-  describe('Class String Format', () => {
-    it('should return string with background and text color classes', () => {
-      const result = getStatusColor('pending');
-      expect(result.split(' ')).toHaveLength(2);
-      expect(result).toContain('bg-');
-      expect(result).toContain('text-');
-    });
-
-    it('should return classes in consistent order (bg first, then text)', () => {
-      const statuses: StatusType[] = ['pending', 'processing', 'completed', 'failed'];
-      statuses.forEach((status) => {
-        const result = getStatusColor(status);
-        const [bg, text] = result.split(' ');
-        expect(bg).toMatch(/^bg-/);
-        expect(text).toMatch(/^text-/);
-      });
-    });
-  });
-});
-
 describe('Integration Tests', () => {
-  it('should work together for document status display', () => {
-    const status = 'completed';
-    const formattedStatus = formatStatus(status);
-    const colorClass = getStatusColor(status as StatusType);
-
-    expect(formattedStatus).toBe('Completed');
-    expect(colorClass).toBe('bg-green-100 text-green-800');
-  });
-
   it('should work together for document metadata display', () => {
     const fileSize = 1024 * 1024;
     const createdAt = '2024-01-15T10:30:00Z';
@@ -278,18 +161,5 @@ describe('Integration Tests', () => {
 
     expect(formattedSize).toBe('1.00 MB');
     expect(formattedDate).toMatch(/Jan 15, 2024/);
-  });
-
-  it('should handle all statuses consistently', () => {
-    const statuses: StatusType[] = ['pending', 'processing', 'completed', 'failed'];
-
-    statuses.forEach((status) => {
-      const formatted = formatStatus(status);
-      const color = getStatusColor(status);
-
-      expect(formatted.charAt(0)).toBe(formatted.charAt(0).toUpperCase());
-      expect(color).toContain('bg-');
-      expect(color).toContain('text-');
-    });
   });
 });

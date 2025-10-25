@@ -3,11 +3,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UploadModal } from '../UploadModal';
-import * as useDocumentsHook from '../../../hooks/useDocuments';
+import * as useDocumentsHook from '@/hooks/useDocuments';
 
 // Mock the useUploadDocument hook
-vi.mock('../../../hooks/useDocuments', async () => {
-  const actual = await vi.importActual('../../../hooks/useDocuments');
+vi.mock('@/hooks/useDocuments', async () => {
+  const actual = await vi.importActual('@/hooks/useDocuments');
   return {
     ...actual,
     useUploadDocument: vi.fn(),
