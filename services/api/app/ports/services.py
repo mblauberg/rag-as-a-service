@@ -138,3 +138,30 @@ class TextChunker(ABC):
             ChunkingError: If chunking fails
         """
         pass
+
+
+class KeywordStore(ABC):
+    """Port for keyword-based (lexical) search.
+
+    Implementations use BM25, TF-IDF, or full-text search
+    to find chunks matching query keywords.
+    """
+
+    @abstractmethod
+    async def search(
+        self,
+        query_text: str,
+        top_k: int,
+        document_id: UUID | None = None
+    ) -> list[Chunk]:
+        """Search using keyword matching.
+
+        Args:
+            query_text: Raw query string
+            top_k: Number of results to return
+            document_id: Optional document filter
+
+        Returns:
+            List of chunks ranked by keyword relevance
+        """
+        pass
