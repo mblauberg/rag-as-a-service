@@ -17,8 +17,8 @@ async def test_postgres_keyword_store_searches_with_fts():
     mock_row = MagicMock()
     mock_row.id = uuid4()
     mock_row.document_id = uuid4()
-    mock_row.content = "Kubernetes orchestrates containers"
-    mock_row.tokens = 10
+    mock_row.chunk_text = "Kubernetes orchestrates containers"
+    mock_row.token_count = 10
     mock_row.chunk_metadata = {}
     mock_row.section_title = None
     mock_row.section_level = None

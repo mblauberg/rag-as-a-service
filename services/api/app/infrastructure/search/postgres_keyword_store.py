@@ -33,14 +33,14 @@ class PostgresKeywordStoreImpl(KeywordStore):
             # Build SQL with optional document filter
             sql = """
                 SELECT
-                    id, document_id, content, tokens,
+                    id, document_id, chunk_text, token_count,
                     chunk_metadata, section_title,
                     section_level, page_number,
                     ts_rank(
                         text_search_vector,
                         plainto_tsquery('english', :query)
                     ) as rank
-                FROM chunks
+                FROM document_chunks
                 WHERE text_search_vector @@ plainto_tsquery('english', :query)
             """
 
@@ -62,8 +62,8 @@ class PostgresKeywordStoreImpl(KeywordStore):
                 chunk = Chunk(
                     id=row.id,
                     document_id=row.document_id,
-                    content=row.content,
-                    tokens=row.tokens,
+                    content=row.chunk_text,
+                    tokens=row.token_count,
                     metadata=row.chunk_metadata or {},
                     section_title=row.section_title,
                     section_level=row.section_level,
