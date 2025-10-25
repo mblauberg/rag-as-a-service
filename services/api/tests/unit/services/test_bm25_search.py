@@ -1,14 +1,25 @@
 import pytest
 from app.services.bm25_search import BM25SearchService
-from app.models.document import DocumentChunk
+from app.models.document import Document, DocumentChunk
 from uuid import uuid4
 
 
 @pytest.mark.asyncio
 async def test_bm25_search_returns_ranked_results(db_session):
     """Test BM25 search returns results ranked by relevance"""
-    # Create test document ID
+    # Create test document (required for foreign key constraint)
     doc_id = uuid4()
+    document = Document(
+        id=doc_id,
+        title="Test Document",
+        file_name="test.txt",
+        file_type="text/plain",
+        file_size=1024,
+        upload_status="completed",
+        embedding_status="completed"
+    )
+    db_session.add(document)
+    await db_session.flush()
 
     # Create test chunks
     chunks = [
@@ -67,6 +78,19 @@ async def test_bm25_search_respects_limit(db_session):
     """Test BM25 search respects limit parameter"""
     doc_id = uuid4()
 
+    # Create test document (required for foreign key constraint)
+    document = Document(
+        id=doc_id,
+        title="Test Document",
+        file_name="test.txt",
+        file_type="text/plain",
+        file_size=1024,
+        upload_status="completed",
+        embedding_status="completed"
+    )
+    db_session.add(document)
+    await db_session.flush()
+
     # Create many test chunks
     for i in range(10):
         chunk = DocumentChunk(
@@ -91,6 +115,29 @@ async def test_bm25_search_filters_by_document_id(db_session):
     """Test BM25 search can filter by document ID"""
     doc_id_1 = uuid4()
     doc_id_2 = uuid4()
+
+    # Create test documents (required for foreign key constraint)
+    document1 = Document(
+        id=doc_id_1,
+        title="Test Document 1",
+        file_name="test1.txt",
+        file_type="text/plain",
+        file_size=1024,
+        upload_status="completed",
+        embedding_status="completed"
+    )
+    document2 = Document(
+        id=doc_id_2,
+        title="Test Document 2",
+        file_name="test2.txt",
+        file_type="text/plain",
+        file_size=1024,
+        upload_status="completed",
+        embedding_status="completed"
+    )
+    db_session.add(document1)
+    db_session.add(document2)
+    await db_session.flush()
 
     # Create chunks for two different documents
     chunk1 = DocumentChunk(

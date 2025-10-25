@@ -14,6 +14,7 @@ from typing import AsyncGenerator
 from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 from httpx import AsyncClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -24,8 +25,8 @@ from app.core.qdrant_client import QdrantClientWrapper
 from app.models.document import Document, DocumentChunk
 
 
-# Test database URL (in-memory SQLite for tests)
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+# Test database URL - use PostgreSQL if DATABASE_URL env var is set, otherwise SQLite
+TEST_DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 
 
 @pytest_asyncio.fixture
@@ -33,22 +34,41 @@ async def db_engine():
     """
     Create test database engine.
 
-    Uses in-memory SQLite for fast, isolated tests.
+    Uses PostgreSQL if DATABASE_URL is set, otherwise in-memory SQLite for fast tests.
     """
-    engine = create_async_engine(
-        TEST_DATABASE_URL,
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-        echo=False,
-    )
+    # Configure engine based on database type
+    engine_kwargs = {"echo": False}
+    is_postgres = "postgresql" in TEST_DATABASE_URL
+
+    if "sqlite" in TEST_DATABASE_URL:
+        engine_kwargs["connect_args"] = {"check_same_thread": False}
+        engine_kwargs["poolclass"] = StaticPool
+    else:
+        # PostgreSQL configuration
+        engine_kwargs["pool_pre_ping"] = True
+
+    engine = create_async_engine(TEST_DATABASE_URL, **engine_kwargs)
 
     # Create all tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+        # For PostgreSQL, apply additional FTS migration for text_search_vector column
+        if is_postgres:
+            await conn.execute(text("""
+                ALTER TABLE document_chunks
+                ADD COLUMN IF NOT EXISTS text_search_vector tsvector
+                GENERATED ALWAYS AS (to_tsvector('english', chunk_text)) STORED;
+            """))
+            await conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_text_search
+                ON document_chunks
+                USING GIN (text_search_vector);
+            """))
+
     yield engine
 
-    # Drop all tables
+    # Drop all tables (cleanup)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 

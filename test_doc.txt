@@ -1,0 +1,22 @@
+Advanced RAG System Testing Document
+
+Introduction
+This is a test document for the advanced RAG improvements integration testing. The document contains multiple sections to test semantic chunking capabilities.
+
+Semantic Chunking
+Semantic chunking is a method that divides documents based on semantic coherence rather than fixed character counts. This approach ensures that related content stays together in the same chunk, improving retrieval accuracy.
+
+Hybrid Search
+Hybrid search combines BM25 full-text search with vector similarity search. This approach leverages both lexical matching and semantic understanding to provide better search results. The Reciprocal Rank Fusion (RRF) algorithm is used to merge results from both approaches.
+
+Query Expansion
+Query expansion uses a language model to generate alternative phrasings of the user's query. This helps capture relevant documents that might use different terminology. The system typically generates 2-3 alternative queries and performs retrieval for each.
+
+Full-Text Search with BM25
+BM25 (Best Match 25) is a probabilistic retrieval function used for full-text search. It ranks documents based on the query term frequency and inverse document frequency. PostgreSQL's full-text search capabilities are used to implement BM25-like scoring.
+
+Integration Testing
+This section discusses the importance of integration testing for RAG systems. It's crucial to test the entire pipeline end-to-end to ensure all components work together correctly. This includes document upload, chunking, embedding, indexing, search, and generation.
+
+Expected Improvements
+The advanced RAG improvements are expected to provide 25-40% better retrieval accuracy compared to baseline vector search. Semantic chunking contributes 8-12%, hybrid search adds 18-22%, and query expansion provides an additional 10-15% improvement.
