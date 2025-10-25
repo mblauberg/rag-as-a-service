@@ -3,7 +3,7 @@ import { EnhancedSearchBar } from '../components/search/EnhancedSearchBar';
 import { UploadModal } from '../components/upload/UploadModal';
 import { UploadFAB } from '../components/upload/UploadFAB';
 import { DocumentDetailModal } from '../components/documents/DocumentDetailModal';
-import { Button } from '../components/common/Button';
+import { Button } from '@/components/ui/button';
 import { useSearchWithDebounce } from '../hooks/useSearchWithDebounce';
 import { useDocuments } from '../hooks/useDocuments';
 import { useModels } from '../hooks/useModels';
