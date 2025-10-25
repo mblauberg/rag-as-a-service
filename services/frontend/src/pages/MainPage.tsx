@@ -165,8 +165,7 @@ export const MainPage: React.FC = () => {
       <UploadModal
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}
-        onSuccess={(id) => {
-          console.log('Upload successful:', id);
+        onSuccess={() => {
           setUploadOpen(false);
         }}
       />
