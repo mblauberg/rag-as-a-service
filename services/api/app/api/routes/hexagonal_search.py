@@ -29,6 +29,10 @@ async def search_documents(
         default=True,
         description="Enable multi-query expansion for improved retrieval coverage (default: True, +15-20% recall)"
     ),
+    use_reranking: bool = Query(
+        default=True,
+        description="Enable cross-encoder reranking for improved precision (default: True, +8-12% precision@10)"
+    ),
     use_case: SearchDocumentsUseCase = Depends(get_search_documents_use_case)
 ):
     """Perform document search with hybrid retrieval (RECOMMENDED).
@@ -43,14 +47,19 @@ async def search_documents(
     2. Searches Qdrant for similar vectors (semantic)
     3. Searches PostgreSQL FTS for keyword matches (lexical)
     4. Fuses results using Reciprocal Rank Fusion (RRF)
-    5. Returns top-k ranked results
+    5. Optionally reranks with cross-encoder for improved precision
+    6. Returns top-k ranked results
 
     Query parameters:
         mode: Search mode (default: hybrid)
+        use_expansion: Enable multi-query expansion (default: True)
+        use_reranking: Enable cross-encoder reranking (default: True)
 
     Args:
         request: Search request with query text and parameters
         mode: Search mode selection (vector/keyword/hybrid)
+        use_expansion: Enable query expansion
+        use_reranking: Enable reranking
         use_case: Injected search documents use case
 
     Returns:
@@ -80,9 +89,17 @@ async def search_documents(
 
     # Execute use case
     try:
-        chunks = await use_case.execute(search_query, mode=mode, use_expansion=use_expansion)
+        chunks = await use_case.execute(
+            search_query,
+            mode=mode,
+            use_expansion=use_expansion,
+            use_reranking=use_reranking
+        )
 
-        logger.info(f"Search for '{request.query}' (mode={mode.value}) returned {len(chunks)} results")
+        logger.info(
+            f"Search for '{request.query}' (mode={mode.value}, reranking={use_reranking}) "
+            f"returned {len(chunks)} results"
+        )
 
         # Convert domain entities to response DTOs
         results = [chunk_to_search_result(chunk, score=0.0) for chunk in chunks]

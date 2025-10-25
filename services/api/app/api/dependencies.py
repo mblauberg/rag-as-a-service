@@ -37,8 +37,11 @@ from app.infrastructure.search.rrf_fusion_service import RRFFusionServiceImpl
 # Infrastructure - Query Augmentation
 from app.infrastructure.generation.llm_query_augmenter import LLMQueryAugmenterImpl
 
+# Infrastructure - Reranking
+from app.infrastructure.reranking.cross_encoder_reranker import CrossEncoderRerankerImpl
+
 # Ports
-from app.ports.services import KeywordStore, FusionService, EmbeddingService, VectorStore, GenerationService, QueryAugmenter
+from app.ports.services import KeywordStore, FusionService, EmbeddingService, VectorStore, GenerationService, QueryAugmenter, Reranker
 
 
 # Qdrant Client Dependency
@@ -168,6 +171,12 @@ def get_query_augmenter(
     return LLMQueryAugmenterImpl(generation_service)
 
 
+# Reranker
+def get_reranker() -> Reranker:
+    """Create cross-encoder reranker instance."""
+    return CrossEncoderRerankerImpl()
+
+
 # Search Documents Use Case
 def get_search_documents_use_case(
     embedding_service: EmbeddingService = Depends(lambda: HTTPEmbeddingService(settings.embedder.url)),
@@ -177,7 +186,8 @@ def get_search_documents_use_case(
     )),
     keyword_store: KeywordStore = Depends(get_keyword_store),
     fusion_service: FusionService = Depends(get_fusion_service),
-    query_augmenter: QueryAugmenter = Depends(get_query_augmenter)
+    query_augmenter: QueryAugmenter = Depends(get_query_augmenter),
+    reranker: Reranker = Depends(get_reranker)
 ) -> SearchDocumentsUseCase:
     """Factory for SearchDocumentsUseCase with hybrid capabilities and query expansion.
 
@@ -187,14 +197,16 @@ def get_search_documents_use_case(
         keyword_store: Store for BM25 keyword search
         fusion_service: Service for result fusion
         query_augmenter: Service for query expansion
+        reranker: Service for reranking results
 
     Returns:
-        Fully configured SearchDocumentsUseCase instance with hybrid search and query expansion support
+        Fully configured SearchDocumentsUseCase instance with hybrid search, query expansion, and reranking support
     """
     return SearchDocumentsUseCase(
         embedding_service=embedding_service,
         vector_store=vector_store,
         keyword_store=keyword_store,
         fusion_service=fusion_service,
-        query_augmenter=query_augmenter
+        query_augmenter=query_augmenter,
+        reranker=reranker
     )
