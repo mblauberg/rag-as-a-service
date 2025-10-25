@@ -39,6 +39,7 @@ sentence-transformers = "^3.3.0"  # Updated from 2.x
 tiktoken = "^0.8.0"
 langchain-text-splitters = "^0.3.0"
 langchain-core = "^0.3.0"
+langchain-experimental = "^0.3.0"
 beautifulsoup4 = "^4.12.3"
 lxml = "^5.3.0"
 
