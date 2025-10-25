@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { EnhancedSearchBar } from '../components/search/EnhancedSearchBar';
 import { UploadModal } from '../components/upload/UploadModal';
 import { UploadFAB } from '../components/upload/UploadFAB';
+import { DocumentDetailModal } from '../components/documents/DocumentDetailModal';
 import { Button } from '../components/common/Button';
 import { useSearchWithDebounce } from '../hooks/useSearchWithDebounce';
 import { useDocuments } from '../hooks/useDocuments';
@@ -175,13 +176,13 @@ export const MainPage: React.FC = () => {
         <UploadFAB onClick={() => setUploadOpen(true)} />
       )}
 
-      {/* Document Detail Modal - placeholder for Task 4 */}
+      {/* Document Detail Modal */}
       {selectedDocId && (
-        <div>
-          {/* DocumentDetailModal will be added in Task 4 */}
-          <p>Document {selectedDocId} - Modal coming in Task 4</p>
-          <button onClick={() => setSelectedDocId(null)}>Close</button>
-        </div>
+        <DocumentDetailModal
+          documentId={selectedDocId}
+          open={!!selectedDocId}
+          onClose={() => setSelectedDocId(null)}
+        />
       )}
     </div>
   );
