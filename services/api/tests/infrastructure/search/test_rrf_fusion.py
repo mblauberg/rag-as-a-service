@@ -51,3 +51,12 @@ def test_rrf_fusion_deduplicates_chunks():
     # Should appear once with combined score
     assert len(fused) == 1
     assert fused[0].id == chunk_a.id
+
+
+def test_rrf_fusion_raises_error_for_unsupported_method():
+    """Test that unsupported fusion methods raise ValueError."""
+    service = RRFFusionServiceImpl()
+    chunk = Chunk(id=uuid4(), document_id=uuid4(), content="test", tokens=1)
+
+    with pytest.raises(ValueError, match="Unsupported fusion method: weighted"):
+        service.fuse([[chunk]], method="weighted", k=60)
