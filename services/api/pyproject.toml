@@ -7,37 +7,49 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-fastapi = "^0.120.0"
-uvicorn = {extras = ["standard"], version = "^0.38.0"}
-sqlalchemy = "^2.0.44"
+
+# Core framework (Python 3.13 compatible)
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.32.0"}
+pydantic = "^2.8.0"            # CRITICAL: >=2.8.0 for Python 3.13
+pydantic-settings = "^2.6.0"
+
+# Database
+sqlalchemy = "^2.0.36"
 asyncpg = "^0.30.0"
-pydantic = "^2.12.0"
-pydantic-settings = "^2.1.0"
+alembic = "^1.14.0"
+
+# HTTP
+httpx = "^0.27.0"
 python-multipart = "^0.0.6"
-httpx = "^0.26.0"
-qdrant-client = "^1.15.0"
+
+# Vector DB
+qdrant-client = "^1.12.0"
+
+# File processing (updated versions)
+pypdf = "^5.1.0"               # Updated from 3.x
+python-docx = "^1.1.2"
+openpyxl = "^3.1.5"
+python-pptx = "^1.0.2"
+aiofiles = "^24.1.0"
 python-magic = "^0.4.27"
-pypdf = "^3.17.0"
-python-docx = "^1.1.0"
-aiofiles = "^23.2.1"
-unstructured = "^0.18.0"
-tiktoken = "^0.12.0"
+
+# NLP/ML
+sentence-transformers = "^3.3.0"  # Updated from 2.x
+tiktoken = "^0.8.0"
 langchain-text-splitters = "^0.3.0"
-markdown = "^3.5.1"
-openpyxl = "^3.1.2"
-python-pptx = "^0.6.23"
-beautifulsoup4 = "^4.12.2"
-lxml = "^5.0.0"
-sentence-transformers = "^2.2.2"
 langchain-core = "^0.3.0"
+beautifulsoup4 = "^4.12.3"
+lxml = "^5.3.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.4"
-pytest-asyncio = "^0.23.3"
-pytest-cov = "^4.1.0"
-httpx = "^0.26.0"
+pytest = "^8.3.0"
+pytest-asyncio = "^0.24.0"
+pytest-cov = "^6.0.0"
+pytest-mock = "^3.14.0"
+mypy = "^1.13.0"
+ruff = "^0.8.0"
 aiosqlite = "^0.19.0"
-pytest-mock = "^3.12.0"
 greenlet = "^3.2.4"
 
 [build-system]
