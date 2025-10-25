@@ -165,3 +165,30 @@ class KeywordStore(ABC):
             List of chunks ranked by keyword relevance
         """
         pass
+
+
+class FusionService(ABC):
+    """Port for fusing multiple ranked result lists.
+
+    Uses algorithms like Reciprocal Rank Fusion (RRF)
+    to combine results from different retrieval methods.
+    """
+
+    @abstractmethod
+    def fuse(
+        self,
+        result_sets: list[list[Chunk]],
+        method: str = "rrf",
+        k: int = 60
+    ) -> list[Chunk]:
+        """Fuse multiple ranked lists into one.
+
+        Args:
+            result_sets: List of ranked chunk lists
+            method: Fusion algorithm ("rrf" or "weighted")
+            k: RRF constant (default 60, research-proven)
+
+        Returns:
+            Single fused and ranked list
+        """
+        pass
