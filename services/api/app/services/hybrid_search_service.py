@@ -7,17 +7,18 @@ Uses Reciprocal Rank Fusion to combine results from:
 """
 import asyncio
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any
 from uuid import UUID
+
 import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
+from app.core.qdrant_client import QdrantClientWrapper
+from app.models.document import DocumentChunk
 from app.services.bm25_search import BM25SearchService
 from app.services.fusion import reciprocal_rank_fusion, reciprocal_rank_fusion_multi
 from app.services.query_expansion import QueryExpansionService
-from app.models.document import DocumentChunk
-from app.core.qdrant_client import QdrantClientWrapper
-from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +44,8 @@ class VectorSearchService:
         self,
         query: str,
         limit: int = 20,
-        document_ids: Optional[List[UUID]] = None
-    ) -> List[DocumentChunk]:
+        document_ids: list[UUID] | None = None
+    ) -> list[DocumentChunk]:
         """
         Search chunks using vector similarity.
 
@@ -142,8 +143,8 @@ class HybridSearchService:
         limit: int = 10,
         bm25_limit: int = 20,
         vector_limit: int = 20,
-        document_ids: Optional[List[UUID]] = None
-    ) -> Dict[str, Any]:
+        document_ids: list[UUID] | None = None
+    ) -> dict[str, Any]:
         """
         Hybrid search combining BM25 and vector results.
 
@@ -192,8 +193,8 @@ class HybridSearchService:
         self,
         query: str,
         limit: int = 10,
-        document_ids: Optional[List[UUID]] = None
-    ) -> Dict[str, Any]:
+        document_ids: list[UUID] | None = None
+    ) -> dict[str, Any]:
         """
         Advanced search with query expansion.
 

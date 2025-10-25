@@ -4,8 +4,8 @@ These Pydantic models define the API contracts for the hexagonal architecture.
 They translate between HTTP requests/responses and domain entities/value objects.
 """
 from datetime import datetime
-from typing import List, Optional
 from uuid import UUID
+
 from pydantic import BaseModel, Field
 
 
@@ -17,7 +17,7 @@ class UploadDocumentRequest(BaseModel):
     """
 
     title: str = Field(..., min_length=1, max_length=500, description="Document title")
-    description: Optional[str] = Field(None, description="Optional document description")
+    description: str | None = Field(None, description="Optional document description")
 
 
 class DocumentResponse(BaseModel):
@@ -29,9 +29,9 @@ class DocumentResponse(BaseModel):
     file_type: str
     created_at: datetime
     upload_status: str
-    description: Optional[str] = None
-    file_path: Optional[str] = None
-    file_size: Optional[int] = None
+    description: str | None = None
+    file_path: str | None = None
+    file_size: int | None = None
 
 
 class UploadDocumentResponse(BaseModel):
@@ -53,7 +53,7 @@ class ListDocumentsRequest(BaseModel):
 class ListDocumentsResponse(BaseModel):
     """Response model for paginated document list."""
 
-    documents: List[DocumentResponse]
+    documents: list[DocumentResponse]
     total: int
     page: int
     limit: int
@@ -65,7 +65,7 @@ class SearchRequest(BaseModel):
 
     query: str = Field(..., min_length=1, description="Search query text")
     top_k: int = Field(10, ge=1, le=100, description="Number of results to return")
-    document_id: Optional[UUID] = Field(None, description="Optional document ID filter")
+    document_id: UUID | None = Field(None, description="Optional document ID filter")
 
 
 class ChunkSearchResult(BaseModel):
@@ -75,14 +75,14 @@ class ChunkSearchResult(BaseModel):
     document_id: UUID
     content: str
     score: float = Field(..., description="Similarity score")
-    tokens: Optional[int] = None
+    tokens: int | None = None
 
 
 class SearchResponse(BaseModel):
     """Response model for search operation."""
 
     query: str
-    results: List[ChunkSearchResult]
+    results: list[ChunkSearchResult]
     total_results: int
 
 
@@ -91,4 +91,4 @@ class ErrorResponse(BaseModel):
     """Standard error response model."""
 
     detail: str
-    error_code: Optional[str] = None
+    error_code: str | None = None

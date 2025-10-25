@@ -3,15 +3,15 @@
 This adapter implements the domain repository interface using SQLAlchemy ORM.
 It handles mapping between domain entities and database models.
 """
-from typing import List, Optional, Tuple
 from uuid import UUID
-from sqlalchemy import select, func
+
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.entities.document import Document
 from app.core.enums import UploadStatus
-from app.ports.repositories import DocumentRepository
+from app.domain.entities.document import Document
 from app.infrastructure.db.models import DocumentModel
+from app.ports.repositories import DocumentRepository
 
 
 class DocumentRepositoryImpl(DocumentRepository):
@@ -73,7 +73,7 @@ class DocumentRepositoryImpl(DocumentRepository):
             saved = result.scalar_one()
             return self._to_entity(saved)
 
-    async def find_by_id(self, document_id: UUID) -> Optional[Document]:
+    async def find_by_id(self, document_id: UUID) -> Document | None:
         """Retrieve document by ID.
 
         Args:
@@ -91,7 +91,7 @@ class DocumentRepositoryImpl(DocumentRepository):
 
         return self._to_entity(db_document)
 
-    async def find_all(self, page: int, limit: int) -> Tuple[List[Document], int]:
+    async def find_all(self, page: int, limit: int) -> tuple[list[Document], int]:
         """Retrieve paginated documents.
 
         Args:

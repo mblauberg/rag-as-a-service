@@ -1,15 +1,16 @@
 """Semantic search endpoint."""
 import logging
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-import httpx
 
-from app.core.database import get_db
-from app.core.dependencies import get_qdrant_client, get_http_client, get_generator_client
-from app.core.qdrant_client import QdrantClientWrapper
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.config import settings
+from app.core.database import get_db
+from app.core.dependencies import get_generator_client, get_http_client, get_qdrant_client
+from app.core.qdrant_client import QdrantClientWrapper
 from app.models.document import Document, DocumentChunk
 from app.models.schemas import SearchRequest, SearchResponse, SearchResultItem
 from app.services.generator_client import GeneratorClient

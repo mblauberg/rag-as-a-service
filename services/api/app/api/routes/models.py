@@ -1,6 +1,8 @@
 """Models listing endpoint."""
 import logging
+
 from fastapi import APIRouter, HTTPException
+
 from app.services.generator_client import GeneratorClient
 
 logger = logging.getLogger(__name__)

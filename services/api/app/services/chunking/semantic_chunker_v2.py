@@ -2,10 +2,10 @@
 Semantic chunking using LangChain's experimental SemanticChunker.
 Uses percentile-based breakpoint detection for adaptive splitting.
 """
-from typing import List, Optional
-from pydantic import BaseModel
-from langchain_experimental.text_splitter import SemanticChunker
+
 from langchain_core.embeddings import Embeddings
+from langchain_experimental.text_splitter import SemanticChunker
+from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
 
 
@@ -14,8 +14,8 @@ class ChunkResult(BaseModel):
     text: str
     start_index: int
     end_index: int
-    token_count: Optional[int] = None
-    coherence_score: Optional[float] = None
+    token_count: int | None = None
+    coherence_score: float | None = None
 
 
 class SentenceTransformerEmbeddings(Embeddings):
@@ -24,12 +24,12 @@ class SentenceTransformerEmbeddings(Embeddings):
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
         self.model = SentenceTransformer(model_name)
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
         """Embed a list of documents"""
         embeddings = self.model.encode(texts, convert_to_numpy=True)
         return embeddings.tolist()
 
-    def embed_query(self, text: str) -> List[float]:
+    def embed_query(self, text: str) -> list[float]:
         """Embed a single query"""
         embedding = self.model.encode([text], convert_to_numpy=True)
         return embedding[0].tolist()
@@ -76,7 +76,7 @@ class SemanticChunkerV2:
             breakpoint_threshold_amount=breakpoint_percentile
         )
 
-    async def chunk_text(self, text: str) -> List[ChunkResult]:
+    async def chunk_text(self, text: str) -> list[ChunkResult]:
         """
         Chunk text using semantic similarity.
 
@@ -242,8 +242,8 @@ class SemanticChunkerV2:
     async def chunk_document(
         self,
         text: str,
-        metadata: Optional[dict] = None
-    ) -> List[dict]:
+        metadata: dict | None = None
+    ) -> list[dict]:
         """
         Chunk document and return with metadata (API-compatible format).
 

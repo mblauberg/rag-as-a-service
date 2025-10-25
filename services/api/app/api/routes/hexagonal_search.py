@@ -4,16 +4,14 @@ These routes implement semantic search using the hexagonal architecture,
 with clean separation between HTTP layer and domain logic.
 """
 import logging
-from typing import Optional
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.dependencies import get_search_documents_use_case
-from app.api.models import SearchRequest, SearchResponse, ChunkSearchResult
+from app.api.models import ChunkSearchResult, SearchRequest, SearchResponse
 from app.application.use_cases.search_documents import SearchDocumentsUseCase
-from app.domain.value_objects.search_query import SearchQuery
 from app.core.exceptions import EmbeddingServiceError, VectorStoreError
+from app.domain.value_objects.search_query import SearchQuery
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

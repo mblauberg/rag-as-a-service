@@ -1,22 +1,18 @@
 """Service for orchestrating document chunking and embedding workflows."""
-from uuid import UUID
-from pathlib import Path
-from typing import List, Dict, Any
-from sqlalchemy.ext.asyncio import AsyncSession
 import logging
-import httpx
+from pathlib import Path
+from uuid import UUID
 
-from app.models.document import DocumentChunk
-from app.services.document_processing_service import DocumentProcessingService
-from app.services.document_metadata_service import DocumentMetadataService
-from app.models.schemas import DocumentType
+import httpx
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.config import settings
 from app.core.enums import EmbeddingStatus
-from app.core.exceptions import (
-    TextExtractionError,
-    FileOperationError,
-    EmbedderServiceError
-)
+from app.core.exceptions import EmbedderServiceError
+from app.models.document import DocumentChunk
+from app.models.schemas import DocumentType
+from app.services.document_metadata_service import DocumentMetadataService
+from app.services.document_processing_service import DocumentProcessingService
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +37,7 @@ class ChunkingOrchestrator:
         document_id: UUID,
         file_path: Path,
         document_type: DocumentType
-    ) -> List[DocumentChunk]:
+    ) -> list[DocumentChunk]:
         """
         Process document, create chunks, and store in database.
 
@@ -78,7 +74,7 @@ class ChunkingOrchestrator:
         self,
         db: AsyncSession,
         document_id: UUID,
-        chunks: List[DocumentChunk]
+        chunks: list[DocumentChunk]
     ) -> None:
         """
         Trigger embedding generation for document chunks and update status.

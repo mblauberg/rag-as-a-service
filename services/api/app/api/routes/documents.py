@@ -1,15 +1,16 @@
 """Document management endpoints."""
 from uuid import UUID
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, status
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.dependencies import get_document_service
 from app.models.schemas import (
-    DocumentUploadResponse,
-    DocumentListResponse,
     DocumentDetailResponse,
-    DocumentResponse
+    DocumentListResponse,
+    DocumentResponse,
+    DocumentUploadResponse,
 )
 
 router = APIRouter()

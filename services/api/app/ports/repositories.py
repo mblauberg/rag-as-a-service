@@ -4,11 +4,10 @@ Repositories abstract data persistence, following the Repository pattern.
 These are interfaces - infrastructure layer provides implementations.
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple
 from uuid import UUID
 
-from app.domain.entities.document import Document
 from app.domain.entities.chunk import Chunk
+from app.domain.entities.document import Document
 
 
 class DocumentRepository(ABC):
@@ -27,7 +26,7 @@ class DocumentRepository(ABC):
         pass
 
     @abstractmethod
-    async def find_by_id(self, document_id: UUID) -> Optional[Document]:
+    async def find_by_id(self, document_id: UUID) -> Document | None:
         """Retrieve document by ID.
 
         Args:
@@ -39,7 +38,7 @@ class DocumentRepository(ABC):
         pass
 
     @abstractmethod
-    async def find_all(self, page: int, limit: int) -> Tuple[List[Document], int]:
+    async def find_all(self, page: int, limit: int) -> tuple[list[Document], int]:
         """Retrieve paginated documents.
 
         Args:
@@ -65,7 +64,7 @@ class ChunkRepository(ABC):
     """Port for chunk persistence operations."""
 
     @abstractmethod
-    async def save_batch(self, chunks: List[Chunk]) -> List[Chunk]:
+    async def save_batch(self, chunks: list[Chunk]) -> list[Chunk]:
         """Persist multiple chunks atomically.
 
         Args:
@@ -77,7 +76,7 @@ class ChunkRepository(ABC):
         pass
 
     @abstractmethod
-    async def find_by_document_id(self, document_id: UUID) -> List[Chunk]:
+    async def find_by_document_id(self, document_id: UUID) -> list[Chunk]:
         """Retrieve all chunks for a document.
 
         Args:

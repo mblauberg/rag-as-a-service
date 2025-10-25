@@ -1,11 +1,12 @@
 """PDF document processor."""
 from pathlib import Path
-from typing import List
+
 import pypdf
+
 from app.services.processors.base_processor import (
     BaseDocumentProcessor,
     DocumentElement,
-    ProcessedDocument
+    ProcessedDocument,
 )
 
 
@@ -29,7 +30,7 @@ class PDFProcessor(BaseDocumentProcessor):
         Raises:
             ValueError: If PDF is invalid, corrupt, or cannot be read
         """
-        elements: List[DocumentElement] = []
+        elements: list[DocumentElement] = []
 
         try:
             with open(file_path, 'rb') as f:

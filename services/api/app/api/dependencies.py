@@ -6,28 +6,28 @@ These factory functions wire up the hexagonal architecture dependencies:
 - FastAPI routes depend on use cases via these factories
 """
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 from qdrant_client import AsyncQdrantClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
-from app.core.config import settings
-from app.core.qdrant_client import qdrant_client
+from app.application.use_cases.delete_document import DeleteDocumentUseCase
+from app.application.use_cases.list_documents import ListDocumentsUseCase
+from app.application.use_cases.search_documents import SearchDocumentsUseCase
 
 # Domain & Use Cases
 from app.application.use_cases.upload_document import UploadDocumentUseCase
-from app.application.use_cases.list_documents import ListDocumentsUseCase
-from app.application.use_cases.delete_document import DeleteDocumentUseCase
-from app.application.use_cases.search_documents import SearchDocumentsUseCase
+from app.core.config import settings
+from app.core.database import get_db
+from app.core.qdrant_client import qdrant_client
+from app.infrastructure.db.repositories.chunk_repository_impl import ChunkRepositoryImpl
 
 # Infrastructure - Repositories
 from app.infrastructure.db.repositories.document_repository_impl import DocumentRepositoryImpl
-from app.infrastructure.db.repositories.chunk_repository_impl import ChunkRepositoryImpl
+from app.infrastructure.processing.file_processor import FileProcessorImpl
+from app.infrastructure.processing.semantic_chunker import SemanticChunkerImpl
 
 # Infrastructure - Services
 from app.infrastructure.services.embedding_service import HTTPEmbeddingService
 from app.infrastructure.vector_store.qdrant_store import QdrantVectorStoreImpl
-from app.infrastructure.processing.file_processor import FileProcessorImpl
-from app.infrastructure.processing.semantic_chunker import SemanticChunkerImpl
 
 
 # Qdrant Client Dependency

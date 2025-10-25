@@ -1,20 +1,14 @@
 """Upload document use case."""
-from dataclasses import dataclass
-from typing import Tuple, Optional
-from uuid import UUID, uuid4
-from datetime import datetime
 import logging
+from dataclasses import dataclass
+from datetime import datetime
+from uuid import uuid4
 
-from app.domain.entities.document import Document
-from app.domain.entities.chunk import Chunk
 from app.core.enums import UploadStatus
-from app.ports.repositories import DocumentRepository, ChunkRepository
-from app.ports.services import (
-    EmbeddingService,
-    VectorStore,
-    FileProcessor,
-    TextChunker
-)
+from app.domain.entities.chunk import Chunk
+from app.domain.entities.document import Document
+from app.ports.repositories import ChunkRepository, DocumentRepository
+from app.ports.services import EmbeddingService, FileProcessor, TextChunker, VectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +20,7 @@ class UploadDocumentCommand:
     title: str
     file_name: str
     file_content: bytes
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class UploadDocumentUseCase:
@@ -53,7 +47,7 @@ class UploadDocumentUseCase:
         self.file_processor = file_processor
         self.chunker = chunker
 
-    async def execute(self, command: UploadDocumentCommand) -> Tuple[Document, int]:
+    async def execute(self, command: UploadDocumentCommand) -> tuple[Document, int]:
         """Execute document upload workflow.
 
         Args:
@@ -114,7 +108,7 @@ class UploadDocumentUseCase:
             logger.debug(f"Generated {len(embeddings)} embeddings")
 
             # 8. Update chunks with embeddings
-            for chunk, embedding in zip(chunks, embeddings):
+            for chunk, embedding in zip(chunks, embeddings, strict=False):
                 chunk.embedding_vector = embedding
 
             # 9. Store vectors in vector database

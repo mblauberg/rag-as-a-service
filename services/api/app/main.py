@@ -1,13 +1,13 @@
 """FastAPI application entrypoint."""
 import logging
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routes import documents, health, hexagonal_documents, hexagonal_search, models, search
 from app.core.config import settings
 from app.core.database import init_db
-from app.api.routes import documents, search, health, models
-from app.api.routes import hexagonal_documents, hexagonal_search
 
 # Configure logging
 logging.basicConfig(

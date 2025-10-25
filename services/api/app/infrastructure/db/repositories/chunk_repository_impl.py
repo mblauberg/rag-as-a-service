@@ -3,14 +3,14 @@
 This adapter implements the domain repository interface using SQLAlchemy ORM.
 It handles mapping between domain entities and database models.
 """
-from typing import List
 from uuid import UUID
-from sqlalchemy import select, delete
+
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.chunk import Chunk
-from app.ports.repositories import ChunkRepository
 from app.infrastructure.db.models import ChunkModel
+from app.ports.repositories import ChunkRepository
 
 
 class ChunkRepositoryImpl(ChunkRepository):
@@ -29,7 +29,7 @@ class ChunkRepositoryImpl(ChunkRepository):
         """
         self.session = session
 
-    async def save_batch(self, chunks: List[Chunk]) -> List[Chunk]:
+    async def save_batch(self, chunks: list[Chunk]) -> list[Chunk]:
         """Persist multiple chunks atomically.
 
         Args:
@@ -53,7 +53,7 @@ class ChunkRepositoryImpl(ChunkRepository):
         # Convert back to domain entities
         return [self._to_entity(db_chunk) for db_chunk in db_chunks]
 
-    async def find_by_document_id(self, document_id: UUID) -> List[Chunk]:
+    async def find_by_document_id(self, document_id: UUID) -> list[Chunk]:
         """Retrieve all chunks for a document.
 
         Args:

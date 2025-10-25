@@ -1,11 +1,11 @@
 """CSV document processor."""
-from pathlib import Path
-from typing import List
 import csv
+from pathlib import Path
+
 from app.services.processors.base_processor import (
     BaseDocumentProcessor,
     DocumentElement,
-    ProcessedDocument
+    ProcessedDocument,
 )
 
 
@@ -27,9 +27,9 @@ class CSVProcessor(BaseDocumentProcessor):
         Returns:
             ProcessedDocument with row elements
         """
-        elements: List[DocumentElement] = []
+        elements: list[DocumentElement] = []
 
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             reader = csv.DictReader(f)
             headers = reader.fieldnames
 

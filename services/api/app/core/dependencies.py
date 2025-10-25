@@ -1,11 +1,12 @@
 """Dependency injection for FastAPI endpoints."""
 import httpx
-from app.core.qdrant_client import qdrant_client, QdrantClientWrapper
-from app.services.generator_client import GeneratorClient
-from app.services.document_upload_service import DocumentUploadService
-from app.services.document_metadata_service import DocumentMetadataService
+
+from app.core.qdrant_client import QdrantClientWrapper, qdrant_client
 from app.services.chunking_orchestrator import ChunkingOrchestrator
+from app.services.document_metadata_service import DocumentMetadataService
 from app.services.document_service import DocumentService
+from app.services.document_upload_service import DocumentUploadService
+from app.services.generator_client import GeneratorClient
 
 
 def get_qdrant_client() -> QdrantClientWrapper:

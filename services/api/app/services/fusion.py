@@ -7,16 +7,16 @@ needing to normalize different scoring schemes.
 Formula: score(d) = sum(1 / (k + rank(d)))
 where k=60 is the research-proven constant.
 """
-from typing import List
 from collections import defaultdict
+
 from app.models.document import DocumentChunk
 
 
 def reciprocal_rank_fusion(
-    results_a: List[DocumentChunk],
-    results_b: List[DocumentChunk],
+    results_a: list[DocumentChunk],
+    results_b: list[DocumentChunk],
     k: int = 60
-) -> List[DocumentChunk]:
+) -> list[DocumentChunk]:
     """
     Combine two ranked result lists using Reciprocal Rank Fusion.
 
@@ -49,9 +49,9 @@ def reciprocal_rank_fusion(
 
 
 def reciprocal_rank_fusion_multi(
-    result_sets: List[List[DocumentChunk]],
+    result_sets: list[list[DocumentChunk]],
     k: int = 60
-) -> List[DocumentChunk]:
+) -> list[DocumentChunk]:
     """
     Combine multiple ranked result lists using RRF.
 

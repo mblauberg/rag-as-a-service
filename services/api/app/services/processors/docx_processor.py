@@ -1,12 +1,13 @@
 """DOCX document processor."""
 from pathlib import Path
-from typing import List
+
 from docx import Document
 from docx.opc.exceptions import PackageNotFoundError
+
 from app.services.processors.base_processor import (
     BaseDocumentProcessor,
     DocumentElement,
-    ProcessedDocument
+    ProcessedDocument,
 )
 
 
@@ -32,7 +33,7 @@ class DOCXProcessor(BaseDocumentProcessor):
         """
         try:
             doc = Document(str(file_path))
-            elements: List[DocumentElement] = []
+            elements: list[DocumentElement] = []
 
             current_section = []
             section_level = 0

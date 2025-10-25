@@ -1,7 +1,9 @@
 """Client for Generator service."""
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any
+
 import httpx
+
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -18,9 +20,9 @@ class GeneratorClient:
     async def generate_summary(
         self,
         query: str,
-        chunks: List[Dict[str, Any]],
+        chunks: list[dict[str, Any]],
         model: str
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Generate summary from chunks.
 
@@ -70,7 +72,7 @@ class GeneratorClient:
         prompt: str,
         max_tokens: int = 150,
         temperature: float = 0.3
-    ) -> Optional[Any]:
+    ) -> Any | None:
         """
         Generate text from a prompt using the generator service.
 
@@ -106,7 +108,7 @@ class GeneratorClient:
             logger.error(f"Generator request failed: {e}")
             return None
 
-    async def list_models(self) -> List[Dict[str, Any]]:
+    async def list_models(self) -> list[dict[str, Any]]:
         """
         List available models from Generator.
 

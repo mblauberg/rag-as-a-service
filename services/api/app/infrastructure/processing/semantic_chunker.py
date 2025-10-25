@@ -3,10 +3,9 @@
 This module implements the TextChunker port interface by wrapping
 the existing SemanticChunkerV2 implementation.
 """
-from typing import List
 
-from app.ports.services import TextChunker
 from app.core.exceptions import ChunkingError
+from app.ports.services import TextChunker
 from app.services.chunking.semantic_chunker_v2 import SemanticChunkerV2
 
 
@@ -35,7 +34,7 @@ class SemanticChunkerImpl(TextChunker):
             embedding_model=embedding_model
         )
 
-    async def chunk(self, text: str) -> List[str]:
+    async def chunk(self, text: str) -> list[str]:
         """Chunk text into semantic segments.
 
         Args:

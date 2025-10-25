@@ -1,23 +1,23 @@
 """Document processing service using Facade pattern."""
-from uuid import UUID
-from pathlib import Path
-from typing import Optional
-from sqlalchemy.ext.asyncio import AsyncSession
 import logging
+from pathlib import Path
+from uuid import UUID
 
-from app.models.document import Document
-from app.models.schemas import DocumentDetailResponse, DocumentListResponse
-from app.core.qdrant_client import QdrantClientWrapper
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.enums import UploadStatus
 from app.core.exceptions import (
     DocumentNotFoundError,
-    QdrantConnectionError,
     FileOperationError,
-    TextExtractionError
+    QdrantConnectionError,
+    TextExtractionError,
 )
-from app.services.document_upload_service import DocumentUploadService
-from app.services.document_metadata_service import DocumentMetadataService
+from app.core.qdrant_client import QdrantClientWrapper
+from app.models.document import Document
+from app.models.schemas import DocumentDetailResponse, DocumentListResponse
 from app.services.chunking_orchestrator import ChunkingOrchestrator
+from app.services.document_metadata_service import DocumentMetadataService
+from app.services.document_upload_service import DocumentUploadService
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ class DocumentService:
         file_content: bytes,
         filename: str,
         title: str,
-        description: Optional[str] = None
+        description: str | None = None
     ) -> tuple[Document, int]:
         """
         Create a new document with file upload and semantic chunking.
@@ -155,7 +155,7 @@ class DocumentService:
         self,
         db: AsyncSession,
         document_id: UUID
-    ) -> Optional[DocumentDetailResponse]:
+    ) -> DocumentDetailResponse | None:
         """
         Get detailed document information including chunks.
 

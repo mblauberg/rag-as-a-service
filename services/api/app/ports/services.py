@@ -4,7 +4,6 @@ These ports abstract external services (embedding, generation, vector store),
 allowing implementations to be swapped without changing business logic.
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional
 from uuid import UUID
 
 from app.domain.entities.chunk import Chunk
@@ -14,7 +13,7 @@ class EmbeddingService(ABC):
     """Port for embedding generation service."""
 
     @abstractmethod
-    async def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
+    async def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Generate vector embeddings for texts.
 
         Args:
@@ -33,7 +32,7 @@ class VectorStore(ABC):
     """Port for vector database operations."""
 
     @abstractmethod
-    async def upsert(self, chunks: List[Chunk]) -> None:
+    async def upsert(self, chunks: list[Chunk]) -> None:
         """Insert or update chunk vectors in vector database.
 
         Args:
@@ -47,10 +46,10 @@ class VectorStore(ABC):
     @abstractmethod
     async def search(
         self,
-        query_vector: List[float],
+        query_vector: list[float],
         top_k: int,
-        document_id: Optional[UUID] = None
-    ) -> List[Chunk]:
+        document_id: UUID | None = None
+    ) -> list[Chunk]:
         """Search for similar vectors.
 
         Args:
@@ -83,8 +82,8 @@ class GenerationService(ABC):
     async def generate(
         self,
         prompt: str,
-        context: List[str],
-        model: Optional[str] = None
+        context: list[str],
+        model: str | None = None
     ) -> str:
         """Generate text response using LLM.
 
@@ -126,7 +125,7 @@ class TextChunker(ABC):
     """Port for text chunking operations."""
 
     @abstractmethod
-    async def chunk(self, text: str) -> List[str]:
+    async def chunk(self, text: str) -> list[str]:
         """Chunk text into semantic segments.
 
         Args:

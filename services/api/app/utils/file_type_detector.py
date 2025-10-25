@@ -1,5 +1,6 @@
 """File type detection utility."""
 from pathlib import Path
+
 from app.models.schemas import DocumentType
 
 

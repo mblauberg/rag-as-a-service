@@ -4,12 +4,11 @@ This module implements the FileProcessor port interface for extracting
 text from various file formats (PDF, TXT).
 """
 from io import BytesIO
-from typing import Optional
 
 from pypdf import PdfReader
 
-from app.ports.services import FileProcessor
 from app.core.exceptions import FileProcessingError
+from app.ports.services import FileProcessor
 
 
 class FileProcessorImpl(FileProcessor):

@@ -3,10 +3,11 @@ BM25-style lexical search using PostgreSQL full-text search.
 
 Uses PostgreSQL's ts_rank for BM25-like relevance ranking.
 """
-from typing import List, Optional
 from uuid import UUID
-from sqlalchemy import text, select
+
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.document import DocumentChunk
 
 
@@ -25,8 +26,8 @@ class BM25SearchService:
         self,
         query: str,
         limit: int = 20,
-        document_ids: Optional[List[UUID]] = None
-    ) -> List[DocumentChunk]:
+        document_ids: list[UUID] | None = None
+    ) -> list[DocumentChunk]:
         """
         Search chunks using BM25-like ranking.
 
@@ -53,8 +54,8 @@ class BM25SearchService:
         self,
         query: str,
         limit: int,
-        document_ids: Optional[List[UUID]]
-    ) -> List[DocumentChunk]:
+        document_ids: list[UUID] | None
+    ) -> list[DocumentChunk]:
         """
         PostgreSQL full-text search implementation.
 
@@ -108,8 +109,8 @@ class BM25SearchService:
         self,
         query: str,
         limit: int,
-        document_ids: Optional[List[UUID]]
-    ) -> List[DocumentChunk]:
+        document_ids: list[UUID] | None
+    ) -> list[DocumentChunk]:
         """
         SQLite fallback implementation using LIKE for testing.
 

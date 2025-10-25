@@ -4,9 +4,8 @@ try:
     MAGIC_AVAILABLE = True
 except ImportError:
     MAGIC_AVAILABLE = False
-from pathlib import Path
-from typing import Tuple
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +70,7 @@ class FileProcessor:
     @staticmethod
     def _extract_text_plain(file_path: str) -> str:
         """Extract text from plain text file."""
-        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(file_path, encoding='utf-8', errors='ignore') as f:
             return f.read()
 
     @staticmethod

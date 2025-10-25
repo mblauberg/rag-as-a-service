@@ -1,13 +1,13 @@
 """SQLAlchemy models for documents and chunks."""
 from datetime import datetime
-from typing import Optional
 from uuid import uuid4
-from sqlalchemy import Column, String, Integer, Text, DateTime, ForeignKey, JSON
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
-from app.core.enums import UploadStatus, EmbeddingStatus
+from app.core.enums import EmbeddingStatus, UploadStatus
 
 
 class Document(Base):

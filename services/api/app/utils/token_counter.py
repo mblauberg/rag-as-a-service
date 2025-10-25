@@ -1,5 +1,5 @@
+
 import tiktoken
-from typing import Optional
 
 
 class TokenCounter:

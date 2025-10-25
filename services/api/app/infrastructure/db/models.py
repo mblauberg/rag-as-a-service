@@ -3,10 +3,11 @@
 These are NOT domain entities - they're database representations.
 Repositories map between these and domain entities.
 """
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Text, JSON
+from uuid import uuid4
+
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from uuid import uuid4
 
 from app.infrastructure.db.base import Base
 

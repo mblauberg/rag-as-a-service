@@ -1,14 +1,15 @@
 """Document processing service coordinating processors and chunking."""
 from pathlib import Path
-from typing import Dict, List, Any, Union
-from app.models.schemas import DocumentType
-from app.services.processors.base_processor import BaseDocumentProcessor, ProcessedDocument
-from app.services.processors.pdf_processor import PDFProcessor
-from app.services.processors.docx_processor import DOCXProcessor
-from app.services.processors.text_processor import TextProcessor
-from app.services.processors.csv_processor import CSVProcessor
-from app.services.chunking.semantic_chunker_v2 import SemanticChunkerV2, ChunkResult
+from typing import Any
+
 from app.core.config import settings
+from app.models.schemas import DocumentType
+from app.services.chunking.semantic_chunker_v2 import SemanticChunkerV2
+from app.services.processors.base_processor import BaseDocumentProcessor
+from app.services.processors.csv_processor import CSVProcessor
+from app.services.processors.docx_processor import DOCXProcessor
+from app.services.processors.pdf_processor import PDFProcessor
+from app.services.processors.text_processor import TextProcessor
 
 
 class DocumentProcessingService:
@@ -19,7 +20,7 @@ class DocumentProcessingService:
 
     def __init__(self):
         """Initialize with all available processors and appropriate chunker based on config."""
-        self.processors: Dict[DocumentType, BaseDocumentProcessor] = {
+        self.processors: dict[DocumentType, BaseDocumentProcessor] = {
             DocumentType.PDF: PDFProcessor(),
             DocumentType.DOCX: DOCXProcessor(),
             DocumentType.TXT: TextProcessor(),
@@ -58,7 +59,7 @@ class DocumentProcessingService:
         self,
         file_path: Path,
         document_type: DocumentType
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Process document and create chunks with metadata.
 
@@ -140,7 +141,7 @@ class DocumentProcessingService:
         self,
         text: str,
         section_context: str = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Chunk text using the configured chunker (handles both sync and async chunkers).
 

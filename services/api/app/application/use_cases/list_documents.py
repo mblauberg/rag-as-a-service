@@ -1,5 +1,4 @@
 """List documents use case."""
-from typing import List, Tuple
 import logging
 
 from app.domain.entities.document import Document
@@ -15,7 +14,7 @@ class ListDocumentsUseCase:
         """Initialize with document repository."""
         self.document_repo = document_repo
 
-    async def execute(self, page: int = 1, limit: int = 20) -> Tuple[List[Document], int]:
+    async def execute(self, page: int = 1, limit: int = 20) -> tuple[list[Document], int]:
         """List documents with pagination.
 
         Args:

@@ -1,11 +1,11 @@
 """Text and Markdown document processor."""
-from pathlib import Path
-from typing import List
 import re
+from pathlib import Path
+
 from app.services.processors.base_processor import (
     BaseDocumentProcessor,
     DocumentElement,
-    ProcessedDocument
+    ProcessedDocument,
 )
 
 
@@ -26,14 +26,14 @@ class TextProcessor(BaseDocumentProcessor):
         Returns:
             ProcessedDocument with elements
         """
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             content = f.read()
 
         file_type = file_path.suffix.lstrip('.').lower()
         if file_type == 'markdown':
             file_type = 'md'
 
-        elements: List[DocumentElement] = []
+        elements: list[DocumentElement] = []
 
         if file_type == 'md':
             # Parse markdown structure
@@ -53,7 +53,7 @@ class TextProcessor(BaseDocumentProcessor):
             document_type=file_type
         )
 
-    def _parse_markdown(self, content: str) -> List[DocumentElement]:
+    def _parse_markdown(self, content: str) -> list[DocumentElement]:
         """Parse markdown with heading structure."""
         elements = []
         lines = content.split('\n')
@@ -102,7 +102,7 @@ class TextProcessor(BaseDocumentProcessor):
 
         return elements
 
-    def _parse_plaintext(self, content: str) -> List[DocumentElement]:
+    def _parse_plaintext(self, content: str) -> list[DocumentElement]:
         """Parse plain text by paragraphs."""
         elements = []
         paragraphs = [p.strip() for p in content.split('\n\n') if p.strip()]

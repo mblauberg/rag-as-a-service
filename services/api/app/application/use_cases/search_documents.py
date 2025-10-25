@@ -1,9 +1,8 @@
 """Search documents use case."""
-from typing import List
 import logging
 
-from app.domain.value_objects.search_query import SearchQuery
 from app.domain.entities.chunk import Chunk
+from app.domain.value_objects.search_query import SearchQuery
 from app.ports.services import EmbeddingService, VectorStore
 
 logger = logging.getLogger(__name__)
@@ -24,7 +23,7 @@ class SearchDocumentsUseCase:
         self.embedding_service = embedding_service
         self.vector_store = vector_store
 
-    async def execute(self, query: SearchQuery) -> List[Chunk]:
+    async def execute(self, query: SearchQuery) -> list[Chunk]:
         """Execute semantic search.
 
         Args:

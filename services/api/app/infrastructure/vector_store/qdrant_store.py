@@ -3,21 +3,14 @@
 Implements the VectorStore port using Qdrant as the vector database.
 Handles chunk vector storage, similarity search, and deletion operations.
 """
-from typing import List, Optional
 from uuid import UUID
 
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.models import (
-    PointStruct,
-    Filter,
-    FieldCondition,
-    MatchValue,
-    FilterSelector
-)
+from qdrant_client.models import FieldCondition, Filter, FilterSelector, MatchValue, PointStruct
 
-from app.ports.services import VectorStore
-from app.domain.entities.chunk import Chunk
 from app.core.exceptions import VectorStoreError
+from app.domain.entities.chunk import Chunk
+from app.ports.services import VectorStore
 
 
 class QdrantVectorStoreImpl(VectorStore):
@@ -37,7 +30,7 @@ class QdrantVectorStoreImpl(VectorStore):
         self.client = client
         self.collection_name = collection_name
 
-    async def upsert(self, chunks: List[Chunk]) -> None:
+    async def upsert(self, chunks: list[Chunk]) -> None:
         """Insert or update chunk vectors in Qdrant.
 
         Args:
@@ -95,10 +88,10 @@ class QdrantVectorStoreImpl(VectorStore):
 
     async def search(
         self,
-        query_vector: List[float],
+        query_vector: list[float],
         top_k: int,
-        document_id: Optional[UUID] = None
-    ) -> List[Chunk]:
+        document_id: UUID | None = None
+    ) -> list[Chunk]:
         """Search for similar vectors in Qdrant.
 
         Args:

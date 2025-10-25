@@ -1,9 +1,10 @@
 """Pydantic schemas for request/response validation."""
 from datetime import datetime
-from typing import List, Optional, Dict, Any
-from uuid import UUID
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DocumentType(str, Enum):
@@ -23,7 +24,7 @@ class DocumentBase(BaseModel):
     """Base document schema."""
 
     title: str = Field(..., max_length=500, description="Document title")
-    description: Optional[str] = Field(None, description="Optional document description")
+    description: str | None = Field(None, description="Optional document description")
 
 
 class DocumentCreate(DocumentBase):
@@ -40,12 +41,12 @@ class DocumentChunkResponse(BaseModel):
     id: UUID
     chunk_index: int
     chunk_text: str
-    token_count: Optional[int] = None
-    section_title: Optional[str] = None
-    section_level: Optional[int] = 0
-    page_number: Optional[int] = None
-    chunk_tokens: Optional[int] = None
-    chunk_metadata: Dict[str, Any] = {}
+    token_count: int | None = None
+    section_title: str | None = None
+    section_level: int | None = 0
+    page_number: int | None = None
+    chunk_tokens: int | None = None
+    chunk_metadata: dict[str, Any] = {}
     created_at: datetime
 
 
@@ -58,7 +59,7 @@ class DocumentResponse(DocumentBase):
     file_name: str
     file_type: str
     file_size: int
-    file_path: Optional[str] = None
+    file_path: str | None = None
     upload_status: str
     embedding_status: str
     created_at: datetime
@@ -70,7 +71,7 @@ class DocumentDetailResponse(DocumentResponse):
 
     model_config = ConfigDict(from_attributes=True)
 
-    chunks: List[DocumentChunkResponse] = []
+    chunks: list[DocumentChunkResponse] = []
 
 
 class DocumentListResponse(BaseModel):
@@ -79,7 +80,7 @@ class DocumentListResponse(BaseModel):
     total: int
     page: int
     limit: int
-    documents: List[DocumentResponse]
+    documents: list[DocumentResponse]
 
 
 class DocumentUploadResponse(DocumentResponse):
@@ -97,8 +98,8 @@ class SearchRequest(BaseModel):
 
     query: str = Field(..., min_length=1, description="Search query text")
     limit: int = Field(10, ge=1, le=100, description="Maximum number of results")
-    document_ids: Optional[List[UUID]] = Field(None, description="Optional list of document IDs to filter")
-    model: Optional[str] = Field(None, description="LLM model for generation (optional)")
+    document_ids: list[UUID] | None = Field(None, description="Optional list of document IDs to filter")
+    model: str | None = Field(None, description="LLM model for generation (optional)")
 
 
 class SearchResultItem(BaseModel):
@@ -110,22 +111,22 @@ class SearchResultItem(BaseModel):
     chunk_text: str
     chunk_index: int
     score: float = Field(..., description="Similarity score")
-    section_title: Optional[str] = None
-    page_number: Optional[int] = None
-    chunk_metadata: Dict[str, Any] = {}
+    section_title: str | None = None
+    page_number: int | None = None
+    chunk_metadata: dict[str, Any] = {}
 
 
 class SearchResponse(BaseModel):
     """Schema for search response with optional generation."""
 
     query: str
-    summary: Optional[str] = Field(None, description="Generated summary with citations")
-    chunks: List[SearchResultItem]
-    model_used: Optional[str] = Field(None, description="Model used for generation")
+    summary: str | None = Field(None, description="Generated summary with citations")
+    chunks: list[SearchResultItem]
+    model_used: str | None = Field(None, description="Model used for generation")
     total_results: int
-    retrieval_method: Optional[str] = Field(None, description="Retrieval method used (vector, hybrid, etc.)")
-    expanded_queries: Optional[List[str]] = Field(None, description="Expanded query variants (for advanced search)")
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional metadata about the search")
+    retrieval_method: str | None = Field(None, description="Retrieval method used (vector, hybrid, etc.)")
+    expanded_queries: list[str] | None = Field(None, description="Expanded query variants (for advanced search)")
+    metadata: dict[str, Any] | None = Field(None, description="Additional metadata about the search")
 
 
 # Health Schemas
@@ -140,14 +141,14 @@ class ServiceStatus(BaseModel):
 
     name: str
     status: str
-    details: Optional[str] = None
+    details: str | None = None
 
 
 class ReadinessResponse(BaseModel):
     """Schema for readiness check response."""
 
     status: str
-    services: List[ServiceStatus]
+    services: list[ServiceStatus]
 
 
 # Embedder Service Schemas
@@ -162,7 +163,7 @@ class EmbedChunkItem(BaseModel):
 class EmbedRequest(BaseModel):
     """Schema for embed request to embedder service."""
 
-    chunks: List[EmbedChunkItem]
+    chunks: list[EmbedChunkItem]
 
 
 class EmbedResponse(BaseModel):
@@ -181,4 +182,4 @@ class EmbedQueryRequest(BaseModel):
 class EmbedQueryResponse(BaseModel):
     """Schema for embed query response."""
 
-    embedding: List[float]
+    embedding: list[float]

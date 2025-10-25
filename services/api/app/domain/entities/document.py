@@ -2,7 +2,6 @@
 from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
-from typing import Optional
 
 from app.core.enums import UploadStatus
 
@@ -21,9 +20,9 @@ class Document:
     file_type: str
     created_at: datetime
     upload_status: UploadStatus
-    description: Optional[str] = None
-    file_path: Optional[str] = None
-    file_size: Optional[int] = None
+    description: str | None = None
+    file_path: str | None = None
+    file_size: int | None = None
 
     def mark_completed(self) -> None:
         """Transition document to completed state.

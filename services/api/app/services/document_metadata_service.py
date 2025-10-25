@@ -1,15 +1,16 @@
 """Service for document database CRUD operations."""
+import logging
+from typing import Any
 from uuid import UUID
-from typing import Optional, List, Dict, Any
-from sqlalchemy import select, func
+
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-import logging
 
-from app.models.document import Document, DocumentChunk
-from app.models.schemas import DocumentResponse, DocumentDetailResponse, DocumentListResponse
-from app.core.enums import UploadStatus, EmbeddingStatus
+from app.core.enums import EmbeddingStatus, UploadStatus
 from app.core.exceptions import DocumentNotFoundError
+from app.models.document import Document, DocumentChunk
+from app.models.schemas import DocumentDetailResponse, DocumentListResponse, DocumentResponse
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class DocumentMetadataService:
         self,
         db: AsyncSession,
         title: str,
-        description: Optional[str],
+        description: str | None,
         file_name: str,
         file_type: str,
         file_size: int,
@@ -104,7 +105,7 @@ class DocumentMetadataService:
         self,
         db: AsyncSession,
         document_id: UUID
-    ) -> Optional[DocumentDetailResponse]:
+    ) -> DocumentDetailResponse | None:
         """
         Get detailed document information including chunks.
 
@@ -214,8 +215,8 @@ class DocumentMetadataService:
         self,
         db: AsyncSession,
         document_id: UUID,
-        chunks_data: List[Dict[str, Any]]
-    ) -> List[DocumentChunk]:
+        chunks_data: list[dict[str, Any]]
+    ) -> list[DocumentChunk]:
         """
         Create chunk records in the database.
 

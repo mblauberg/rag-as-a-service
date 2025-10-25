@@ -1,10 +1,9 @@
 """HTTP-based embedding service adapter implementation."""
-from typing import List
 
 import httpx
 
-from app.ports.services import EmbeddingService
 from app.core.exceptions import EmbeddingServiceError
+from app.ports.services import EmbeddingService
 
 
 class HTTPEmbeddingService(EmbeddingService):
@@ -22,7 +21,7 @@ class HTTPEmbeddingService(EmbeddingService):
         """
         self.embedder_url = embedder_url.rstrip("/")
 
-    async def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
+    async def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Generate vector embeddings for texts via HTTP.
 
         Args:

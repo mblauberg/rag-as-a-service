@@ -1,7 +1,7 @@
 """Cross-encoder reranking service for improving retrieval precision."""
-from typing import List, Tuple
-from sentence_transformers import CrossEncoder
 import logging
+
+from sentence_transformers import CrossEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +23,9 @@ class RerankerService:
     def rerank(
         self,
         query: str,
-        candidates: List[str],
+        candidates: list[str],
         top_k: int = 10
-    ) -> List[Tuple[int, float]]:
+    ) -> list[tuple[int, float]]:
         """
         Rerank candidate documents and return top-K with scores.
 

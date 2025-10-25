@@ -1,13 +1,13 @@
 """Health and readiness check endpoints."""
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text
 import httpx
+from fastapi import APIRouter, Depends
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_qdrant_client
 from app.core.qdrant_client import QdrantClientWrapper
-from app.core.config import settings
 from app.models.schemas import HealthResponse, ReadinessResponse, ServiceStatus
 
 router = APIRouter()

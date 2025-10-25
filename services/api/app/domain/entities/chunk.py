@@ -1,7 +1,7 @@
 """Chunk domain entity."""
 from dataclasses import dataclass, field
+from typing import Any
 from uuid import UUID
-from typing import Optional, List, Dict, Any
 
 
 @dataclass
@@ -16,11 +16,11 @@ class Chunk:
     document_id: UUID
     content: str
     tokens: int
-    embedding_vector: Optional[List[float]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    section_title: Optional[str] = None
-    section_level: Optional[int] = None
-    page_number: Optional[int] = None
+    embedding_vector: list[float] | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    section_title: str | None = None
+    section_level: int | None = None
+    page_number: int | None = None
 
     def has_embedding(self) -> bool:
         """Check if chunk has been embedded.

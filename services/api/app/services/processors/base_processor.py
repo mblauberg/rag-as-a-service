@@ -1,8 +1,8 @@
 """Base document processor interface."""
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -10,17 +10,17 @@ class DocumentElement:
     """Represents a structured element from a document."""
     content: str
     element_type: str  # paragraph, heading, table, list_item, etc.
-    metadata: Dict[str, Any]
-    page_number: Optional[int] = None
-    section_level: Optional[int] = None
-    section_title: Optional[str] = None
+    metadata: dict[str, Any]
+    page_number: int | None = None
+    section_level: int | None = None
+    section_title: str | None = None
 
 
 @dataclass
 class ProcessedDocument:
     """Represents a fully processed document."""
-    elements: List[DocumentElement]
-    metadata: Dict[str, Any]
+    elements: list[DocumentElement]
+    metadata: dict[str, Any]
     document_type: str
 
 

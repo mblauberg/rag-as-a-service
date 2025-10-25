@@ -1,9 +1,10 @@
 """Service for document file upload operations."""
-import aiofiles
-from uuid import uuid4
-from pathlib import Path
-from typing import Dict, Any
 import logging
+from pathlib import Path
+from typing import Any
+from uuid import uuid4
+
+import aiofiles
 
 from app.core.config import settings
 from app.core.exceptions import FileOperationError
@@ -26,7 +27,7 @@ class DocumentUploadService:
         self,
         file_content: bytes,
         filename: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Save uploaded file to disk and extract metadata.
 
@@ -100,7 +101,7 @@ class DocumentUploadService:
             logger.error(f"Error deleting file {file_path}: {e}")
             raise FileOperationError("delete", str(file_path), e)
 
-    def get_file_metadata(self, file_path: str) -> Dict[str, Any]:
+    def get_file_metadata(self, file_path: str) -> dict[str, Any]:
         """
         Get metadata for an existing file.
 

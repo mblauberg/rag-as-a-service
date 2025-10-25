@@ -1,7 +1,13 @@
 """Qdrant client wrapper for vector operations."""
-from typing import List, Optional
+
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct, Filter, FieldCondition, MatchValue
+from qdrant_client.models import (
+    Distance,
+    FieldCondition,
+    Filter,
+    MatchValue,
+    VectorParams,
+)
 
 from app.core.config import settings
 
@@ -36,11 +42,11 @@ class QdrantClientWrapper:
 
     async def search(
         self,
-        query_vector: List[float],
+        query_vector: list[float],
         limit: int = 10,
         score_threshold: float = 0.0,
-        document_ids: Optional[List[str]] = None
-    ) -> List[dict]:
+        document_ids: list[str] | None = None
+    ) -> list[dict]:
         """
         Search for similar vectors in Qdrant.
 

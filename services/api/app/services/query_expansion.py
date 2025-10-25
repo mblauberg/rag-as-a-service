@@ -7,7 +7,6 @@ Improves recall by:
 - Clarifying vague terminology
 """
 import logging
-from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +27,7 @@ class QueryExpansionService:
         """
         self.generator_client = generator_client
 
-    async def expand_query(self, query: str) -> List[str]:
+    async def expand_query(self, query: str) -> list[str]:
         """
         Generate alternative query phrasings.
 
@@ -75,7 +74,7 @@ Alternative 2:"""
             logger.error(f"Query expansion failed: {e}")
             return [query]
 
-    def _parse_alternatives(self, response: str) -> List[str]:
+    def _parse_alternatives(self, response: str) -> list[str]:
         """
         Parse LLM response to extract alternative queries.
 

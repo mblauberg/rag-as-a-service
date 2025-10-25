@@ -6,33 +6,28 @@ principles with dependency injection and proper error handling.
 """
 import logging
 from uuid import UUID
-from typing import Optional
 
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 
 from app.api.dependencies import (
-    get_upload_document_use_case,
+    get_delete_document_use_case,
     get_list_documents_use_case,
-    get_delete_document_use_case
+    get_upload_document_use_case,
 )
 from app.api.models import (
-    UploadDocumentResponse,
     DocumentResponse,
     ListDocumentsResponse,
-    ErrorResponse
+    UploadDocumentResponse,
 )
-from app.application.use_cases.upload_document import (
-    UploadDocumentUseCase,
-    UploadDocumentCommand
-)
-from app.application.use_cases.list_documents import ListDocumentsUseCase
 from app.application.use_cases.delete_document import DeleteDocumentUseCase
+from app.application.use_cases.list_documents import ListDocumentsUseCase
+from app.application.use_cases.upload_document import UploadDocumentCommand, UploadDocumentUseCase
 from app.core.exceptions import (
-    DocumentNotFoundError,
-    FileProcessingError,
     ChunkingError,
+    DocumentNotFoundError,
     EmbeddingServiceError,
-    VectorStoreError
+    FileProcessingError,
+    VectorStoreError,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,7 +38,7 @@ router = APIRouter()
 async def upload_document(
     file: UploadFile = File(..., description="File to upload"),
     title: str = Form(..., description="Document title"),
-    description: Optional[str] = Form(None, description="Optional document description"),
+    description: str | None = Form(None, description="Optional document description"),
     use_case: UploadDocumentUseCase = Depends(get_upload_document_use_case)
 ):
     """Upload a document file with hexagonal architecture.
