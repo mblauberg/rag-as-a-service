@@ -14,6 +14,7 @@ from app.api.dependencies import (
     get_list_documents_use_case,
     get_upload_document_use_case,
 )
+from app.api.mappers import document_to_response
 from app.api.models import (
     DocumentResponse,
     ListDocumentsResponse,
@@ -103,17 +104,7 @@ async def upload_document(
 
         # Convert domain entity to response DTO
         return UploadDocumentResponse(
-            document=DocumentResponse(
-                id=document.id,
-                title=document.title,
-                file_name=document.file_name,
-                file_type=document.file_type,
-                created_at=document.created_at,
-                upload_status=document.upload_status.value,
-                description=document.description,
-                file_path=document.file_path,
-                file_size=document.file_size
-            ),
+            document=document_to_response(document),
             chunk_count=chunk_count,
             message="Document uploaded and processed successfully"
         )
@@ -180,20 +171,7 @@ async def list_documents(
         documents, total = await use_case.execute(page=page, limit=limit)
 
         # Convert domain entities to response DTOs
-        document_responses = [
-            DocumentResponse(
-                id=doc.id,
-                title=doc.title,
-                file_name=doc.file_name,
-                file_type=doc.file_type,
-                created_at=doc.created_at,
-                upload_status=doc.upload_status.value,
-                description=doc.description,
-                file_path=doc.file_path,
-                file_size=doc.file_size
-            )
-            for doc in documents
-        ]
+        document_responses = [document_to_response(doc) for doc in documents]
 
         return ListDocumentsResponse(
             documents=document_responses,

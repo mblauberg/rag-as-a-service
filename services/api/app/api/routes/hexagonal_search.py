@@ -8,6 +8,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.dependencies import get_search_documents_use_case
+from app.api.mappers import chunk_to_search_result
 from app.api.models import ChunkSearchResult, SearchRequest, SearchResponse
 from app.application.use_cases.search_documents import SearchDocumentsUseCase
 from app.core.exceptions import EmbeddingServiceError, VectorStoreError
@@ -65,16 +66,7 @@ async def search_documents(
         logger.info(f"Search for '{request.query}' returned {len(chunks)} results")
 
         # Convert domain entities to response DTOs
-        results = [
-            ChunkSearchResult(
-                chunk_id=chunk.id,
-                document_id=chunk.document_id,
-                content=chunk.content,
-                score=0.0,  # Score is not available in current Chunk entity
-                tokens=chunk.tokens
-            )
-            for chunk in chunks
-        ]
+        results = [chunk_to_search_result(chunk, score=0.0) for chunk in chunks]
 
         return SearchResponse(
             query=request.query,

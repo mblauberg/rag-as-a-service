@@ -29,6 +29,13 @@ class FileProcessorImpl(FileProcessor):
         Raises:
             FileProcessingError: If text extraction fails or file type is unsupported
         """
+        # Validate file content is not None (empty bytes b"" is valid)
+        if file_content is None:
+            raise FileProcessingError(
+                operation="extract_text",
+                original_error=ValueError("File content is None")
+            )
+
         # Normalize file type (remove leading dot, convert to lowercase)
         normalized_type = file_type.lower().lstrip(".")
 

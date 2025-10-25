@@ -1,7 +1,7 @@
 """Upload document use case."""
 import logging
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from app.core.enums import UploadStatus
@@ -65,7 +65,7 @@ class UploadDocumentUseCase:
             title=command.title,
             file_name=command.file_name,
             file_type=self._detect_file_type(command.file_name),
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
             upload_status=UploadStatus.PROCESSING,
             description=command.description
         )
@@ -108,7 +108,11 @@ class UploadDocumentUseCase:
             logger.debug(f"Generated {len(embeddings)} embeddings")
 
             # 8. Update chunks with embeddings
-            for chunk, embedding in zip(chunks, embeddings, strict=False):
+            if len(embeddings) != len(chunks):
+                raise ValueError(
+                    f"Embedding count mismatch: got {len(embeddings)} embeddings for {len(chunks)} chunks"
+                )
+            for chunk, embedding in zip(chunks, embeddings, strict=True):
                 chunk.embedding_vector = embedding
 
             # 9. Store vectors in vector database
