@@ -27,14 +27,18 @@ from app.infrastructure.processing.semantic_chunker import SemanticChunkerImpl
 
 # Infrastructure - Services
 from app.infrastructure.services.embedding_service import HTTPEmbeddingService
+from app.infrastructure.services.generation_service import HTTPGenerationService
 from app.infrastructure.vector_store.qdrant_store import QdrantVectorStoreImpl
 
 # Infrastructure - Search
 from app.infrastructure.search.postgres_keyword_store import PostgresKeywordStoreImpl
 from app.infrastructure.search.rrf_fusion_service import RRFFusionServiceImpl
 
+# Infrastructure - Query Augmentation
+from app.infrastructure.generation.llm_query_augmenter import LLMQueryAugmenterImpl
+
 # Ports
-from app.ports.services import KeywordStore, FusionService, EmbeddingService, VectorStore
+from app.ports.services import KeywordStore, FusionService, EmbeddingService, VectorStore, GenerationService, QueryAugmenter
 
 
 # Qdrant Client Dependency
@@ -150,6 +154,20 @@ def get_fusion_service() -> FusionService:
     return RRFFusionServiceImpl()
 
 
+# Generation Service
+def get_generation_service() -> GenerationService:
+    """Create HTTP generation service instance."""
+    return HTTPGenerationService(settings.generator.url)
+
+
+# Query Augmenter
+def get_query_augmenter(
+    generation_service: GenerationService = Depends(get_generation_service)
+) -> QueryAugmenter:
+    """Create LLM query augmenter instance."""
+    return LLMQueryAugmenterImpl(generation_service)
+
+
 # Search Documents Use Case
 def get_search_documents_use_case(
     embedding_service: EmbeddingService = Depends(lambda: HTTPEmbeddingService(settings.embedder.url)),
@@ -158,22 +176,25 @@ def get_search_documents_use_case(
         collection_name="documents"
     )),
     keyword_store: KeywordStore = Depends(get_keyword_store),
-    fusion_service: FusionService = Depends(get_fusion_service)
+    fusion_service: FusionService = Depends(get_fusion_service),
+    query_augmenter: QueryAugmenter = Depends(get_query_augmenter)
 ) -> SearchDocumentsUseCase:
-    """Factory for SearchDocumentsUseCase with hybrid capabilities.
+    """Factory for SearchDocumentsUseCase with hybrid capabilities and query expansion.
 
     Args:
         embedding_service: Service for generating embeddings
         vector_store: Store for semantic search
         keyword_store: Store for BM25 keyword search
         fusion_service: Service for result fusion
+        query_augmenter: Service for query expansion
 
     Returns:
-        Fully configured SearchDocumentsUseCase instance with hybrid search support
+        Fully configured SearchDocumentsUseCase instance with hybrid search and query expansion support
     """
     return SearchDocumentsUseCase(
         embedding_service=embedding_service,
         vector_store=vector_store,
         keyword_store=keyword_store,
-        fusion_service=fusion_service
+        fusion_service=fusion_service,
+        query_augmenter=query_augmenter
     )

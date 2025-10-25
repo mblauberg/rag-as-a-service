@@ -8,7 +8,8 @@ from app.ports.services import (
     EmbeddingService,
     VectorStore,
     KeywordStore,
-    FusionService
+    FusionService,
+    QueryAugmenter
 )
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,8 @@ class SearchDocumentsUseCase:
         embedding_service: EmbeddingService,
         vector_store: VectorStore,
         keyword_store: KeywordStore | None = None,
-        fusion_service: FusionService | None = None
+        fusion_service: FusionService | None = None,
+        query_augmenter: QueryAugmenter | None = None
     ):
         """Initialize with required dependencies.
 
@@ -47,23 +49,27 @@ class SearchDocumentsUseCase:
             vector_store: For semantic search
             keyword_store: For BM25 search (optional, required for hybrid)
             fusion_service: For result fusion (optional, required for hybrid)
+            query_augmenter: For query expansion (optional, for multi-query search)
         """
         self.embedding_service = embedding_service
         self.vector_store = vector_store
         self.keyword_store = keyword_store
         self.fusion_service = fusion_service
+        self.query_augmenter = query_augmenter
 
     async def execute(
         self,
         query: SearchQuery,
         mode: SearchMode = SearchMode.HYBRID,
+        use_expansion: bool = True,
         fusion_k: int = 60
     ) -> list[Chunk]:
-        """Execute document search with specified mode.
+        """Execute document search with specified mode and optional query expansion.
 
         Args:
             query: Search query value object
             mode: Search mode (vector/keyword/hybrid)
+            use_expansion: Enable multi-query expansion (default True)
             fusion_k: RRF constant for hybrid mode (default 60)
 
         Returns:
@@ -74,9 +80,47 @@ class SearchDocumentsUseCase:
         """
         logger.info(
             f"Searching: '{query.text}' "
-            f"(mode={mode}, top_k={query.top_k})"
+            f"(mode={mode}, top_k={query.top_k}, expansion={use_expansion})"
         )
 
+        # Query expansion if enabled and available
+        if use_expansion and self.query_augmenter:
+            expanded_queries = await self.query_augmenter.expand(
+                query.text,
+                num_variants=2
+            )
+
+            # Search with each query variant
+            all_result_sets = []
+            for q_text in expanded_queries:
+                variant_query = SearchQuery(text=q_text, top_k=query.top_k)
+
+                if mode == SearchMode.HYBRID:
+                    results = await self._hybrid_search(variant_query, fusion_k)
+                elif mode == SearchMode.VECTOR:
+                    results = await self._vector_search(variant_query)
+                else:  # KEYWORD
+                    results = await self._keyword_search(variant_query)
+
+                all_result_sets.append(results)
+
+            # Fuse all expanded query results
+            if self.fusion_service and len(all_result_sets) > 1:
+                final_results = self.fusion_service.fuse(
+                    result_sets=all_result_sets,
+                    k=fusion_k
+                )[:query.top_k]
+            else:
+                final_results = all_result_sets[0][:query.top_k]
+
+            logger.info(
+                f"Multi-query search: {len(expanded_queries)} queries, "
+                f"{len(final_results)} final results"
+            )
+
+            return final_results
+
+        # Standard search without expansion
         if mode == SearchMode.VECTOR:
             return await self._vector_search(query)
 

@@ -25,6 +25,10 @@ async def search_documents(
         default=SearchMode.HYBRID,
         description="Search mode: 'vector' (semantic only), 'keyword' (BM25 only), or 'hybrid' (RRF fusion - RECOMMENDED, +18-22% accuracy)"
     ),
+    use_expansion: bool = Query(
+        default=True,
+        description="Enable multi-query expansion for improved retrieval coverage (default: True, +15-20% recall)"
+    ),
     use_case: SearchDocumentsUseCase = Depends(get_search_documents_use_case)
 ):
     """Perform document search with hybrid retrieval (RECOMMENDED).
@@ -76,7 +80,7 @@ async def search_documents(
 
     # Execute use case
     try:
-        chunks = await use_case.execute(search_query, mode=mode)
+        chunks = await use_case.execute(search_query, mode=mode, use_expansion=use_expansion)
 
         logger.info(f"Search for '{request.query}' (mode={mode.value}) returned {len(chunks)} results")
 
