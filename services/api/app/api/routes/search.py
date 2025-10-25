@@ -23,8 +23,7 @@ router = APIRouter()
 async def search_documents(
     request: SearchRequest,
     db: AsyncSession = Depends(get_db),
-    qdrant_client: QdrantClientWrapper = Depends(get_qdrant_client),
-    http_client: httpx.AsyncClient = Depends(get_http_client)
+    qdrant_client: QdrantClientWrapper = Depends(get_qdrant_client)
 ):
     """
     Perform semantic search across documents.
@@ -46,14 +45,14 @@ async def search_documents(
     """
     # Generate query embedding using embedder service
     try:
-        response = await http_client.post(
-            f"{settings.embedder_url}/embed-query",
-            json={"query": request.query},
-            timeout=30.0
-        )
-        response.raise_for_status()
-        result = response.json()
-        query_embedding = result["embedding"]
+        async with httpx.AsyncClient(timeout=30.0) as http_client:
+            response = await http_client.post(
+                f"{settings.embedder_url}/embed-query",
+                json={"query": request.query}
+            )
+            response.raise_for_status()
+            result = response.json()
+            query_embedding = result["embedding"]
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

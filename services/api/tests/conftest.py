@@ -19,7 +19,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.main import app
 from app.core.database import Base, get_db
-from app.core.dependencies import get_qdrant_client, get_http_client
+from app.core.dependencies import get_qdrant_client
 from app.core.qdrant_client import QdrantClientWrapper
 from app.models.document import Document, DocumentChunk
 
@@ -150,7 +150,7 @@ async def async_client(db_session, mock_qdrant_client, mock_embedder_client):
     """
     Provide async test client with dependency overrides.
 
-    Overrides database, Qdrant, and HTTP client dependencies with mocks.
+    Overrides database and Qdrant dependencies with mocks.
     """
     # Override dependencies
     async def override_get_db():
@@ -159,12 +159,8 @@ async def async_client(db_session, mock_qdrant_client, mock_embedder_client):
     def override_get_qdrant_client():
         return mock_qdrant_client
 
-    async def override_get_http_client():
-        yield mock_embedder_client
-
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_qdrant_client] = override_get_qdrant_client
-    app.dependency_overrides[get_http_client] = override_get_http_client
 
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client

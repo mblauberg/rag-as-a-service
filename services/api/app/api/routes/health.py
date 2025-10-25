@@ -5,7 +5,7 @@ from sqlalchemy import text
 import httpx
 
 from app.core.database import get_db
-from app.core.dependencies import get_qdrant_client, get_http_client
+from app.core.dependencies import get_qdrant_client
 from app.core.qdrant_client import QdrantClientWrapper
 from app.core.config import settings
 from app.models.schemas import HealthResponse, ReadinessResponse, ServiceStatus
@@ -27,8 +27,7 @@ async def health_check():
 @router.get("/ready", response_model=ReadinessResponse)
 async def readiness_check(
     db: AsyncSession = Depends(get_db),
-    qdrant_client: QdrantClientWrapper = Depends(get_qdrant_client),
-    http_client: httpx.AsyncClient = Depends(get_http_client)
+    qdrant_client: QdrantClientWrapper = Depends(get_qdrant_client)
 ):
     """
     Readiness check that validates connectivity to dependencies.
@@ -81,22 +80,20 @@ async def readiness_check(
 
     # Check embedder service
     try:
-        response = await http_client.get(
-            f"{settings.embedder_url}/health",
-            timeout=5.0
-        )
-        if response.status_code == 200:
-            services.append(ServiceStatus(
-                name="embedder",
-                status="ready",
-                details="Connected to embedder service"
-            ))
-        else:
-            services.append(ServiceStatus(
-                name="embedder",
-                status="not_ready",
-                details="Embedder service not responding"
-            ))
+        async with httpx.AsyncClient(timeout=5.0) as http_client:
+            response = await http_client.get(f"{settings.embedder_url}/health")
+            if response.status_code == 200:
+                services.append(ServiceStatus(
+                    name="embedder",
+                    status="ready",
+                    details="Connected to embedder service"
+                ))
+            else:
+                services.append(ServiceStatus(
+                    name="embedder",
+                    status="not_ready",
+                    details="Embedder service not responding"
+                ))
     except Exception as e:
         services.append(ServiceStatus(
             name="embedder",
