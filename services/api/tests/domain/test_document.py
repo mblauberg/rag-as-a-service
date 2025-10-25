@@ -1,6 +1,6 @@
 """Tests for Document domain entity."""
 import pytest
-from datetime import datetime
+from datetime import datetime, UTC
 from uuid import uuid4
 
 from app.domain.entities.document import Document
@@ -10,7 +10,7 @@ from app.core.enums import UploadStatus
 def test_document_creation():
     """Test creating a document entity."""
     doc_id = uuid4()
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
 
     document = Document(
         id=doc_id,
@@ -33,7 +33,7 @@ def test_document_mark_completed():
         title="Test",
         file_name="test.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.PROCESSING
     )
 
@@ -49,7 +49,7 @@ def test_document_mark_failed():
         title="Test",
         file_name="test.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.PROCESSING
     )
 

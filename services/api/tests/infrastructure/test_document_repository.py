@@ -4,7 +4,7 @@ Uses in-memory SQLite database with SQLAlchemy async API.
 Tests the full mapping between domain entities and ORM models.
 """
 import pytest
-from datetime import datetime
+from datetime import datetime, UTC
 from uuid import uuid4
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
@@ -55,7 +55,7 @@ async def test_save_document(document_repository):
         title="Test Document",
         file_name="test.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.PROCESSING,
         description="Test description"
     )
@@ -78,7 +78,7 @@ async def test_find_by_id(document_repository):
         title="Find Me",
         file_name="findme.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.COMPLETED
     )
     await document_repository.save(document)
@@ -112,7 +112,7 @@ async def test_update_document(document_repository):
         title="Original Title",
         file_name="test.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.PROCESSING
     )
     await document_repository.save(document)
@@ -139,7 +139,7 @@ async def test_find_all_pagination(document_repository):
             title=f"Document {i}",
             file_name=f"doc{i}.pdf",
             file_type="pdf",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             upload_status=UploadStatus.COMPLETED
         )
         await document_repository.save(document)
@@ -162,7 +162,7 @@ async def test_find_all_second_page(document_repository):
             title=f"Document {i}",
             file_name=f"doc{i}.pdf",
             file_type="pdf",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             upload_status=UploadStatus.COMPLETED
         )
         await document_repository.save(document)
@@ -184,7 +184,7 @@ async def test_delete_document(document_repository):
         title="Delete Me",
         file_name="delete.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.COMPLETED
     )
     await document_repository.save(document)
@@ -208,7 +208,7 @@ async def test_enum_mapping(document_repository):
             title=f"Test {status.value}",
             file_name="test.pdf",
             file_type="pdf",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             upload_status=status
         )
 
@@ -231,7 +231,7 @@ async def test_optional_fields(document_repository):
         title="With Optional Fields",
         file_name="test.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.COMPLETED,
         description="A description",
         file_path="/path/to/file",
@@ -258,7 +258,7 @@ async def test_optional_fields_none(document_repository):
         title="Minimal Document",
         file_name="test.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.PENDING,
         description=None,
         file_path=None,

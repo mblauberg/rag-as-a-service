@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.application.use_cases.delete_document import DeleteDocumentUseCase
 from app.domain.entities.document import Document
@@ -26,7 +26,7 @@ async def test_delete_document_success():
         title="Test",
         file_name="test.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.COMPLETED
     ))
     mock_doc_repo.delete = AsyncMock()

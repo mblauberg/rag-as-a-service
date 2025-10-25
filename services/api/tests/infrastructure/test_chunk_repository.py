@@ -4,7 +4,7 @@ Uses in-memory SQLite database with SQLAlchemy async API.
 Tests the full mapping between domain entities and ORM models.
 """
 import pytest
-from datetime import datetime
+from datetime import datetime, UTC
 from uuid import uuid4
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
@@ -62,7 +62,7 @@ async def sample_document(document_repository):
         title="Test Document",
         file_name="test.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.PROCESSING
     )
     return await document_repository.save(document)
@@ -203,7 +203,7 @@ async def test_find_by_document_id_multiple_documents(
         title="Second Document",
         file_name="doc2.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.PROCESSING
     )
     doc2 = await document_repository.save(doc2)
@@ -261,7 +261,7 @@ async def test_delete_by_document_id_leaves_other_documents(
         title="Second Document",
         file_name="doc2.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.PROCESSING
     )
     doc2 = await document_repository.save(doc2)

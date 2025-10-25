@@ -24,14 +24,14 @@ def document_to_response(document: Document) -> DocumentResponse:
 
     Example:
         >>> from uuid import uuid4
-        >>> from datetime import datetime
+        >>> from datetime import datetime, UTC
         >>> from app.core.enums import UploadStatus
         >>> doc = Document(
         ...     id=uuid4(),
         ...     title="Sample Document",
         ...     file_name="sample.pdf",
         ...     file_type="pdf",
-        ...     created_at=datetime.utcnow(),
+        ...     created_at=datetime.now(UTC),
         ...     upload_status=UploadStatus.COMPLETED,
         ...     description="A test document",
         ...     file_path="/uploads/sample.pdf",

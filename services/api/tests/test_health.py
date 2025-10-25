@@ -159,7 +159,8 @@ async def test_readiness_check_qdrant_exception(
 async def test_readiness_check_embedder_unavailable(
     async_client,
     mock_qdrant_client,
-    mock_embedder_client
+    mock_embedder_client,
+    monkeypatch
 ):
     """
     Test readiness check when embedder service is unavailable.
@@ -173,7 +174,15 @@ async def test_readiness_check_embedder_unavailable(
     async def mock_get(*args, **kwargs):
         return error_response
 
-    mock_embedder_client.get = AsyncMock(side_effect=mock_get)
+    # Create mock client that returns error
+    mock_http_client = AsyncMock()
+    mock_http_client.get = mock_get
+    mock_http_client.__aenter__ = AsyncMock(return_value=mock_http_client)
+    mock_http_client.__aexit__ = AsyncMock(return_value=None)
+
+    # Patch httpx.AsyncClient to return our mock
+    import httpx
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: mock_http_client)
 
     response = await async_client.get("/api/v1/ready")
 
@@ -192,15 +201,23 @@ async def test_readiness_check_embedder_unavailable(
 async def test_readiness_check_embedder_exception(
     async_client,
     mock_qdrant_client,
-    mock_embedder_client
+    mock_embedder_client,
+    monkeypatch
 ):
     """
     Test readiness check when embedder service raises exception.
 
     Should handle exception gracefully and report not_ready.
     """
-    # Mock embedder to raise exception
-    mock_embedder_client.get = AsyncMock(side_effect=Exception("Connection refused"))
+    # Create mock client that raises exception
+    mock_http_client = AsyncMock()
+    mock_http_client.get = AsyncMock(side_effect=Exception("Connection refused"))
+    mock_http_client.__aenter__ = AsyncMock(return_value=mock_http_client)
+    mock_http_client.__aexit__ = AsyncMock(return_value=None)
+
+    # Patch httpx.AsyncClient to return our mock
+    import httpx
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: mock_http_client)
 
     response = await async_client.get("/api/v1/ready")
 
@@ -237,8 +254,15 @@ async def test_readiness_check_multiple_services_down(
     # Mock Qdrant to fail
     mock_qdrant_client.health_check = AsyncMock(return_value=False)
 
-    # Mock embedder to fail
-    mock_embedder_client.get = AsyncMock(side_effect=Exception("Embedder down"))
+    # Create mock HTTP client that raises exception
+    mock_http_client = AsyncMock()
+    mock_http_client.get = AsyncMock(side_effect=Exception("Embedder down"))
+    mock_http_client.__aenter__ = AsyncMock(return_value=mock_http_client)
+    mock_http_client.__aexit__ = AsyncMock(return_value=None)
+
+    # Patch httpx.AsyncClient to return our mock
+    import httpx
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: mock_http_client)
 
     response = await async_client.get("/api/v1/ready")
 

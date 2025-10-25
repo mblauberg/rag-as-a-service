@@ -42,8 +42,9 @@ class TestUploadStatus:
         assert UploadStatus.PENDING in UploadStatus
         # Note: In Python 3.11, checking string membership raises TypeError
         # In Python 3.12+, this will return True/False based on value matching
-        with pytest.raises(TypeError):
-            _ = "pending" in UploadStatus
+        # Python 3.13 changed behavior - string membership check now works with str-based Enums
+        assert "pending" in UploadStatus
+        assert "invalid" not in UploadStatus
 
 
 class TestEmbeddingStatus:
@@ -83,8 +84,9 @@ class TestEmbeddingStatus:
         assert EmbeddingStatus.PENDING in EmbeddingStatus
         # Note: In Python 3.11, checking string membership raises TypeError
         # In Python 3.12+, this will return True/False based on value matching
-        with pytest.raises(TypeError):
-            _ = "pending" in EmbeddingStatus
+        # Python 3.13 changed behavior - string membership check now works with str-based Enums
+        assert "pending" in EmbeddingStatus
+        assert "invalid" not in EmbeddingStatus
 
 
 class TestProcessingStatus:
@@ -124,8 +126,9 @@ class TestProcessingStatus:
         assert ProcessingStatus.PENDING in ProcessingStatus
         # Note: In Python 3.11, checking string membership raises TypeError
         # In Python 3.12+, this will return True/False based on value matching
-        with pytest.raises(TypeError):
-            _ = "pending" in ProcessingStatus
+        # Python 3.13 changed behavior - string membership check now works with str-based Enums
+        assert "pending" in ProcessingStatus
+        assert "invalid" not in ProcessingStatus
 
 
 class TestEnumsIndependence:

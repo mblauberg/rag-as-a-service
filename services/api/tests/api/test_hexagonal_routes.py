@@ -7,7 +7,7 @@ import pytest
 from unittest.mock import AsyncMock, patch, Mock
 from uuid import uuid4
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, UTC
 
 from fastapi import UploadFile
 from httpx import AsyncClient
@@ -38,7 +38,7 @@ async def test_upload_document_success():
         title="Test Doc",
         file_name="test.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.COMPLETED,
         description="Test description",
         file_path="/path/to/test.pdf",
@@ -110,7 +110,7 @@ async def test_list_documents_success():
         title="Doc 1",
         file_name="doc1.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.COMPLETED,
         file_size=1024
     )
@@ -119,7 +119,7 @@ async def test_list_documents_success():
         title="Doc 2",
         file_name="doc2.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.COMPLETED,
         file_size=2048
     )

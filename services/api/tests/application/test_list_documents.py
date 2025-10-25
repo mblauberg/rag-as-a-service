@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.application.use_cases.list_documents import ListDocumentsUseCase
 from app.domain.entities.document import Document
@@ -21,7 +21,7 @@ async def test_list_documents_success():
         title="Document 1",
         file_name="doc1.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.COMPLETED
     )
     doc2 = Document(
@@ -29,7 +29,7 @@ async def test_list_documents_success():
         title="Document 2",
         file_name="doc2.pdf",
         file_type="pdf",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         upload_status=UploadStatus.COMPLETED
     )
 

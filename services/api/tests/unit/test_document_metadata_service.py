@@ -26,9 +26,9 @@ def mock_db():
 @pytest.fixture
 def sample_document():
     """Create sample document for testing."""
-    from datetime import datetime
+    from datetime import datetime, UTC
     doc_id = uuid4()
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     return Document(
         id=doc_id,
         title="Test Document",
