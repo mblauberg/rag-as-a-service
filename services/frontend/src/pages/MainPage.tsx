@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { EnhancedSearchBar } from '../components/search/EnhancedSearchBar';
-import { UploadModal } from '../components/upload/UploadModal';
-import { UploadFAB } from '../components/upload/UploadFAB';
-import { DocumentDetailModal } from '../components/documents/DocumentDetailModal';
+import { EnhancedSearchBar } from '@/components/search/EnhancedSearchBar';
+import { UploadModal } from '@/components/upload/UploadModal';
+import { UploadFAB } from '@/components/upload/UploadFAB';
+import { DocumentDetailModal } from '@/components/documents/DocumentDetailModal';
 import { Button } from '@/components/ui/button';
-import { useSearchWithDebounce } from '../hooks/useSearchWithDebounce';
-import { useDocuments } from '../hooks/useDocuments';
-import { useModels } from '../hooks/useModels';
-import { DocumentCard } from '../components/documents/DocumentCard';
-import { SearchResults } from '../components/search/SearchResults';
+import { useSearchWithDebounce } from '@/hooks/useSearchWithDebounce';
+import { useDocuments } from '@/hooks/useDocuments';
+import { useModels } from '@/hooks/useModels';
+import { DocumentCard } from '@/components/documents/DocumentCard';
+import { SearchResults } from '@/components/search/SearchResults';
 import { motion } from 'framer-motion';
 import { PlusIcon } from '@radix-ui/react-icons';
 
