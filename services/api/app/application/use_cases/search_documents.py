@@ -56,7 +56,7 @@ class SearchDocumentsUseCase:
     async def execute(
         self,
         query: SearchQuery,
-        mode: SearchMode = SearchMode.HYBRID,
+        mode: SearchMode = SearchMode.VECTOR,
         fusion_k: int = 60
     ) -> list[Chunk]:
         """Execute document search with specified mode.
