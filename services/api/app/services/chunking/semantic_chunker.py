@@ -35,7 +35,7 @@ class SentenceTransformerEmbeddings(Embeddings):
         return embedding[0].tolist()
 
 
-class SemanticChunkerV2:
+class SemanticChunker:
     """
     Semantic chunking using percentile-based breakpoint detection.
 

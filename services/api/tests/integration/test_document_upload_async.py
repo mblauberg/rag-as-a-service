@@ -51,11 +51,11 @@ async def test_process_and_chunk_in_async_context():
 
 
 @pytest.mark.asyncio
-async def test_semantic_chunker_v2_directly():
-    """Test that SemanticChunkerV2 works correctly in async context."""
-    from app.services.chunking.semantic_chunker_v2 import SemanticChunkerV2
+async def test_semantic_chunker_directly():
+    """Test that SemanticChunker works correctly in async context."""
+    from app.services.chunking.semantic_chunker import SemanticChunker
 
-    chunker = SemanticChunkerV2(
+    chunker = SemanticChunker(
         min_chunk_size=128,
         max_chunk_size=512,
         breakpoint_percentile=95.0

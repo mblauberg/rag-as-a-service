@@ -4,7 +4,7 @@ from typing import Any
 
 from app.core.config import settings
 from app.models.schemas import DocumentType
-from app.services.chunking.semantic_chunker_v2 import SemanticChunkerV2
+from app.services.chunking.semantic_chunker import SemanticChunker
 from app.services.processors.base_processor import BaseDocumentProcessor
 from app.services.processors.csv_processor import CSVProcessor
 from app.services.processors.docx_processor import DOCXProcessor
@@ -29,8 +29,8 @@ class DocumentProcessingService:
         }
 
         # Use semantic chunker with embedding-based breakpoint detection
-        # Removed legacy fallback - SemanticChunkerV2 is the canonical implementation
-        self.chunker = SemanticChunkerV2(
+        # Removed legacy fallback - SemanticChunker is the canonical implementation
+        self.chunker = SemanticChunker(
             min_chunk_size=settings.chunking.min_chunk_size,
             max_chunk_size=settings.chunking.max_chunk_size,
             breakpoint_percentile=settings.chunking.breakpoint_percentile
@@ -64,7 +64,7 @@ class DocumentProcessingService:
         Process document and create chunks with metadata.
 
         This method is now async to support both synchronous and asynchronous chunkers.
-        The SemanticChunkerV2 uses async operations for embedding-based chunking.
+        The SemanticChunker uses async operations for embedding-based chunking.
 
         Args:
             file_path: Path to document
@@ -153,7 +153,7 @@ class DocumentProcessingService:
             List of dicts with 'content' and 'tokens' keys
         """
         if self.use_async_chunker:
-            # Use async SemanticChunkerV2
+            # Use async SemanticChunker
             chunk_results = await self.chunker.chunk_text(text)
 
             # Convert ChunkResult objects to expected format

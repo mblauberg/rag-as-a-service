@@ -1,11 +1,11 @@
 import pytest
-from app.services.chunking.semantic_chunker_v2 import SemanticChunkerV2
+from app.services.chunking.semantic_chunker import SemanticChunker
 
 
 @pytest.mark.asyncio
 async def test_semantic_chunker_creates_coherent_chunks():
     """Test that semantic chunker splits on semantic boundaries"""
-    chunker = SemanticChunkerV2(
+    chunker = SemanticChunker(
         min_chunk_size=50,
         max_chunk_size=200,
         breakpoint_percentile=95.0
@@ -35,7 +35,7 @@ async def test_semantic_chunker_creates_coherent_chunks():
 @pytest.mark.asyncio
 async def test_semantic_chunker_respects_size_limits():
     """Test that chunks respect min/max size constraints"""
-    chunker = SemanticChunkerV2(
+    chunker = SemanticChunker(
         min_chunk_size=100,
         max_chunk_size=500
     )

@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.infrastructure.processing.semantic_chunker import SemanticChunkerImpl
 from app.core.exceptions import ChunkingError
-from app.services.chunking.semantic_chunker_v2 import ChunkResult
+from app.services.chunking.semantic_chunker import ChunkResult
 
 
 @pytest.fixture

@@ -1,16 +1,16 @@
 """SemanticChunker infrastructure adapter implementation.
 
 This module implements the TextChunker port interface by wrapping
-the existing SemanticChunkerV2 implementation.
+the existing SemanticChunker implementation.
 """
 
 from app.core.exceptions import ChunkingError
 from app.ports.services import TextChunker
-from app.services.chunking.semantic_chunker_v2 import SemanticChunkerV2
+from app.services.chunking.semantic_chunker import SemanticChunker
 
 
 class SemanticChunkerImpl(TextChunker):
-    """Implementation of TextChunker port using SemanticChunkerV2."""
+    """Implementation of TextChunker port using SemanticChunker."""
 
     def __init__(
         self,
@@ -27,7 +27,7 @@ class SemanticChunkerImpl(TextChunker):
             breakpoint_percentile: Percentile for boundary detection (95 = top 5% drops)
             embedding_model: Model for sentence embeddings
         """
-        self.chunker = SemanticChunkerV2(
+        self.chunker = SemanticChunker(
             min_chunk_size=min_chunk_size,
             max_chunk_size=max_chunk_size,
             breakpoint_percentile=breakpoint_percentile,
