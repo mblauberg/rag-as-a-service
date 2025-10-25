@@ -228,3 +228,27 @@ class ChunkingError(Exception):
         super().__init__(message)
         self.operation = operation
         self.original_error = original_error
+
+
+class SearchError(Exception):
+    """
+    Exception raised when search operations fail.
+
+    This exception is raised when keyword search, vector search,
+    or hybrid search operations fail.
+    """
+
+    def __init__(self, operation: str, original_error: Exception = None):
+        """
+        Initialize SearchError.
+
+        Args:
+            operation: Description of the operation that failed
+            original_error: The original exception that was caught
+        """
+        message = f"Search operation failed: {operation}"
+        if original_error:
+            message += f" - {str(original_error)}"
+        super().__init__(message)
+        self.operation = operation
+        self.original_error = original_error
