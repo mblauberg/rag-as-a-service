@@ -219,3 +219,30 @@ class QueryAugmenter(ABC):
             List containing original + variant queries
         """
         pass
+
+
+class Reranker(ABC):
+    """Port for reranking search results.
+
+    Uses more expensive but accurate models (cross-encoders)
+    to rerank an initial candidate set.
+    """
+
+    @abstractmethod
+    async def rerank(
+        self,
+        query: str,
+        chunks: list[Chunk],
+        top_k: int
+    ) -> list[Chunk]:
+        """Rerank chunks using query-document relevance.
+
+        Args:
+            query: Search query
+            chunks: Initial candidate chunks
+            top_k: Number of top results to return
+
+        Returns:
+            Reranked list of top_k chunks
+        """
+        pass
