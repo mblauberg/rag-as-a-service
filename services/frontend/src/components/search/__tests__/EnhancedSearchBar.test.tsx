@@ -149,7 +149,6 @@ describe('EnhancedSearchBar', () => {
       await user.click(input);
       expect(input).toHaveFocus();
 
-      const focusCount = document.activeElement === input ? 1 : 0;
       fireEvent.keyDown(window, { key: '/' });
 
       // Should still be focused (no additional focus event)

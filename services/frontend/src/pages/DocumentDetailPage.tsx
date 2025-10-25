@@ -44,7 +44,7 @@ export const DocumentDetailPage: React.FC = () => {
           <div className="text-center py-12">
             <p className="text-red-600 mb-4">Error loading document: {error.message}</p>
             <Link to="/" className="inline-block">
-              <Button variant="secondary">Back to Home</Button>
+              <Button variant="outline">Back to Home</Button>
             </Link>
           </div>
         </div>
@@ -59,7 +59,7 @@ export const DocumentDetailPage: React.FC = () => {
           <div className="text-center py-12">
             <p className="text-gray-600 mb-4">Document not found</p>
             <Link to="/" className="inline-block">
-              <Button variant="secondary">Back to Home</Button>
+              <Button variant="outline">Back to Home</Button>
             </Link>
           </div>
         </div>
@@ -91,8 +91,8 @@ export const DocumentDetailPage: React.FC = () => {
               </Link>
               <h1 className="text-3xl font-bold text-gray-900">{document.title}</h1>
             </div>
-            <Button variant="danger" onClick={handleDelete} isLoading={deleteDocument.isPending}>
-              Delete Document
+            <Button variant="destructive" onClick={handleDelete} disabled={deleteDocument.isPending}>
+              {deleteDocument.isPending ? 'Deleting...' : 'Delete Document'}
             </Button>
           </div>
 

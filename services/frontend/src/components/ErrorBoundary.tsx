@@ -103,11 +103,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               )}
 
               <div className="flex justify-center gap-4">
-                <Button variant="primary" onClick={this.handleReload}>
+                <Button variant="default" onClick={this.handleReload}>
                   Reload Page
                 </Button>
                 <Button
-                  variant="secondary"
+                  variant="outline"
                   onClick={() => window.history.back()}
                 >
                   Go Back

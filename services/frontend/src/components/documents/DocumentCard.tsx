@@ -45,7 +45,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document }) => {
               </h3>
             </Link>
             <Button
-              variant="danger"
+              variant="destructive"
               size="sm"
               onClick={() => setShowDeleteModal(true)}
               className="ml-2"
@@ -125,15 +125,15 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document }) => {
             Are you sure you want to delete "{document.title}"? This action cannot be undone.
           </p>
           <div className="flex justify-end space-x-3">
-            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
               Cancel
             </Button>
             <Button
-              variant="danger"
+              variant="destructive"
               onClick={handleDelete}
-              isLoading={deleteDocument.isPending}
+              disabled={deleteDocument.isPending}
             >
-              Delete
+              {deleteDocument.isPending ? 'Deleting...' : 'Delete'}
             </Button>
           </div>
         </div>
