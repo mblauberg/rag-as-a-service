@@ -1,62 +1,128 @@
-"""Configuration settings loaded from environment variables."""
+"""Application configuration with nested Pydantic Settings"""
 from typing import List
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from app.core.constants import (
+    DEFAULT_CHUNK_MIN_SIZE,
+    DEFAULT_CHUNK_MAX_SIZE,
+    SEMANTIC_BREAKPOINT_PERCENTILE,
+    DEFAULT_SEARCH_LIMIT,
+    MAX_SEARCH_LIMIT,
+    EMBEDDER_TIMEOUT_SECONDS,
+    GENERATOR_TIMEOUT_SECONDS,
+)
+
+
+class ChunkingConfig(BaseSettings):
+    """Chunking configuration - all chunking parameters centralized"""
+
+    strategy: str = Field("semantic", description="Chunking strategy: 'semantic' or 'recursive'")
+    min_chunk_size: int = Field(DEFAULT_CHUNK_MIN_SIZE, description="Minimum chunk size in characters")
+    max_chunk_size: int = Field(DEFAULT_CHUNK_MAX_SIZE, description="Maximum chunk size in characters")
+    breakpoint_percentile: int = Field(SEMANTIC_BREAKPOINT_PERCENTILE, description="Percentile for semantic breakpoints")
+
+    @field_validator("breakpoint_percentile")
+    @classmethod
+    def validate_percentile(cls, v):
+        if not 0 <= v <= 100:
+            raise ValueError("Percentile must be between 0 and 100")
+        return v
+
+    @field_validator("max_chunk_size")
+    @classmethod
+    def validate_chunk_sizes(cls, v, info):
+        if "min_chunk_size" in info.data and v <= info.data["min_chunk_size"]:
+            raise ValueError("max_chunk_size must be greater than min_chunk_size")
+        return v
+
+    model_config = SettingsConfigDict(
+        env_prefix="CHUNKING_",
+        case_sensitive=False
+    )
+
+
+class SearchConfig(BaseSettings):
+    """Search configuration - all search parameters centralized"""
+
+    default_limit: int = Field(DEFAULT_SEARCH_LIMIT, description="Default number of results")
+    max_limit: int = Field(MAX_SEARCH_LIMIT, description="Maximum allowed results")
+    enable_reranking: bool = Field(True, description="Enable cross-encoder reranking")
+    enable_query_expansion: bool = Field(True, description="Enable query expansion")
+    rrf_weight: float = Field(0.5, description="Reciprocal rank fusion weight (0.0-1.0)")
+
+    @field_validator("rrf_weight")
+    @classmethod
+    def validate_rrf_weight(cls, v):
+        if not 0.0 <= v <= 1.0:
+            raise ValueError("rrf_weight must be between 0.0 and 1.0")
+        return v
+
+    model_config = SettingsConfigDict(
+        env_prefix="SEARCH_",
+        case_sensitive=False
+    )
+
+
+class EmbedderConfig(BaseSettings):
+    """Embedder service configuration"""
+
+    url: str = Field(..., description="Embedder service URL")
+    batch_size: int = Field(32, description="Batch size for embedding generation")
+    timeout: float = Field(EMBEDDER_TIMEOUT_SECONDS, description="HTTP timeout in seconds")
+
+    model_config = SettingsConfigDict(
+        env_prefix="EMBEDDER_",
+        case_sensitive=False
+    )
+
+
+class GeneratorConfig(BaseSettings):
+    """Generator service configuration"""
+
+    url: str = Field(..., description="Generator service URL")
+    timeout: float = Field(GENERATOR_TIMEOUT_SECONDS, description="HTTP timeout in seconds")
+    default_model: str = Field("openai:gpt-4", description="Default LLM model to use")
+
+    model_config = SettingsConfigDict(
+        env_prefix="GENERATOR_",
+        case_sensitive=False
+    )
 
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables."""
+    """Application settings - top-level configuration
 
-    # Database Configuration
-    database_url: str
+    Includes nested configurations for different domains.
+    All settings can be overridden via environment variables.
+    """
 
-    # Qdrant Configuration
-    qdrant_url: str
+    # Database
+    database_url: str = Field(..., description="Database connection URL")
 
-    # Embedder Service Configuration
-    embedder_url: str
+    # Vector DB
+    qdrant_url: str = Field(..., description="Qdrant vector database URL")
 
-    # Generator Service Configuration
-    generator_url: str = "http://localhost:8002"
+    # Nested configurations
+    chunking: ChunkingConfig = Field(default_factory=ChunkingConfig)
+    search: SearchConfig = Field(default_factory=SearchConfig)
+    embedder: EmbedderConfig = Field(default_factory=EmbedderConfig)
+    generator: GeneratorConfig = Field(default_factory=GeneratorConfig)
+
+    # Application settings
+    log_level: str = Field("INFO", description="Logging level")
+    cors_origins: List[str] = Field(
+        default=["http://localhost:3000"],
+        description="Allowed CORS origins"
+    )
 
     # File Upload Configuration
-    upload_dir: str = "/app/uploads"
-    max_upload_size: int = 104857600  # 100MB
+    upload_dir: str = Field("/app/uploads", description="Directory for uploaded files")
+    max_upload_size: int = Field(104857600, description="Maximum file upload size in bytes (100MB)")
 
     # API Configuration
-    api_host: str = "0.0.0.0"
-    api_port: int = 8000
-    api_workers: int = 4
-
-    # CORS Configuration
-    cors_origins: List[str] = ["http://localhost:3000", "http://localhost"]
-
-    # Logging
-    log_level: str = "INFO"
-
-    # Chunking Configuration
-    CHUNKING_STRATEGY: str = "semantic"  # semantic | recursive
-    SEMANTIC_MIN_CHUNK_SIZE: int = 128
-    SEMANTIC_MAX_CHUNK_SIZE: int = 512
-    SEMANTIC_BREAKPOINT_PERCENTILE: float = 95.0
-
-    # Legacy chunking (for backward compatibility)
-    CHUNK_SIZE: int = 400
-    CHUNK_OVERLAP: int = 80
-
-    # Reranker settings
-    RERANKER_MODEL: str = Field(
-        default="BAAI/bge-reranker-v2-m3",
-        description="Cross-encoder model for reranking"
-    )
-    RERANKER_TOP_K: int = Field(
-        default=10,
-        description="Number of results to return after reranking"
-    )
-    RERANKER_CANDIDATE_MULTIPLIER: int = Field(
-        default=5,
-        description="Retrieve N*top_k candidates before reranking"
-    )
+    api_host: str = Field("0.0.0.0", description="API host")
+    api_port: int = Field(8000, description="API port")
+    api_workers: int = Field(4, description="Number of API workers")
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -65,4 +131,5 @@ class Settings(BaseSettings):
     )
 
 
+# Singleton instance
 settings = Settings()

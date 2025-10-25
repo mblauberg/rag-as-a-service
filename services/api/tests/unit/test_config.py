@@ -4,7 +4,8 @@ def test_semantic_chunking_config_defaults():
 
     settings = Settings()
 
-    assert settings.CHUNKING_STRATEGY in ["semantic", "recursive"]
-    assert settings.SEMANTIC_MIN_CHUNK_SIZE == 128
-    assert settings.SEMANTIC_MAX_CHUNK_SIZE == 512
-    assert settings.SEMANTIC_BREAKPOINT_PERCENTILE == 95.0
+    # Use new nested config structure
+    assert settings.chunking.strategy in ["semantic", "recursive"]
+    assert settings.chunking.min_chunk_size == 128
+    assert settings.chunking.max_chunk_size == 512
+    assert settings.chunking.breakpoint_percentile == 95

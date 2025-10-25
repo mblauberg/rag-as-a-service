@@ -8,6 +8,7 @@ import logging
 
 from app.models.document import Document, DocumentChunk
 from app.models.schemas import DocumentResponse, DocumentDetailResponse, DocumentListResponse
+from app.core.enums import UploadStatus, EmbeddingStatus
 from app.core.exceptions import DocumentNotFoundError
 
 logger = logging.getLogger(__name__)
@@ -51,8 +52,8 @@ class DocumentMetadataService:
             file_size=file_size,
             file_path=file_path,
             document_type=document_type,
-            upload_status="processing",
-            embedding_status="pending"
+            upload_status=UploadStatus.PROCESSING.value,
+            embedding_status=EmbeddingStatus.PENDING.value
         )
         db.add(document)
         await db.flush()  # Get the document ID

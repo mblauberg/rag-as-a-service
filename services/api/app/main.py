@@ -29,8 +29,8 @@ async def lifespan(app: FastAPI):
     logger.info("Starting RAAS API service")
     logger.info(f"Database URL: {settings.database_url.split('@')[1] if '@' in settings.database_url else 'configured'}")
     logger.info(f"Qdrant URL: {settings.qdrant_url}")
-    logger.info(f"Embedder URL: {settings.embedder_url}")
-    logger.info(f"Generator URL: {settings.generator_url}")
+    logger.info(f"Embedder URL: {settings.embedder.url}")
+    logger.info(f"Generator URL: {settings.generator.url}")
 
     # Initialize database tables (in production, use proper migrations)
     try:

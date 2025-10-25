@@ -59,7 +59,7 @@ class VectorSearchService:
         # Generate query embedding using embedder service
         try:
             response = await self.http_client.post(
-                f"{settings.embedder_url}/embed-query",
+                f"{settings.embedder.url}/embed-query",
                 json={"query": query},
                 timeout=30.0
             )

@@ -11,6 +11,7 @@ from app.services.document_processing_service import DocumentProcessingService
 from app.services.document_metadata_service import DocumentMetadataService
 from app.models.schemas import DocumentType
 from app.core.config import settings
+from app.core.enums import EmbeddingStatus
 from app.core.exceptions import (
     TextExtractionError,
     FileOperationError,
@@ -32,7 +33,7 @@ class ChunkingOrchestrator:
         """
         self.processing_service = DocumentProcessingService()
         self.metadata_service = metadata_service
-        self.embedder_url = settings.embedder_url
+        self.embedder_url = settings.embedder.url
 
     async def process_and_chunk(
         self,
@@ -121,7 +122,7 @@ class ChunkingOrchestrator:
                     await self.metadata_service.update_embedding_status(
                         db,
                         document_id,
-                        "completed"
+                        EmbeddingStatus.COMPLETED.value
                     )
                 else:
                     logger.error(f"Failed to trigger embedding for document {document_id}")
@@ -129,7 +130,7 @@ class ChunkingOrchestrator:
                     await self.metadata_service.update_embedding_status(
                         db,
                         document_id,
-                        "failed"
+                        EmbeddingStatus.FAILED.value
                     )
                     raise EmbedderServiceError("embed_chunks", Exception("Embedder returned success=false"))
 
@@ -139,7 +140,7 @@ class ChunkingOrchestrator:
                 await self.metadata_service.update_embedding_status(
                     db,
                     document_id,
-                    "failed"
+                    EmbeddingStatus.FAILED.value
                 )
                 raise EmbedderServiceError("embed_chunks", e)
 
@@ -153,7 +154,7 @@ class ChunkingOrchestrator:
                 await self.metadata_service.update_embedding_status(
                     db,
                     document_id,
-                    "failed"
+                    EmbeddingStatus.FAILED.value
                 )
             except Exception as db_error:
                 logger.error(f"Failed to update embedding status after error: {db_error}")

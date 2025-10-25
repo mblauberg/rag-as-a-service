@@ -8,6 +8,7 @@ import logging
 from app.models.document import Document
 from app.models.schemas import DocumentDetailResponse, DocumentListResponse
 from app.core.qdrant_client import QdrantClientWrapper
+from app.core.enums import UploadStatus
 from app.core.exceptions import (
     DocumentNotFoundError,
     QdrantConnectionError,
@@ -98,7 +99,7 @@ class DocumentService:
             await self.metadata_service.update_upload_status(
                 db=db,
                 document_id=document.id,
-                status="completed"
+                status=UploadStatus.COMPLETED.value
             )
 
             # Trigger embedding generation asynchronously
@@ -116,7 +117,7 @@ class DocumentService:
             await self.metadata_service.update_upload_status(
                 db=db,
                 document_id=document.id,
-                status="failed"
+                status=UploadStatus.FAILED.value
             )
             raise
         except Exception as e:
@@ -125,7 +126,7 @@ class DocumentService:
             await self.metadata_service.update_upload_status(
                 db=db,
                 document_id=document.id,
-                status="failed"
+                status=UploadStatus.FAILED.value
             )
             raise
 

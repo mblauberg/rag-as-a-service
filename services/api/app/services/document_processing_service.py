@@ -7,7 +7,6 @@ from app.services.processors.pdf_processor import PDFProcessor
 from app.services.processors.docx_processor import DOCXProcessor
 from app.services.processors.text_processor import TextProcessor
 from app.services.processors.csv_processor import CSVProcessor
-from app.services.chunking.semantic_chunker import SemanticChunker
 from app.services.chunking.semantic_chunker_v2 import SemanticChunkerV2, ChunkResult
 from app.core.config import settings
 
@@ -28,22 +27,14 @@ class DocumentProcessingService:
             DocumentType.CSV: CSVProcessor(),
         }
 
-        # Select chunking strategy based on configuration
-        if settings.CHUNKING_STRATEGY == "semantic":
-            # Use new semantic chunker with percentile-based breakpoints (async)
-            self.chunker = SemanticChunkerV2(
-                min_chunk_size=settings.SEMANTIC_MIN_CHUNK_SIZE,
-                max_chunk_size=settings.SEMANTIC_MAX_CHUNK_SIZE,
-                breakpoint_percentile=settings.SEMANTIC_BREAKPOINT_PERCENTILE
-            )
-            self.use_async_chunker = True
-        else:
-            # Use legacy recursive chunker (synchronous)
-            self.chunker = SemanticChunker(
-                chunk_size=settings.CHUNK_SIZE,
-                overlap=settings.CHUNK_OVERLAP
-            )
-            self.use_async_chunker = False
+        # Use semantic chunker with embedding-based breakpoint detection
+        # Removed legacy fallback - SemanticChunkerV2 is the canonical implementation
+        self.chunker = SemanticChunkerV2(
+            min_chunk_size=settings.chunking.min_chunk_size,
+            max_chunk_size=settings.chunking.max_chunk_size,
+            breakpoint_percentile=settings.chunking.breakpoint_percentile
+        )
+        self.use_async_chunker = True
 
     def get_processor(self, document_type: DocumentType) -> BaseDocumentProcessor:
         """

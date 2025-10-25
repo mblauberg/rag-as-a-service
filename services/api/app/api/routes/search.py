@@ -47,7 +47,7 @@ async def search_documents(
     try:
         async with httpx.AsyncClient(timeout=30.0) as http_client:
             response = await http_client.post(
-                f"{settings.embedder_url}/embed-query",
+                f"{settings.embedder.url}/embed-query",
                 json={"query": request.query}
             )
             response.raise_for_status()

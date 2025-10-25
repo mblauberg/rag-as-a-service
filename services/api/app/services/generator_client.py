@@ -12,7 +12,7 @@ class GeneratorClient:
 
     def __init__(self, base_url: str = None):
         """Initialize generator client."""
-        self.base_url = base_url or settings.generator_url
+        self.base_url = base_url or settings.generator.url
         self.timeout = 30.0  # 30 second timeout for generation
 
     async def generate_summary(
