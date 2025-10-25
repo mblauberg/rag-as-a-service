@@ -25,9 +25,9 @@ class SearchDocumentsUseCase:
     """Use case for document search with hybrid retrieval.
 
     Supports three search modes:
-    - VECTOR: Pure semantic search (current default)
+    - VECTOR: Pure semantic search
     - KEYWORD: Pure lexical/BM25 search
-    - HYBRID: Combines both with RRF fusion (RECOMMENDED)
+    - HYBRID: Combines both with RRF fusion (DEFAULT)
 
     Hybrid search provides 18-22% accuracy improvement over
     vector-only search according to 2025 research.
@@ -56,7 +56,7 @@ class SearchDocumentsUseCase:
     async def execute(
         self,
         query: SearchQuery,
-        mode: SearchMode = SearchMode.VECTOR,
+        mode: SearchMode = SearchMode.HYBRID,
         fusion_k: int = 60
     ) -> list[Chunk]:
         """Execute document search with specified mode.
