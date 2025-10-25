@@ -29,6 +29,13 @@ from app.infrastructure.processing.semantic_chunker import SemanticChunkerImpl
 from app.infrastructure.services.embedding_service import HTTPEmbeddingService
 from app.infrastructure.vector_store.qdrant_store import QdrantVectorStoreImpl
 
+# Infrastructure - Search
+from app.infrastructure.search.postgres_keyword_store import PostgresKeywordStoreImpl
+from app.infrastructure.search.rrf_fusion_service import RRFFusionServiceImpl
+
+# Ports
+from app.ports.services import KeywordStore, FusionService, EmbeddingService, VectorStore
+
 
 # Qdrant Client Dependency
 async def get_qdrant_client() -> AsyncQdrantClient:
@@ -129,25 +136,44 @@ def get_delete_document_use_case(
     )
 
 
+# Keyword Store
+def get_keyword_store(
+    db: AsyncSession = Depends(get_db)
+) -> KeywordStore:
+    """Create PostgreSQL keyword store instance."""
+    return PostgresKeywordStoreImpl(db)
+
+
+# Fusion Service
+def get_fusion_service() -> FusionService:
+    """Create RRF fusion service instance."""
+    return RRFFusionServiceImpl()
+
+
 # Search Documents Use Case
 def get_search_documents_use_case(
-    db: AsyncSession = Depends(get_db)
-) -> SearchDocumentsUseCase:
-    """Factory for SearchDocumentsUseCase.
-
-    Args:
-        db: Database session from FastAPI dependency
-
-    Returns:
-        Fully configured SearchDocumentsUseCase instance
-    """
-    embedding_service = HTTPEmbeddingService(settings.embedder.url)
-    vector_store = QdrantVectorStoreImpl(
+    embedding_service: EmbeddingService = Depends(lambda: HTTPEmbeddingService(settings.embedder.url)),
+    vector_store: VectorStore = Depends(lambda: QdrantVectorStoreImpl(
         client=qdrant_client.client,
         collection_name="documents"
-    )
+    )),
+    keyword_store: KeywordStore = Depends(get_keyword_store),
+    fusion_service: FusionService = Depends(get_fusion_service)
+) -> SearchDocumentsUseCase:
+    """Factory for SearchDocumentsUseCase with hybrid capabilities.
 
+    Args:
+        embedding_service: Service for generating embeddings
+        vector_store: Store for semantic search
+        keyword_store: Store for BM25 keyword search
+        fusion_service: Service for result fusion
+
+    Returns:
+        Fully configured SearchDocumentsUseCase instance with hybrid search support
+    """
     return SearchDocumentsUseCase(
         embedding_service=embedding_service,
-        vector_store=vector_store
+        vector_store=vector_store,
+        keyword_store=keyword_store,
+        fusion_service=fusion_service
     )
