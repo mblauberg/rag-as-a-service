@@ -35,7 +35,7 @@ export const MainPage: React.FC = () => {
   // Auto-select GPT-5 Mini when models load
   useEffect(() => {
     if (models.data && !selectedModel) {
-      const gpt5Mini = models.data.find((m: any) => m.name.includes('gpt-5-mini'));
+      const gpt5Mini = models.data.find(m => m.name.includes('gpt-5-mini'));
       setSelectedModel(gpt5Mini?.name || models.data[0]?.name || null);
     }
   }, [models.data, selectedModel]);
