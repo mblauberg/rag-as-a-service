@@ -11,6 +11,7 @@ import { Button } from '../common/Button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { cn } from '../../lib/utils';
+import { validateUploadFile, extractTitleFromFilename, ALLOWED_EXTENSIONS } from '@/utils/fileValidation';
 
 interface UploadModalProps {
   open: boolean;
@@ -73,41 +74,44 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     setError(null);
 
     const files = Array.from(e.dataTransfer.files);
-    const validFile = files.find(f =>
-      ['.pdf', '.docx', '.txt'].some(ext => f.name.toLowerCase().endsWith(ext))
-    );
+    const droppedFile = files[0];
 
-    if (validFile) {
-      const MAX_SIZE = 100 * 1024 * 1024; // 100MB
-      if (validFile.size > MAX_SIZE) {
-        setError('File size must be less than 100MB');
-        return;
-      }
+    if (!droppedFile) {
+      return;
+    }
 
-      setFile(validFile);
-      if (!title) {
-        setTitle(validFile.name.replace(/\.[^/.]+$/, ''));
-      }
-    } else if (files.length > 0) {
-      setError('Please upload a PDF, DOCX, or TXT file');
+    const validation = validateUploadFile(droppedFile);
+
+    if (!validation.valid) {
+      setError(validation.error!);
+      return;
+    }
+
+    setFile(droppedFile);
+    if (!title) {
+      setTitle(extractTitleFromFilename(droppedFile.name));
     }
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setError(null);
 
-      const MAX_SIZE = 100 * 1024 * 1024; // 100MB
-      if (selectedFile.size > MAX_SIZE) {
-        setError('File size must be less than 100MB');
-        return;
-      }
+    if (!selectedFile) {
+      return;
+    }
 
-      setFile(selectedFile);
-      if (!title) {
-        setTitle(selectedFile.name.replace(/\.[^/.]+$/, ''));
-      }
+    setError(null);
+
+    const validation = validateUploadFile(selectedFile);
+
+    if (!validation.valid) {
+      setError(validation.error!);
+      return;
+    }
+
+    setFile(selectedFile);
+    if (!title) {
+      setTitle(extractTitleFromFilename(selectedFile.name));
     }
   };
 
@@ -167,7 +171,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               type="file"
               id="file-upload"
               className="sr-only"
-              accept=".pdf,.docx,.txt"
+              accept={ALLOWED_EXTENSIONS.join(',')}
               onChange={handleFileInput}
             />
 
