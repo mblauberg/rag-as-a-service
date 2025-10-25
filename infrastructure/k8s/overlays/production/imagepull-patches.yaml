@@ -1,0 +1,49 @@
+# Always pull from registry in production
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: raas
+spec:
+  template:
+    spec:
+      containers:
+      - name: api
+        imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: embedder
+  namespace: raas
+spec:
+  template:
+    spec:
+      containers:
+      - name: embedder
+        imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: raas
+spec:
+  template:
+    spec:
+      containers:
+      - name: frontend
+        imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generator
+  namespace: raas
+spec:
+  template:
+    spec:
+      containers:
+      - name: generator
+        imagePullPolicy: Always

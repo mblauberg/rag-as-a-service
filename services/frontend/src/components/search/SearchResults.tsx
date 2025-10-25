@@ -1,14 +1,33 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import type { SearchResult } from '../../types';
-import { Card } from '../common/Card';
+import { motion } from 'framer-motion';
+import type { SearchResult, SearchResponse } from '@/types';
+import { SummaryDisplay } from './SummaryDisplay';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface SearchResultsProps {
   results: SearchResult[];
   query: string;
+  searchResponse?: SearchResponse;
+  onDocumentClick?: (documentId: string) => void;
 }
 
-export const SearchResults: React.FC<SearchResultsProps> = ({ results, query }) => {
+/**
+ * SearchResults - Displays search results with optional summary.
+ * Click result to open document detail modal.
+ */
+export const SearchResults: React.FC<SearchResultsProps> = ({
+  results,
+  query,
+  searchResponse,
+  onDocumentClick,
+}) => {
+  const handleResultClick = (documentId: string) => {
+    if (onDocumentClick) {
+      onDocumentClick(documentId);
+    }
+  };
+
   const highlightText = (text: string, query: string) => {
     if (!query.trim()) return text;
 
@@ -44,8 +63,8 @@ export const SearchResults: React.FC<SearchResultsProps> = ({ results, query }) 
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
           />
         </svg>
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No results found</h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <h3 className="mt-2 text-sm font-medium text-foreground">No results found</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
           Try adjusting your search query or search for different terms.
         </p>
       </div>
@@ -53,46 +72,61 @@ export const SearchResults: React.FC<SearchResultsProps> = ({ results, query }) 
   }
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900">
-        Found {results.length} {results.length === 1 ? 'result' : 'results'}
-      </h3>
-      {results.map((result) => (
-        <Card key={`${result.document_id}-${result.chunk_index}`}>
-          <div className="space-y-3">
-            <div className="flex items-start justify-between">
-              <Link
-                to={`/documents/${result.document_id}`}
-                className="text-lg font-semibold text-primary-600 hover:text-primary-800"
-              >
-                {result.document_title}
-              </Link>
-              <span className="ml-2 px-2 py-1 text-xs font-medium bg-primary-100 text-primary-800 rounded-full">
-                {(result.similarity_score * 100).toFixed(1)}% match
-              </span>
-            </div>
-            <p className="text-gray-700 leading-relaxed">
-              {highlightText(result.chunk_text, query)}
-            </p>
-            <div className="flex items-center text-sm text-gray-500">
-              <svg
-                className="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
-                />
-              </svg>
-              Chunk {result.chunk_index + 1}
-            </div>
-          </div>
-        </Card>
-      ))}
+    <div className="space-y-6">
+      {/* Summary if present */}
+      {searchResponse?.summary && searchResponse?.model_used && (
+        <SummaryDisplay
+          summary={searchResponse.summary}
+          modelUsed={searchResponse.model_used}
+        />
+      )}
+
+      {/* Results */}
+      <div className="space-y-3">
+        {results.map((result, index) => (
+          <motion.div
+            key={`${result.document_id}-${result.chunk_index}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+          >
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleResultClick(result.document_id)}
+            >
+              <CardHeader>
+                <div className="flex items-start justify-between gap-2">
+                  <CardTitle className="text-base">{result.document_title}</CardTitle>
+                  <Badge variant="secondary">
+                    {(result.score * 100).toFixed(0)}% match
+                  </Badge>
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                <p className="text-sm text-muted-foreground line-clamp-3">
+                  {highlightText(result.chunk_text, query)}
+                </p>
+                <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                  <span>Chunk {result.chunk_index + 1}</span>
+                  {result.section_title && (
+                    <>
+                      <span>•</span>
+                      <span>{result.section_title}</span>
+                    </>
+                  )}
+                  {result.page_number && (
+                    <>
+                      <span>•</span>
+                      <span>Page {result.page_number}</span>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
     </div>
   );
 };

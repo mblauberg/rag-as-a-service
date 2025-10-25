@@ -19,6 +19,11 @@ export interface DocumentChunk {
   chunk_index: number;
   chunk_text: string;
   token_count: number | null;
+  section_title?: string;
+  section_level?: number;
+  page_number?: number;
+  chunk_tokens?: number;
+  chunk_metadata?: Record<string, any>;
   created_at: string;
 }
 
@@ -39,23 +44,44 @@ export interface PaginatedDocuments {
 }
 
 export interface SearchResult {
+  chunk_id: string;
   document_id: string;
   document_title: string;
   chunk_text: string;
   chunk_index: number;
-  similarity_score: number;
+  score: number;
+  section_title?: string;
+  page_number?: number;
+  chunk_metadata?: Record<string, any>;
 }
 
 export interface SearchRequest {
   query: string;
   limit?: number;
   document_ids?: string[];
+  model?: string;  // NEW: Optional model for generation
 }
 
 export interface SearchResponse {
   query: string;
-  results: SearchResult[];
+  summary: string | null;  // NEW: Generated summary
+  chunks: SearchResult[];
+  model_used: string | null;  // NEW: Model that generated summary
   total_results: number;
+}
+
+export interface Model {
+  name: string;              // Unique identifier (e.g., "llama3.3:70b", "openai:gpt-5")
+  display_name: string;      // Human-readable name (e.g., "Llama 3.3 70B")
+  provider: string;          // "ollama", "openai", "anthropic", "google"
+  size: string;              // "8B", "70B", "N/A"
+  description: string;       // Capability description
+  capabilities: string[];    // ["reasoning", "coding"]
+  modified_at: string;       // ISO timestamp
+}
+
+export interface ModelsResponse {
+  models: Model[];
 }
 
 export interface HealthStatus {

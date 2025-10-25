@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: api-uploads
+  namespace: raas
+spec:
+  accessModes:
+  - ReadWriteOnce  # Change to ReadWriteMany if supported
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard

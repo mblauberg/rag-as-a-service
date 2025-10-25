@@ -7,6 +7,7 @@ import type {
   SearchResponse,
   HealthStatus,
   ReadinessStatus,
+  ModelsResponse,
 } from '../types';
 
 class ApiClient {
@@ -100,6 +101,12 @@ class ApiClient {
   // Search endpoints
   async search(request: SearchRequest): Promise<SearchResponse> {
     const response = await this.client.post<SearchResponse>('/api/v1/search', request);
+    return response.data;
+  }
+
+  // Models endpoints
+  async listModels(): Promise<ModelsResponse> {
+    const response = await this.client.get<ModelsResponse>('/api/v1/models');
     return response.data;
   }
 }

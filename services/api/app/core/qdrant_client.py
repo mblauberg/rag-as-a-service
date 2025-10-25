@@ -1,7 +1,7 @@
 """Qdrant client wrapper for vector operations."""
 from typing import List, Optional
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
+from qdrant_client.models import Distance, VectorParams, PointStruct, Filter, FieldCondition, MatchValue
 
 from app.core.config import settings
 
@@ -95,16 +95,14 @@ class QdrantClientWrapper:
 
         await self.client.delete(
             collection_name=self.collection_name,
-            points_selector={
-                "filter": {
-                    "must": [
-                        {
-                            "key": "document_id",
-                            "match": {"value": document_id}
-                        }
-                    ]
-                }
-            }
+            points_selector=Filter(
+                must=[
+                    FieldCondition(
+                        key="document_id",
+                        match=MatchValue(value=document_id)
+                    )
+                ]
+            )
         )
 
     async def health_check(self) -> bool:

@@ -1,0 +1,53 @@
+import pytest
+from unittest.mock import Mock, patch, AsyncMock
+from app.providers.anthropic_provider import AnthropicProvider
+from app.models.schemas import Model
+
+
+@pytest.fixture
+def anthropic_provider():
+    """Create AnthropicProvider for testing."""
+    with patch.dict('os.environ', {'ANTHROPIC_API_KEY': 'test-key'}):
+        return AnthropicProvider()
+
+
+def test_is_available_with_api_key():
+    """is_available returns True when API key is set"""
+    with patch.dict('os.environ', {'ANTHROPIC_API_KEY': 'test-key'}):
+        provider = AnthropicProvider()
+        assert provider.is_available() is True
+
+
+def test_is_available_without_api_key():
+    """is_available returns False when API key is missing"""
+    with patch.dict('os.environ', {}, clear=True):
+        provider = AnthropicProvider()
+        assert provider.is_available() is False
+
+
+@pytest.mark.asyncio
+async def test_list_models_returns_claude_models(anthropic_provider):
+    """list_models returns predefined Claude models"""
+    models = await anthropic_provider.list_models()
+
+    assert len(models) >= 3  # Opus, Sonnet, Haiku
+
+    opus = next(m for m in models if m.name == "anthropic:claude-opus-4-1")
+    assert opus.display_name == "Claude Opus 4.1"
+    assert opus.provider == "anthropic"
+    assert "powerful" in opus.description.lower()
+
+
+@pytest.mark.asyncio
+async def test_generate_calls_anthropic_api(anthropic_provider):
+    """generate calls Anthropic API with correct parameters"""
+    mock_response = Mock()
+    mock_response.content = [Mock(text="Generated summary")]
+
+    with patch.object(anthropic_provider.client.messages, 'create', new_callable=AsyncMock, return_value=mock_response) as mock_create:
+        result = await anthropic_provider.generate("anthropic:claude-sonnet-4-5", "query", "context")
+
+        assert result == "Generated summary"
+        mock_create.assert_called_once()
+        call_kwargs = mock_create.call_args.kwargs
+        assert call_kwargs["model"] == "claude-sonnet-4-5"  # Strip prefix

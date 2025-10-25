@@ -1,8 +1,21 @@
 """Pydantic schemas for request/response validation."""
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from uuid import UUID
+from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
+
+
+class DocumentType(str, Enum):
+    """Supported document types."""
+    PDF = "pdf"
+    DOCX = "docx"
+    TXT = "txt"
+    MD = "md"
+    CSV = "csv"
+    XLSX = "xlsx"
+    PPTX = "pptx"
+    HTML = "html"
 
 
 # Document Schemas
@@ -28,6 +41,11 @@ class DocumentChunkResponse(BaseModel):
     chunk_index: int
     chunk_text: str
     token_count: Optional[int] = None
+    section_title: Optional[str] = None
+    section_level: Optional[int] = 0
+    page_number: Optional[int] = None
+    chunk_tokens: Optional[int] = None
+    chunk_metadata: Dict[str, Any] = {}
     created_at: datetime
 
 
@@ -80,6 +98,7 @@ class SearchRequest(BaseModel):
     query: str = Field(..., min_length=1, description="Search query text")
     limit: int = Field(10, ge=1, le=100, description="Maximum number of results")
     document_ids: Optional[List[UUID]] = Field(None, description="Optional list of document IDs to filter")
+    model: Optional[str] = Field(None, description="LLM model for generation (optional)")
 
 
 class SearchResultItem(BaseModel):
@@ -91,14 +110,22 @@ class SearchResultItem(BaseModel):
     chunk_text: str
     chunk_index: int
     score: float = Field(..., description="Similarity score")
+    section_title: Optional[str] = None
+    page_number: Optional[int] = None
+    chunk_metadata: Dict[str, Any] = {}
 
 
 class SearchResponse(BaseModel):
-    """Schema for search response."""
+    """Schema for search response with optional generation."""
 
     query: str
-    results: List[SearchResultItem]
+    summary: Optional[str] = Field(None, description="Generated summary with citations")
+    chunks: List[SearchResultItem]
+    model_used: Optional[str] = Field(None, description="Model used for generation")
     total_results: int
+    retrieval_method: Optional[str] = Field(None, description="Retrieval method used (vector, hybrid, etc.)")
+    expanded_queries: Optional[List[str]] = Field(None, description="Expanded query variants (for advanced search)")
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional metadata about the search")
 
 
 # Health Schemas

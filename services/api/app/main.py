@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.database import init_db
-from app.api.routes import documents, search, health
+from app.api.routes import documents, search, health, models
 
 # Configure logging
 logging.basicConfig(
@@ -30,6 +30,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"Database URL: {settings.database_url.split('@')[1] if '@' in settings.database_url else 'configured'}")
     logger.info(f"Qdrant URL: {settings.qdrant_url}")
     logger.info(f"Embedder URL: {settings.embedder_url}")
+    logger.info(f"Generator URL: {settings.generator_url}")
 
     # Initialize database tables (in production, use proper migrations)
     try:
@@ -78,6 +79,12 @@ app.include_router(
     search.router,
     prefix="/api/v1/search",
     tags=["search"]
+)
+
+app.include_router(
+    models.router,
+    prefix="/api/v1",
+    tags=["models"]
 )
 
 

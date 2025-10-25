@@ -1,143 +1,134 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import type { Document } from '../../types';
-import { Card } from '../common/Card';
-import { Button } from '../common/Button';
-import { Modal } from '../common/Modal';
-import { useDeleteDocument } from '../../hooks/useDocuments';
-import { formatBytes, formatDate, formatStatus, getStatusColor } from '../../utils/formatting';
+import { useNavigate } from 'react-router-dom';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+import { TrashIcon } from '@radix-ui/react-icons';
+import { api } from '@/services/api';
+import type { Document } from '@/types';
+import { formatBytes, formatDate } from '@/utils/formatters';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/common/Button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 interface DocumentCardProps {
   document: Document;
+  onClick?: () => void;
 }
 
-export const DocumentCard: React.FC<DocumentCardProps> = ({ document }) => {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const deleteDocument = useDeleteDocument();
+/**
+ * DocumentCard - Displays document metadata in a card.
+ * Click to open document detail modal.
+ */
+export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onClick }) => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
-  const handleDelete = async () => {
-    try {
-      await deleteDocument.mutateAsync(document.id);
-      setShowDeleteModal(false);
-    } catch (error) {
-      console.error('Failed to delete document:', error);
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.deleteDocument(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      setDeleteConfirmOpen(false);
+    },
+  });
+
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      // Fallback to navigation if no onClick provided (backward compatibility)
+      navigate(`/documents/${document.id}`);
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    return (
-      <span
-        className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(status)}`}
-      >
-        {formatStatus(status)}
-      </span>
-    );
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    deleteMutation.mutate(document.id);
   };
 
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow duration-200">
-        <div className="flex flex-col space-y-3">
-          <div className="flex justify-between items-start">
-            <Link to={`/documents/${document.id}`} className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 hover:text-primary-600">
-                {document.title}
-              </h3>
-            </Link>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => setShowDeleteModal(true)}
-              className="ml-2"
-            >
-              Delete
-            </Button>
-          </div>
-
-          {document.description && (
-            <p className="text-sm text-gray-600 line-clamp-2">{document.description}</p>
-          )}
-
-          <div className="flex flex-wrap gap-2">
-            {getStatusBadge(document.embedding_status)}
-          </div>
-
-          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-500">
-            <div className="flex items-center">
-              <svg
-                className="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              {document.file_name}
-            </div>
-            <div className="flex items-center">
-              <svg
-                className="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
-                />
-              </svg>
-              {formatBytes(document.file_size)}
-            </div>
-            <div className="flex items-center">
-              <svg
-                className="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              {formatDate(document.created_at)}
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <Modal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        title="Confirm Delete"
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -4 }}
+        transition={{ duration: 0.2 }}
       >
-        <div className="space-y-4">
-          <p className="text-gray-700">
-            Are you sure you want to delete "{document.title}"? This action cannot be undone.
-          </p>
-          <div className="flex justify-end space-x-3">
-            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+        <Card
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={handleCardClick}
+        >
+          <CardHeader>
+            <CardTitle className="text-lg">{document.title}</CardTitle>
+            {document.description && (
+              <CardDescription className="line-clamp-2">
+                {document.description}
+              </CardDescription>
+            )}
+          </CardHeader>
+
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary">{formatBytes(document.file_size)}</Badge>
+              <Badge variant="secondary">{document.file_name}</Badge>
+            </div>
+          </CardContent>
+
+          <CardFooter className="flex justify-between items-center">
+            <span className="text-xs text-muted-foreground">
+              {formatDate(document.created_at)}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteClick}
+              disabled={deleteMutation.isPending}
+              aria-label="Delete document"
+            >
+              <TrashIcon className="h-4 w-4 text-destructive" />
+            </Button>
+          </CardFooter>
+        </Card>
+      </motion.div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Document</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{document.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteConfirmOpen(false)}
+            >
               Cancel
             </Button>
             <Button
-              variant="danger"
-              onClick={handleDelete}
-              isLoading={deleteDocument.isPending}
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={deleteMutation.isPending}
             >
-              Delete
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
             </Button>
-          </div>
-        </div>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -163,7 +163,7 @@ start_services() {
     print_header "Waiting for Services"
 
     wait_for_service "API Health Check" "$API_URL/api/v1/health" || exit 1
-    wait_for_service "API Ready Check" "$API_URL/api/v1/health/ready" || exit 1
+    wait_for_service "API Ready Check" "$API_URL/api/v1/ready" || exit 1
     wait_for_service "Embedder Health Check" "$EMBEDDER_URL/health" || exit 1
     wait_for_service "Frontend" "$FRONTEND_URL" || exit 1
 
@@ -190,7 +190,7 @@ test_health_endpoints() {
     fi
 
     # Test API ready
-    if curl -s -f "$API_URL/api/v1/health/ready" > /dev/null 2>&1; then
+    if curl -s -f "$API_URL/api/v1/ready" > /dev/null 2>&1; then
         record_test "API ready endpoint" "PASS"
     else
         record_test "API ready endpoint" "FAIL"
@@ -220,14 +220,14 @@ test_document_upload() {
     echo "This is a test document for RAAS integration testing. It contains sample text about artificial intelligence, machine learning, and natural language processing." > "$TEST_DOC_PATH"
 
     # Upload document
-    local response=$(curl -s -X POST "$API_URL/api/v1/documents" \
+    local response=$(curl -s -X POST "$API_URL/api/v1/documents/upload" \
         -F "file=@$TEST_DOC_PATH" \
         -F "title=Integration Test Document" \
         -F "description=Test document for integration testing")
 
     # Check if upload was successful
     if echo "$response" | grep -q '"id"'; then
-        DOCUMENT_ID=$(echo "$response" | grep -o '"id":[0-9]*' | grep -o '[0-9]*')
+        DOCUMENT_ID=$(echo "$response" | grep -o '"id": *"[^"]*"' | head -1 | grep -o '"[0-9a-f-]*"' | tr -d '"')
         record_test "Document upload" "PASS"
         print_info "Document ID: $DOCUMENT_ID"
     else

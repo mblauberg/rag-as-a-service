@@ -1,52 +1,49 @@
-"""Document processing service orchestrating upload, chunking, and embedding."""
-import os
-import aiofiles
-from uuid import uuid4, UUID
+"""Document processing service using Facade pattern."""
+from uuid import UUID
 from pathlib import Path
-from typing import List, Optional
-from sqlalchemy import select, func
+from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 import logging
-import httpx
 
-from app.models.document import Document, DocumentChunk
-from app.models.schemas import DocumentResponse, DocumentDetailResponse, DocumentListResponse
-from app.services.chunking_service import chunking_service
-from app.utils.file_processing import file_processor
-from app.core.config import settings
+from app.models.document import Document
+from app.models.schemas import DocumentDetailResponse, DocumentListResponse
 from app.core.qdrant_client import QdrantClientWrapper
 from app.core.exceptions import (
     DocumentNotFoundError,
     QdrantConnectionError,
-    EmbedderServiceError,
     FileOperationError,
     TextExtractionError
 )
+from app.services.document_upload_service import DocumentUploadService
+from app.services.document_metadata_service import DocumentMetadataService
+from app.services.chunking_orchestrator import ChunkingOrchestrator
 
 logger = logging.getLogger(__name__)
 
 
 class DocumentService:
-    """Service for document operations."""
+    """Facade service coordinating document operations across specialized services."""
 
     def __init__(
         self,
-        qdrant_client: QdrantClientWrapper,
-        http_client: httpx.AsyncClient
+        upload_service: DocumentUploadService,
+        metadata_service: DocumentMetadataService,
+        chunking_orchestrator: ChunkingOrchestrator,
+        qdrant_client: QdrantClientWrapper
     ):
         """
         Initialize document service with injected dependencies.
 
         Args:
+            upload_service: Service for file I/O operations
+            metadata_service: Service for database CRUD operations
+            chunking_orchestrator: Service for chunking workflow coordination
             qdrant_client: Qdrant client wrapper for vector operations
-            http_client: HTTP client for embedder service communication
         """
-        self.upload_dir = Path(settings.upload_dir)
-        self.upload_dir.mkdir(parents=True, exist_ok=True)
+        self.upload_service = upload_service
+        self.metadata_service = metadata_service
+        self.chunking_orchestrator = chunking_orchestrator
         self.qdrant_client = qdrant_client
-        self.http_client = http_client
-        self.embedder_url = settings.embedder_url
 
     async def create_document(
         self,
@@ -57,7 +54,9 @@ class DocumentService:
         description: Optional[str] = None
     ) -> tuple[Document, int]:
         """
-        Create a new document with file upload and chunking.
+        Create a new document with file upload and semantic chunking.
+
+        Delegates to specialized services following Facade pattern.
 
         Args:
             db: Database session
@@ -69,134 +68,66 @@ class DocumentService:
         Returns:
             Tuple of (Document, chunk_count)
         """
-        # Generate unique file path
-        file_id = uuid4()
-        file_extension = Path(filename).suffix
-        file_path = self.upload_dir / f"{file_id}{file_extension}"
+        # Delegate file upload to upload service
+        file_metadata = await self.upload_service.save_file(file_content, filename)
 
-        # Save file to disk
-        try:
-            async with aiofiles.open(file_path, 'wb') as f:
-                await f.write(file_content)
-        except Exception as e:
-            logger.error(f"Failed to save file {file_path}: {e}")
-            raise FileOperationError("write", str(file_path), e)
-
-        # Detect file type
-        file_type = file_processor.detect_file_type(str(file_path))
-        file_size = len(file_content)
-
-        # Create document record
-        document = Document(
+        # Delegate document record creation to metadata service
+        document = await self.metadata_service.create_document(
+            db=db,
             title=title,
             description=description,
             file_name=filename,
-            file_type=file_type,
-            file_size=file_size,
-            file_path=str(file_path),
-            upload_status="processing",
-            embedding_status="pending"
+            file_type=file_metadata["file_type"],
+            file_size=file_metadata["file_size"],
+            file_path=file_metadata["file_path"],
+            document_type=file_metadata["document_type"]
         )
-        db.add(document)
-        await db.flush()  # Get the document ID
 
         try:
-            # Extract text
-            try:
-                text = file_processor.extract_text(str(file_path), file_type)
-            except Exception as e:
-                logger.error(f"Failed to extract text from {file_path}: {e}")
-                raise TextExtractionError(str(file_path), file_type, e)
+            # Delegate chunking workflow to orchestrator
+            from app.models.schemas import DocumentType
+            document_type = DocumentType(file_metadata["document_type"])
+            chunk_objects = await self.chunking_orchestrator.process_and_chunk(
+                db=db,
+                document_id=document.id,
+                file_path=Path(file_metadata["file_path"]),
+                document_type=document_type
+            )
 
-            # Chunk text
-            chunks = chunking_service.chunk_text(text)
-
-            # Create chunk records
-            chunk_objects = []
-            for idx, chunk_text in enumerate(chunks):
-                token_count = chunking_service.estimate_token_count(chunk_text)
-                chunk = DocumentChunk(
-                    document_id=document.id,
-                    chunk_index=idx,
-                    chunk_text=chunk_text,
-                    token_count=token_count
-                )
-                chunk_objects.append(chunk)
-                db.add(chunk)
-
-            document.upload_status = "completed"
-            await db.commit()
-            await db.refresh(document)
+            # Update upload status to completed
+            await self.metadata_service.update_upload_status(
+                db=db,
+                document_id=document.id,
+                status="completed"
+            )
 
             # Trigger embedding generation asynchronously
-            await self._trigger_embedding(document.id, chunk_objects)
+            await self.chunking_orchestrator.trigger_embedding(
+                db=db,
+                document_id=document.id,
+                chunks=chunk_objects
+            )
 
-            return document, len(chunks)
+            return document, len(chunk_objects)
 
         except (TextExtractionError, FileOperationError) as e:
             # Re-raise custom exceptions as-is
             logger.error(f"Error processing document: {e}")
-            document.upload_status = "failed"
-            await db.commit()
+            await self.metadata_service.update_upload_status(
+                db=db,
+                document_id=document.id,
+                status="failed"
+            )
             raise
         except Exception as e:
             # Wrap unexpected exceptions
             logger.error(f"Unexpected error processing document: {e}")
-            document.upload_status = "failed"
-            await db.commit()
+            await self.metadata_service.update_upload_status(
+                db=db,
+                document_id=document.id,
+                status="failed"
+            )
             raise
-
-    async def _trigger_embedding(
-        self,
-        document_id: UUID,
-        chunks: List[DocumentChunk]
-    ) -> None:
-        """
-        Trigger embedding generation for document chunks.
-
-        Args:
-            document_id: Document UUID
-            chunks: List of document chunks
-        """
-        try:
-            # Prepare chunks for embedder
-            chunks_data = [
-                {
-                    "id": str(chunk.id),
-                    "text": chunk.chunk_text,
-                    "metadata": {
-                        "document_id": str(document_id),
-                        "chunk_index": chunk.chunk_index
-                    }
-                }
-                for chunk in chunks
-            ]
-
-            # Send to embedder service using injected HTTP client
-            try:
-                response = await self.http_client.post(
-                    f"{self.embedder_url}/embed",
-                    json={"chunks": chunks_data},
-                    timeout=300.0  # 5 minutes for large batches
-                )
-                response.raise_for_status()
-                result = response.json()
-                success = result.get("success", False)
-
-                if success:
-                    logger.info(f"Successfully triggered embedding for document {document_id}")
-                else:
-                    logger.error(f"Failed to trigger embedding for document {document_id}")
-                    raise EmbedderServiceError("embed_chunks", Exception("Embedder returned success=false"))
-            except httpx.HTTPError as e:
-                logger.error(f"HTTP error communicating with embedder: {e}")
-                raise EmbedderServiceError("embed_chunks", e)
-
-        except EmbedderServiceError as e:
-            logger.error(f"Error triggering embeddings: {e}")
-            # Don't re-raise - this is a background operation, document is already saved
-        except Exception as e:
-            logger.error(f"Unexpected error triggering embeddings: {e}")
 
     async def get_documents(
         self,
@@ -207,6 +138,8 @@ class DocumentService:
         """
         Get paginated list of documents.
 
+        Delegates to metadata service.
+
         Args:
             db: Database session
             page: Page number (1-indexed)
@@ -215,28 +148,7 @@ class DocumentService:
         Returns:
             Paginated document list
         """
-        # Get total count
-        count_query = select(func.count(Document.id))
-        count_result = await db.execute(count_query)
-        total = count_result.scalar()
-
-        # Get paginated documents
-        offset = (page - 1) * limit
-        query = (
-            select(Document)
-            .order_by(Document.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
-        result = await db.execute(query)
-        documents = result.scalars().all()
-
-        return DocumentListResponse(
-            total=total or 0,
-            page=page,
-            limit=limit,
-            documents=[DocumentResponse.model_validate(doc) for doc in documents]
-        )
+        return await self.metadata_service.get_documents(db, page, limit)
 
     async def get_document_detail(
         self,
@@ -246,6 +158,8 @@ class DocumentService:
         """
         Get detailed document information including chunks.
 
+        Delegates to metadata service.
+
         Args:
             db: Database session
             document_id: Document UUID
@@ -253,17 +167,7 @@ class DocumentService:
         Returns:
             Document detail or None if not found
         """
-        query = (
-            select(Document)
-            .options(selectinload(Document.chunks))
-            .where(Document.id == document_id)
-        )
-        result = await db.execute(query)
-        document = result.scalar_one_or_none()
-
-        if document:
-            return DocumentDetailResponse.model_validate(document)
-        return None
+        return await self.metadata_service.get_document_by_id(db, document_id)
 
     async def delete_document(
         self,
@@ -272,6 +176,8 @@ class DocumentService:
     ) -> None:
         """
         Delete document and associated resources.
+
+        Coordinates deletion across services in proper order.
 
         Args:
             db: Database session
@@ -282,12 +188,10 @@ class DocumentService:
             QdrantConnectionError: If vector deletion fails
             FileOperationError: If file deletion fails
         """
-        # Get document
-        query = select(Document).where(Document.id == document_id)
-        result = await db.execute(query)
-        document = result.scalar_one_or_none()
+        # Get document first to access file_path (delegates to metadata service)
+        document_detail = await self.metadata_service.get_document_by_id(db, document_id)
 
-        if not document:
+        if not document_detail:
             raise DocumentNotFoundError(str(document_id))
 
         # Delete vectors from Qdrant
@@ -297,29 +201,9 @@ class DocumentService:
             logger.error(f"Error deleting vectors from Qdrant: {e}")
             raise QdrantConnectionError("delete_by_document_id", e)
 
-        # Delete file from disk
-        if document.file_path:
-            file_path = Path(document.file_path)
-            try:
-                if file_path.exists():
-                    file_path.unlink()
-                    logger.info(f"Deleted file: {file_path}")
-                else:
-                    logger.warning(f"File not found at stored path: {file_path}")
-            except Exception as e:
-                logger.error(f"Error deleting file {file_path}: {e}")
-                raise FileOperationError("delete", str(file_path), e)
-        else:
-            # Fallback for old records without file_path - use glob pattern
-            logger.warning(f"Document {document_id} has no file_path, attempting glob pattern fallback")
-            for file in self.upload_dir.glob(f"{document_id}*"):
-                try:
-                    file.unlink()
-                    logger.info(f"Deleted file via glob pattern: {file}")
-                except Exception as e:
-                    logger.error(f"Error deleting file via glob: {e}")
-                    raise FileOperationError("delete", str(file), e)
+        # Delete file from disk (delegates to upload service)
+        if document_detail.file_path:
+            await self.upload_service.delete_file(document_detail.file_path)
 
-        # Delete from database (cascades to chunks)
-        await db.delete(document)
-        await db.commit()
+        # Delete from database - cascades to chunks (delegates to metadata service)
+        await self.metadata_service.delete_document(db, document_id)

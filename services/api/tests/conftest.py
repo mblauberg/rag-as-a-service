@@ -1,22 +1,32 @@
 """Pytest configuration and fixtures for API tests."""
+import os
+
+# Set test environment variables before importing app modules
+os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+os.environ.setdefault("QDRANT_URL", "http://localhost:6333")
+os.environ.setdefault("EMBEDDER_URL", "http://localhost:8001")
+os.environ.setdefault("GENERATOR_URL", "http://localhost:8002")
+os.environ.setdefault("UPLOAD_DIR", "/tmp/raas-test-uploads")
+
 import pytest
 import pytest_asyncio
 from typing import AsyncGenerator
 from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 from httpx import AsyncClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.main import app
 from app.core.database import Base, get_db
-from app.core.dependencies import get_qdrant_client, get_http_client
+from app.core.dependencies import get_qdrant_client
 from app.core.qdrant_client import QdrantClientWrapper
 from app.models.document import Document, DocumentChunk
 
 
-# Test database URL (in-memory SQLite for tests)
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+# Test database URL - use PostgreSQL if DATABASE_URL env var is set, otherwise SQLite
+TEST_DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 
 
 @pytest_asyncio.fixture
@@ -24,22 +34,41 @@ async def db_engine():
     """
     Create test database engine.
 
-    Uses in-memory SQLite for fast, isolated tests.
+    Uses PostgreSQL if DATABASE_URL is set, otherwise in-memory SQLite for fast tests.
     """
-    engine = create_async_engine(
-        TEST_DATABASE_URL,
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-        echo=False,
-    )
+    # Configure engine based on database type
+    engine_kwargs = {"echo": False}
+    is_postgres = "postgresql" in TEST_DATABASE_URL
+
+    if "sqlite" in TEST_DATABASE_URL:
+        engine_kwargs["connect_args"] = {"check_same_thread": False}
+        engine_kwargs["poolclass"] = StaticPool
+    else:
+        # PostgreSQL configuration
+        engine_kwargs["pool_pre_ping"] = True
+
+    engine = create_async_engine(TEST_DATABASE_URL, **engine_kwargs)
 
     # Create all tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+        # For PostgreSQL, apply additional FTS migration for text_search_vector column
+        if is_postgres:
+            await conn.execute(text("""
+                ALTER TABLE document_chunks
+                ADD COLUMN IF NOT EXISTS text_search_vector tsvector
+                GENERATED ALWAYS AS (to_tsvector('english', chunk_text)) STORED;
+            """))
+            await conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_text_search
+                ON document_chunks
+                USING GIN (text_search_vector);
+            """))
+
     yield engine
 
-    # Drop all tables
+    # Drop all tables (cleanup)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
@@ -141,7 +170,7 @@ async def async_client(db_session, mock_qdrant_client, mock_embedder_client):
     """
     Provide async test client with dependency overrides.
 
-    Overrides database, Qdrant, and HTTP client dependencies with mocks.
+    Overrides database and Qdrant dependencies with mocks.
     """
     # Override dependencies
     async def override_get_db():
@@ -150,12 +179,8 @@ async def async_client(db_session, mock_qdrant_client, mock_embedder_client):
     def override_get_qdrant_client():
         return mock_qdrant_client
 
-    async def override_get_http_client():
-        yield mock_embedder_client
-
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_qdrant_client] = override_get_qdrant_client
-    app.dependency_overrides[get_http_client] = override_get_http_client
 
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
