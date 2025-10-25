@@ -1,6 +1,6 @@
 """Document processing service coordinating processors and chunking."""
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Any, Union
 from app.models.schemas import DocumentType
 from app.services.processors.base_processor import BaseDocumentProcessor, ProcessedDocument
 from app.services.processors.pdf_processor import PDFProcessor
@@ -8,6 +8,8 @@ from app.services.processors.docx_processor import DOCXProcessor
 from app.services.processors.text_processor import TextProcessor
 from app.services.processors.csv_processor import CSVProcessor
 from app.services.chunking.semantic_chunker import SemanticChunker
+from app.services.chunking.semantic_chunker_v2 import SemanticChunkerV2, ChunkResult
+from app.core.config import settings
 
 
 class DocumentProcessingService:
@@ -17,7 +19,7 @@ class DocumentProcessingService:
     """
 
     def __init__(self):
-        """Initialize with all available processors."""
+        """Initialize with all available processors and appropriate chunker based on config."""
         self.processors: Dict[DocumentType, BaseDocumentProcessor] = {
             DocumentType.PDF: PDFProcessor(),
             DocumentType.DOCX: DOCXProcessor(),
@@ -26,10 +28,22 @@ class DocumentProcessingService:
             DocumentType.CSV: CSVProcessor(),
         }
 
-        self.chunker = SemanticChunker(
-            chunk_size=400,
-            overlap=80
-        )
+        # Select chunking strategy based on configuration
+        if settings.CHUNKING_STRATEGY == "semantic":
+            # Use new semantic chunker with percentile-based breakpoints (async)
+            self.chunker = SemanticChunkerV2(
+                min_chunk_size=settings.SEMANTIC_MIN_CHUNK_SIZE,
+                max_chunk_size=settings.SEMANTIC_MAX_CHUNK_SIZE,
+                breakpoint_percentile=settings.SEMANTIC_BREAKPOINT_PERCENTILE
+            )
+            self.use_async_chunker = True
+        else:
+            # Use legacy recursive chunker (synchronous)
+            self.chunker = SemanticChunker(
+                chunk_size=settings.CHUNK_SIZE,
+                overlap=settings.CHUNK_OVERLAP
+            )
+            self.use_async_chunker = False
 
     def get_processor(self, document_type: DocumentType) -> BaseDocumentProcessor:
         """
@@ -49,13 +63,16 @@ class DocumentProcessingService:
 
         return self.processors[document_type]
 
-    def process_and_chunk(
+    async def process_and_chunk(
         self,
         file_path: Path,
         document_type: DocumentType
     ) -> List[Dict]:
         """
         Process document and create chunks with metadata.
+
+        This method is now async to support both synchronous and asynchronous chunkers.
+        The SemanticChunkerV2 uses async operations for embedding-based chunking.
 
         Args:
             file_path: Path to document
@@ -81,7 +98,7 @@ class DocumentProcessingService:
                 # Flush previous section
                 if current_section:
                     section_text = '\n\n'.join(current_section)
-                    section_chunks = self.chunker.chunk_with_metadata(
+                    section_chunks = await self._chunk_text(
                         section_text,
                         section_context=current_section_title
                     )
@@ -111,7 +128,7 @@ class DocumentProcessingService:
         # Flush final section
         if current_section:
             section_text = '\n\n'.join(current_section)
-            section_chunks = self.chunker.chunk_with_metadata(
+            section_chunks = await self._chunk_text(
                 section_text,
                 section_context=current_section_title
             )
@@ -127,3 +144,34 @@ class DocumentProcessingService:
                 })
 
         return chunks
+
+    async def _chunk_text(
+        self,
+        text: str,
+        section_context: str = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Chunk text using the configured chunker (handles both sync and async chunkers).
+
+        Args:
+            text: Text to chunk
+            section_context: Optional section context
+
+        Returns:
+            List of dicts with 'content' and 'tokens' keys
+        """
+        if self.use_async_chunker:
+            # Use async SemanticChunkerV2
+            chunk_results = await self.chunker.chunk_text(text)
+
+            # Convert ChunkResult objects to expected format
+            return [
+                {
+                    'content': chunk.text,
+                    'tokens': chunk.token_count or len(chunk.text.split())
+                }
+                for chunk in chunk_results
+            ]
+        else:
+            # Use legacy synchronous chunker
+            return self.chunker.chunk_with_metadata(text, section_context)

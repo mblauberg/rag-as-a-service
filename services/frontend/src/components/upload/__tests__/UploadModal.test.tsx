@@ -553,7 +553,6 @@ describe('UploadModal', () => {
     });
 
     it('should disable buttons during upload', async () => {
-      const user = userEvent.setup();
       vi.mocked(useDocumentsHook.useUploadDocument).mockReturnValue({
         ...mockUploadDocument,
         isPending: true,

@@ -22,13 +22,15 @@ python-docx = "^1.1.0"
 aiofiles = "^23.2.1"
 unstructured = "^0.11.0"
 tiktoken = "^0.5.2"
-langchain-text-splitters = "^0.0.1"
+langchain-text-splitters = "^0.2.0"
 markdown = "^3.5.1"
 openpyxl = "^3.1.2"
 python-pptx = "^0.6.23"
 beautifulsoup4 = "^4.12.2"
 lxml = "^4.9.3"
 sentence-transformers = "^2.2.2"
+langchain-experimental = "^0.0.60"
+langchain-core = "^0.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.4"
@@ -37,6 +39,7 @@ pytest-cov = "^4.1.0"
 httpx = "^0.26.0"
 aiosqlite = "^0.19.0"
 pytest-mock = "^3.12.0"
+greenlet = "^3.2.4"
 
 [build-system]
 requires = ["poetry-core"]

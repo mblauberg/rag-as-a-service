@@ -123,6 +123,9 @@ class SearchResponse(BaseModel):
     chunks: List[SearchResultItem]
     model_used: Optional[str] = Field(None, description="Model used for generation")
     total_results: int
+    retrieval_method: Optional[str] = Field(None, description="Retrieval method used (vector, hybrid, etc.)")
+    expanded_queries: Optional[List[str]] = Field(None, description="Expanded query variants (for advanced search)")
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional metadata about the search")
 
 
 # Health Schemas
