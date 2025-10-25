@@ -4,12 +4,12 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { DocumentCard } from '../DocumentCard';
-import type { Document } from '../../../types';
-import * as useDocumentsHook from '../../../hooks/useDocuments';
+import type { Document } from '@/types';
+import * as useDocumentsHook from '@/hooks/useDocuments';
 
 // Mock the useDeleteDocument hook
-vi.mock('../../../hooks/useDocuments', async () => {
-  const actual = await vi.importActual('../../../hooks/useDocuments');
+vi.mock('@/hooks/useDocuments', async () => {
+  const actual = await vi.importActual('@/hooks/useDocuments');
   return {
     ...actual,
     useDeleteDocument: vi.fn(),

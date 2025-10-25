@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useUploadDocument } from '../../hooks/useDocuments';
+import { useUploadDocument } from '@/hooks/useDocuments';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '../ui/dialog';
-import { Button } from '../common/Button';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { cn } from '../../lib/utils';
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import { validateUploadFile, extractTitleFromFilename, ALLOWED_EXTENSIONS } from '@/utils/fileValidation';
 
 interface UploadModalProps {
