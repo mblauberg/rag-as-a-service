@@ -1,12 +1,11 @@
 """
-Semantic chunking using LangChain's experimental SemanticChunker.
-Uses percentile-based breakpoint detection for adaptive splitting.
+Semantic chunking using Chonkie's SemanticChunker.
+Modern, fast, and Python 3.13 compatible semantic text splitting.
 """
 
-from langchain_core.embeddings import Embeddings
-from langchain_experimental.text_splitter import SemanticChunker
+from chonkie import SemanticChunker as ChonkieSemanticChunker
+from chonkie.embeddings import AutoEmbeddings
 from pydantic import BaseModel
-from sentence_transformers import SentenceTransformer
 
 
 class ChunkResult(BaseModel):
@@ -18,32 +17,14 @@ class ChunkResult(BaseModel):
     coherence_score: float | None = None
 
 
-class SentenceTransformerEmbeddings(Embeddings):
-    """Wrapper to make SentenceTransformer compatible with LangChain"""
-
-    def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
-        self.model = SentenceTransformer(model_name)
-
-    def embed_documents(self, texts: list[str]) -> list[list[float]]:
-        """Embed a list of documents"""
-        embeddings = self.model.encode(texts, convert_to_numpy=True)
-        return embeddings.tolist()
-
-    def embed_query(self, text: str) -> list[float]:
-        """Embed a single query"""
-        embedding = self.model.encode([text], convert_to_numpy=True)
-        return embedding[0].tolist()
-
-
 class SemanticChunker:
     """
-    Semantic chunking using percentile-based breakpoint detection.
+    Semantic chunking using Chonkie's semantic similarity detection.
 
     Splits text based on semantic similarity between sentences:
-    1. Splits into sentences
-    2. Embeds each sentence
-    3. Calculates similarity between adjacent sentences
-    4. Creates boundary when similarity drop exceeds percentile threshold
+    - Fast and lightweight implementation
+    - Python 3.13 compatible
+    - Production-ready performance
     """
 
     def __init__(
@@ -65,15 +46,20 @@ class SemanticChunker:
         self.min_chunk_size = min_chunk_size
         self.max_chunk_size = max_chunk_size
         self.breakpoint_percentile = breakpoint_percentile
+        self.embedding_model = embedding_model
 
-        # Initialize embeddings wrapper
-        self.embeddings = SentenceTransformerEmbeddings(embedding_model)
+        # Initialize Chonkie embeddings
+        self.embeddings = AutoEmbeddings.get_embeddings(
+            model_name=embedding_model,
+            provider="sentence-transformers"
+        )
 
-        # Initialize LangChain semantic chunker
-        self.chunker = SemanticChunker(
-            embeddings=self.embeddings,
-            breakpoint_threshold_type="percentile",
-            breakpoint_threshold_amount=breakpoint_percentile
+        # Initialize Chonkie semantic chunker
+        self.chunker = ChonkieSemanticChunker(
+            embedding_model=self.embeddings,
+            chunk_size=max_chunk_size,
+            min_chunk_size=min_chunk_size,
+            threshold=breakpoint_percentile / 100.0  # Convert percentile to 0-1 range
         )
 
     async def chunk_text(self, text: str) -> list[ChunkResult]:
@@ -86,17 +72,17 @@ class SemanticChunker:
         Returns:
             List of ChunkResult objects
         """
-        # Use LangChain's semantic chunker
-        documents = self.chunker.create_documents([text])
+        # Use Chonkie's semantic chunker
+        chunks = self.chunker.chunk(text)
 
-        # Convert to ChunkResult format with size constraints
+        # Convert to ChunkResult format
         results = []
         current_index = 0
         accumulated_chunks = []
 
-        for doc in documents:
-            chunk_text = doc.page_content.strip()
-            token_count = len(chunk_text.split())
+        for chunk in chunks:
+            chunk_text = chunk.text.strip()
+            token_count = chunk.token_count if hasattr(chunk, 'token_count') else len(chunk_text.split())
 
             # Accumulate all chunks first
             accumulated_chunks.append({
