@@ -1,6 +1,6 @@
 """Tests for KeywordStore port."""
 import pytest
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from app.ports.services import KeywordStore
 from app.domain.entities.chunk import Chunk
@@ -13,7 +13,7 @@ class MockKeywordStore(KeywordStore):
         self,
         query_text: str,
         top_k: int,
-        document_id: uuid4 | None = None
+        document_id: UUID | None = None
     ) -> list[Chunk]:
         return []
 
