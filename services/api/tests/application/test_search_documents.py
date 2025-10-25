@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import Mock, AsyncMock
 from uuid import uuid4
 
-from app.application.use_cases.search_documents import SearchDocumentsUseCase
+from app.application.use_cases.search_documents import SearchDocumentsUseCase, SearchMode
 from app.domain.value_objects.search_query import SearchQuery
 from app.domain.entities.chunk import Chunk
 from app.ports.services import EmbeddingService, VectorStore
@@ -45,7 +45,7 @@ async def test_search_documents_success():
 
     # Execute search
     query = SearchQuery(text="test query", top_k=5)
-    results = await use_case.execute(query)
+    results = await use_case.execute(query, mode=SearchMode.VECTOR)
 
     # Verify results
     assert len(results) == 2
@@ -75,6 +75,6 @@ async def test_search_documents_empty_results():
     )
 
     query = SearchQuery(text="nonexistent query", top_k=10)
-    results = await use_case.execute(query)
+    results = await use_case.execute(query, mode=SearchMode.VECTOR)
 
     assert len(results) == 0
