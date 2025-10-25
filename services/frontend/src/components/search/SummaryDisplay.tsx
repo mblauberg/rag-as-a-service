@@ -3,7 +3,7 @@ import React from 'react';
 interface SummaryDisplayProps {
   summary: string;
   modelUsed: string;
-  onCitationClick: (citationNumber: number) => void;
+  onCitationClick?: (citationNumber: number) => void;
 }
 
 export const SummaryDisplay: React.FC<SummaryDisplayProps> = ({
@@ -30,7 +30,7 @@ export const SummaryDisplay: React.FC<SummaryDisplayProps> = ({
       parts.push(
         <button
           key={`citation-${match.index}`}
-          onClick={() => onCitationClick(citationNum)}
+          onClick={() => onCitationClick?.(citationNum)}
           className="inline-flex items-center px-1.5 py-0.5 mx-0.5 text-xs font-medium text-blue-700 bg-blue-100 rounded hover:bg-blue-200 transition-colors"
           aria-label={`Go to source ${citationNum}`}
         >

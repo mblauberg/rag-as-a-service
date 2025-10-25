@@ -159,8 +159,8 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             className={cn(
               "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
               isDragging
-                ? "border-primary-500 bg-primary-50"
-                : "border-gray-300 hover:border-gray-400"
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50"
             )}
           >
             <input
@@ -186,15 +186,15 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                     strokeLinejoin="round"
                   />
                 </svg>
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium text-primary-600">Click to upload</span>
+                <div className="text-sm text-muted-foreground">
+                  <span className="font-medium text-primary">Click to upload</span>
                   {' or drag and drop'}
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   PDF, DOCX, or TXT (up to 100MB)
                 </p>
                 {file && (
-                  <p className="text-sm font-medium text-gray-900 mt-2">
+                  <p className="text-sm font-medium text-foreground mt-2">
                     Selected: {file.name}
                   </p>
                 )}
@@ -203,7 +203,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
               {error}
             </div>
           )}
@@ -231,7 +231,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           <div className="flex justify-end space-x-3">
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               onClick={onClose}
               disabled={uploadDocument.isPending}
             >

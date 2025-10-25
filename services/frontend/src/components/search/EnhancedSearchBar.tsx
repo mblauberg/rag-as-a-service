@@ -1,9 +1,19 @@
 import React, { useEffect, useRef } from 'react';
-import { MagnifyingGlassIcon, ChevronDownIcon, CheckIcon } from '@radix-ui/react-icons';
+import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { Cpu } from 'lucide-react';
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { Model } from '../../types';
-import { abbreviateModelName, groupModelsByProvider } from '../../utils/modelUtils';
+import { Model } from '@/types';
+import { abbreviateModelName, groupModelsByProvider } from '@/utils/modelUtils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectGroup,
+  SelectLabel,
+  SelectSeparator,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface EnhancedSearchBarProps {
   value: string;
@@ -23,7 +33,7 @@ interface EnhancedSearchBarProps {
  * - Press "/" to focus from anywhere
  * - Press "Escape" to clear and blur
  * - Glassmorphism styling with backdrop-blur
- * - Integrated model dropdown on right side
+ * - shadcn/ui Select component for model selection
  */
 export const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
   value,
@@ -86,96 +96,69 @@ export const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
             bg-white/70 backdrop-blur-md
             border border-gray-200/50
             rounded-full shadow-lg
-            focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+            focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
             transition-all duration-200
             placeholder:text-gray-400
           "
         />
 
-        {/* Model Dropdown */}
+        {/* Model Select */}
         <div className="absolute right-6 top-1/2 -translate-y-1/2">
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <button
-                className="
-                  flex items-center gap-2 px-3 py-2
-                  bg-white/70 backdrop-blur-md
-                  border border-gray-200/50
-                  rounded-full
-                  hover:bg-white/90
-                  transition-all duration-200
-                  text-sm font-medium text-gray-700
-                "
-                disabled={modelsLoading}
+          {modelsLoading ? (
+            <Skeleton className="h-10 w-40" />
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-2 bg-white/70 backdrop-blur-md border border-gray-200/50 rounded-full">
+              <Cpu className="h-4 w-4 text-gray-500" />
+              <Select
+                value={selectedModel || undefined}
+                onValueChange={(value) => onModelChange(value)}
               >
-                <Cpu className="h-4 w-4" />
-                <span>{modelsLoading ? 'Loading...' : displayName}</span>
-                <ChevronDownIcon className="h-3 w-3" />
-              </button>
-            </DropdownMenu.Trigger>
+                <SelectTrigger className="border-none bg-transparent h-auto p-0 focus:ring-0 focus:ring-offset-0 w-32">
+                  <SelectValue placeholder="Select model">
+                    <span className="text-sm font-medium text-gray-700">
+                      {displayName}
+                    </span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {providerOrder.map((provider, idx) => {
+                    const providerModels = groupedModels[provider];
+                    if (!providerModels || providerModels.length === 0) return null;
 
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content
-                className="
-                  min-w-[320px] max-h-[400px] overflow-y-auto
-                  bg-white/90 backdrop-blur-md
-                  border border-gray-200/50
-                  rounded-lg shadow-lg
-                  p-2
-                "
-                sideOffset={8}
-                align="end"
-              >
-                {providerOrder.map((provider, idx) => {
-                  const providerModels = groupedModels[provider];
-                  if (!providerModels || providerModels.length === 0) return null;
-
-                  return (
-                    <React.Fragment key={provider}>
-                      {idx > 0 && <DropdownMenu.Separator className="h-px bg-gray-200 my-2" />}
-
-                      <div className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase">
-                        {provider}
-                      </div>
-
-                      {providerModels.map((model) => (
-                        <DropdownMenu.Item
-                          key={model.name}
-                          className="
-                            px-3 py-2.5 rounded-md
-                            hover:bg-gray-100/80
-                            cursor-pointer
-                            outline-none
-                            transition-colors
-                          "
-                          onSelect={() => onModelChange(model.name)}
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium text-gray-900">
-                                  {model.display_name}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {model.size}
-                                </span>
+                    return (
+                      <React.Fragment key={provider}>
+                        {idx > 0 && <SelectSeparator />}
+                        <SelectGroup>
+                          <SelectLabel className="text-xs font-semibold text-gray-500 uppercase">
+                            {provider}
+                          </SelectLabel>
+                          {providerModels.map((model) => (
+                            <SelectItem key={model.name} value={model.name}>
+                              <div className="flex items-start gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-gray-900">
+                                      {model.display_name}
+                                    </span>
+                                    <span className="text-xs text-gray-500">
+                                      {model.size}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-gray-600 mt-0.5 truncate">
+                                    {model.description}
+                                  </p>
+                                </div>
                               </div>
-                              <p className="text-xs text-gray-600 mt-0.5">
-                                {model.description}
-                              </p>
-                            </div>
-                            {selectedModel === model.name && (
-                              <CheckIcon className="h-4 w-4 text-primary-600 flex-shrink-0 mt-1" />
-                            )}
-                          </div>
-                        </DropdownMenu.Item>
-                      ))}
-                    </React.Fragment>
-                  );
-                })}
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </React.Fragment>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
       </div>
     </div>
