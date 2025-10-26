@@ -10,6 +10,8 @@ RAAS enables intelligent document search through semantic understanding. Upload 
 
 ### Core Functionality
 - **Semantic Search**: Find documents by meaning, not just keywords
+- **AI-Generated Summaries**: Get instant AI-powered summaries of search results with clickable citations
+- **Enhanced Document Navigation**: Click search results or summary citations to jump directly to specific chunks in documents
 - **Vector Embeddings**: 384-dimensional embeddings using sentence-transformers (all-MiniLM-L6-v2)
 - **Intelligent Chunking**: Automatic text segmentation for optimal retrieval
 - **Multi-format Support**: Upload TXT, PDF, DOCX, and more
@@ -377,6 +379,29 @@ Body: {
 ```bash
 # List available LLM models
 GET /api/v1/models
+```
+
+#### Summary Generation
+
+```bash
+# Generate AI summary from search result chunks
+POST /api/v1/generate/summary
+Content-Type: application/json
+Body: {
+  "query": "what is semantic search?",
+  "chunk_ids": ["uuid1", "uuid2", ...],
+  "model": "gpt-5-mini"
+}
+
+# Response:
+{
+  "summary": "Based on your documents, semantic search uses embeddings...",
+  "model_used": "gpt-5-mini"
+}
+
+# Error Codes:
+# - 404: Chunk IDs not found
+# - 503: Generator service unavailable
 ```
 
 ### Response Examples
