@@ -6,7 +6,7 @@ from app.core.config import settings
 
 
 @pytest.mark.asyncio
-async def test_list_models_success():
+async def test_list_models_with_available_models_returns_model_list():
     """Test listing available models."""
     mock_response = {
         "models": [
@@ -29,7 +29,7 @@ async def test_list_models_success():
 
 
 @pytest.mark.asyncio
-async def test_generate_success():
+async def test_generate_with_valid_prompt_returns_response():
     """Test generating text with Ollama."""
     mock_response = {
         "response": "This is a test summary [1].",
@@ -54,7 +54,7 @@ async def test_generate_success():
 
 
 @pytest.mark.asyncio
-async def test_check_health_success():
+async def test_check_health_when_ollama_available_returns_true():
     """Test health check when Ollama is available."""
     with patch('ollama.AsyncClient') as mock_client_class:
         mock_instance = AsyncMock()
@@ -68,7 +68,7 @@ async def test_check_health_success():
 
 
 @pytest.mark.asyncio
-async def test_check_health_failure():
+async def test_check_health_when_connection_fails_returns_false():
     """Test health check when Ollama is unavailable."""
     with patch('ollama.AsyncClient') as mock_client_class:
         mock_instance = AsyncMock()

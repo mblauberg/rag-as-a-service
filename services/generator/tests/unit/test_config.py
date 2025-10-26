@@ -3,7 +3,7 @@ import os
 from app.core.config import settings
 
 
-def test_default_provider_toggles():
+def test_provider_toggles_with_defaults_enables_ollama_only():
     """Provider toggles should have correct defaults."""
     # Reset settings to defaults
     os.environ.clear()
@@ -19,7 +19,7 @@ def test_default_provider_toggles():
     assert test_settings.enable_google is False
 
 
-def test_api_keys_optional():
+def test_api_keys_without_environment_variables_default_to_empty():
     """API keys should be optional (empty string by default)."""
     os.environ.clear()
     from app.core.config import Settings

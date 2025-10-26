@@ -1,5 +1,26 @@
 #!/usr/bin/env python3
-"""Debug script to inspect actual DOM structure"""
+"""Debug script to inspect actual DOM structure.
+
+This utility script uses Playwright to inspect the frontend DOM structure
+for debugging test failures and understanding component selectors.
+
+Usage:
+    python tests/debug/debug_dom_structure.py
+
+Prerequisites:
+    - Frontend running on http://localhost:3000
+    - Playwright installed (pip install playwright)
+    - Run: playwright install chromium
+
+Purpose:
+    - Inspects document card structure and CSS classes
+    - Tests search functionality and result container selectors
+    - Helps identify correct locators for integration tests
+    - Useful when tests fail due to DOM structure changes
+
+Note:
+    This is a development/debugging tool - not part of the automated test suite.
+"""
 
 from playwright.sync_api import sync_playwright
 import json

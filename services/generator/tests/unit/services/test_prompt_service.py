@@ -6,14 +6,17 @@ from app.models.schemas import ChunkInput
 
 def test_build_rag_prompt_single_chunk():
     """Test building RAG prompt with single chunk."""
+    # Arrange
     service = PromptService()
     chunks = [
         ChunkInput(text="Machine learning is AI", document_id="doc1", chunk_index=0)
     ]
     query = "What is machine learning?"
 
+    # Act
     prompt = service.build_rag_prompt(query, chunks)
 
+    # Assert
     assert "What is machine learning?" in prompt
     assert "[1] Machine learning is AI" in prompt
     assert "Cite sources using [1]" in prompt
@@ -21,6 +24,7 @@ def test_build_rag_prompt_single_chunk():
 
 def test_build_rag_prompt_multiple_chunks():
     """Test building RAG prompt with multiple chunks."""
+    # Arrange
     service = PromptService()
     chunks = [
         ChunkInput(text="ML is AI subset", document_id="doc1", chunk_index=0),
@@ -29,8 +33,10 @@ def test_build_rag_prompt_multiple_chunks():
     ]
     query = "Explain machine learning"
 
+    # Act
     prompt = service.build_rag_prompt(query, chunks)
 
+    # Assert
     assert "[1] ML is AI subset" in prompt
     assert "[2] It learns from data" in prompt
     assert "[3] Used for predictions" in prompt
@@ -39,24 +45,28 @@ def test_build_rag_prompt_multiple_chunks():
 
 def test_build_rag_prompt_empty_chunks():
     """Test building prompt with no chunks."""
+    # Arrange
     service = PromptService()
     chunks = []
     query = "Test query"
 
+    # Act
     prompt = service.build_rag_prompt(query, chunks)
 
-    # Should still create valid prompt
+    # Assert - Should still create valid prompt
     assert "Test query" in prompt
     assert "Context:" in prompt
 
 
 def test_estimate_tokens():
     """Test token estimation."""
+    # Arrange
     service = PromptService()
-
-    # Rough estimate: ~4 chars per token
     text = "This is a test sentence with some words."
+
+    # Act
     tokens = service.estimate_tokens(text)
 
+    # Assert - Rough estimate: ~4 chars per token
     assert tokens > 0
     assert tokens < len(text)  # Should be less than character count
