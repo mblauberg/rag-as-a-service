@@ -84,17 +84,20 @@ class TestDocumentTypeSupport:
         ), f"Upload failed for {filename}: {response.text}"
         upload_data = response.json()
 
-        # Verify response structure
-        assert "id" in upload_data
-        assert "filename" in upload_data
-        assert "file_type" in upload_data
-        document_id = upload_data["id"]
+        # Verify response structure (nested under "document" key)
+        assert "document" in upload_data
+        assert "chunk_count" in upload_data
+        document = upload_data["document"]
+        assert "id" in document
+        assert "file_name" in document
+        assert "file_type" in document
+        document_id = document["id"]
 
         # Step 2: Verify document metadata
-        assert upload_data["filename"] == filename
-        assert upload_data["file_type"] == expected_type
-        assert "file_size" in upload_data
-        assert upload_data["file_size"] > 0
+        assert document["file_name"] == filename
+        assert document["file_type"] == expected_type
+        assert "file_size" in document
+        assert document["file_size"] > 0
 
         # Step 3: Wait for processing (if async)
         await asyncio.sleep(2)
@@ -106,7 +109,7 @@ class TestDocumentTypeSupport:
 
         # Verify document was stored correctly
         assert document_data["id"] == document_id
-        assert document_data["filename"] == filename
+        assert document_data["file_name"] == filename
         assert document_data["file_type"] == expected_type
 
         # Step 5: Verify content extraction (if applicable)

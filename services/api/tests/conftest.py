@@ -121,6 +121,9 @@ def mock_qdrant_client():
     # Mock search
     mock.search = AsyncMock(return_value=[])
 
+    # Mock upsert (for inserting vectors)
+    mock.upsert = AsyncMock(return_value=None)
+
     # Mock delete
     mock.delete_points = AsyncMock(return_value=None)
 
@@ -174,13 +177,43 @@ def mock_embedder_client():
     return mock
 
 
+@pytest.fixture
+def mock_embedding_service():
+    """
+    Provide mocked embedding service.
+
+    Returns a mock EmbeddingService that generates fake embeddings.
+    """
+    from app.ports.services import EmbeddingService
+
+    mock = AsyncMock(spec=EmbeddingService)
+
+    # Mock generate_embeddings to return fake 384-dimensional vectors
+    async def generate_fake_embeddings(texts: list[str]) -> list[list[float]]:
+        import random
+        random.seed(42)  # Deterministic for testing
+        return [[random.random() for _ in range(384)] for _ in texts]
+
+    mock.generate_embeddings = AsyncMock(side_effect=generate_fake_embeddings)
+
+    return mock
+
+
 @pytest_asyncio.fixture
-async def async_client(db_session, mock_qdrant_client, mock_embedder_client):
+async def async_client(db_session, mock_qdrant_client, mock_embedder_client, mock_embedding_service):
     """
     Provide async test client with dependency overrides.
 
-    Overrides database and Qdrant dependencies with mocks.
+    Overrides database, Qdrant, and embedding service dependencies with mocks.
     """
+    from app.api.dependencies import get_upload_document_use_case
+    from app.application.use_cases.upload_document import UploadDocumentUseCase
+    from app.infrastructure.db.repositories.chunk_repository_impl import ChunkRepositoryImpl
+    from app.infrastructure.db.repositories.document_repository_impl import DocumentRepositoryImpl
+    from app.infrastructure.processing.file_processor import FileProcessorImpl
+    from app.infrastructure.processing.semantic_chunker import SemanticChunkerImpl
+    from app.infrastructure.vector_store.qdrant_store import QdrantVectorStoreImpl
+    from app.core.config import settings
 
     # Override dependencies
     async def override_get_db():
@@ -189,8 +222,32 @@ async def async_client(db_session, mock_qdrant_client, mock_embedder_client):
     def override_get_qdrant_client():
         return mock_qdrant_client
 
+    def override_get_upload_document_use_case():
+        """Override upload use case to use mock embedding service."""
+        document_repo = DocumentRepositoryImpl(db_session)
+        chunk_repo = ChunkRepositoryImpl(db_session)
+        vector_store = QdrantVectorStoreImpl(
+            client=mock_qdrant_client, collection_name="documents"
+        )
+        file_processor = FileProcessorImpl()
+        chunker = SemanticChunkerImpl(
+            min_chunk_size=settings.chunking.min_chunk_size,
+            max_chunk_size=settings.chunking.max_chunk_size,
+            breakpoint_percentile=settings.chunking.breakpoint_percentile,
+        )
+
+        return UploadDocumentUseCase(
+            document_repo=document_repo,
+            chunk_repo=chunk_repo,
+            embedding_service=mock_embedding_service,  # Use mock instead of real HTTP service
+            vector_store=vector_store,
+            file_processor=file_processor,
+            chunker=chunker,
+        )
+
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_qdrant_client] = override_get_qdrant_client
+    app.dependency_overrides[get_upload_document_use_case] = override_get_upload_document_use_case
 
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
