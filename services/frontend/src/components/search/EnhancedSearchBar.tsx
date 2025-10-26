@@ -68,7 +68,9 @@ export const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
 
   // Get current model for display
   const currentModel = models.find(m => m.name === selectedModel);
-  const displayName = currentModel
+  const displayName = selectedModel === null || !selectedModel
+    ? 'None'
+    : currentModel
     ? abbreviateModelName(currentModel.display_name)
     : 'Select model';
 
@@ -110,7 +112,7 @@ export const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
             <div className="flex items-center gap-2 px-3 py-2 bg-white/70 backdrop-blur-md border border-gray-200/50 rounded-full">
               <Cpu className="h-4 w-4 text-gray-500" />
               <Select
-                value={selectedModel || undefined}
+                value={selectedModel || 'none'}
                 onValueChange={(value) => onModelChange(value)}
               >
                 <SelectTrigger className="border-none bg-transparent h-auto p-0 focus:ring-0 focus:ring-offset-0 w-32">
@@ -121,13 +123,14 @@ export const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {providerOrder.map((provider, idx) => {
+                  <SelectItem value="none">None - No AI Summary</SelectItem>
+                  {providerOrder.map((provider) => {
                     const providerModels = groupedModels[provider];
                     if (!providerModels || providerModels.length === 0) return null;
 
                     return (
                       <React.Fragment key={provider}>
-                        {idx > 0 && <SelectSeparator />}
+                        <SelectSeparator />
                         <SelectGroup>
                           <SelectLabel className="text-xs font-semibold text-gray-500 uppercase">
                             {provider}

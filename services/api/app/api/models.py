@@ -161,3 +161,21 @@ class ModelsListResponse(BaseModel):
     """Response model for listing available models."""
 
     models: list[ModelInfo]
+
+
+# Summary Generation Models
+class GenerateSummaryRequest(BaseModel):
+    """Request model for summary generation."""
+
+    query: str = Field(..., min_length=1, description="Original search query")
+    chunk_ids: list[UUID] = Field(
+        ..., min_items=1, max_items=50, description="Chunk IDs to summarize"
+    )
+    model: str = Field(..., min_length=1, description="Model to use for generation")
+
+
+class GenerateSummaryResponse(BaseModel):
+    """Response model for summary generation."""
+
+    summary: str = Field(..., description="Generated summary text")
+    model_used: str = Field(..., description="Model that generated the summary")

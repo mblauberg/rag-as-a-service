@@ -63,10 +63,26 @@ async def sample_document(document_repository):
         title="Test Document",
         file_name="test.pdf",
         file_type="pdf",
+        file_size=1024,
         created_at=datetime.now(UTC),
         upload_status=UploadStatus.PROCESSING,
     )
     return await document_repository.save(document)
+
+
+@pytest.fixture
+async def sample_chunks(chunk_repository, sample_document):
+    """Create sample chunks for testing."""
+    chunks = [
+        Chunk(
+            id=uuid4(),
+            document_id=sample_document.id,
+            content=f"Test chunk {i} content",
+            tokens=10,
+        )
+        for i in range(5)
+    ]
+    return await chunk_repository.save_batch(chunks)
 
 
 @pytest.mark.asyncio
@@ -343,3 +359,34 @@ async def test_cascade_delete_on_document_deletion(
     # Assert - chunks should be cascade deleted
     found = await chunk_repository.find_by_document_id(sample_document.id)
     assert len(found) == 0
+
+
+@pytest.mark.asyncio
+async def test_get_chunks_by_ids(chunk_repository, sample_chunks):
+    """Test retrieving multiple chunks by their IDs."""
+    # Arrange
+    chunk_ids = [chunk.id for chunk in sample_chunks[:3]]
+
+    # Act
+    result = await chunk_repository.get_chunks_by_ids(chunk_ids)
+
+    # Assert
+    assert len(result) == 3
+    assert all(chunk.id in chunk_ids for chunk in result)
+    assert result[0].content is not None
+
+
+@pytest.mark.asyncio
+async def test_get_chunks_by_ids_empty_list(chunk_repository):
+    """Test retrieving chunks with empty ID list."""
+    result = await chunk_repository.get_chunks_by_ids([])
+    assert result == []
+
+
+@pytest.mark.asyncio
+async def test_get_chunks_by_ids_nonexistent(chunk_repository):
+    """Test retrieving chunks with nonexistent IDs."""
+    from uuid import uuid4
+    fake_ids = [uuid4(), uuid4()]
+    result = await chunk_repository.get_chunks_by_ids(fake_ids)
+    assert result == []

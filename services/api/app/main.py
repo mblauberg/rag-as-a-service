@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import documents, health, models, search
+from app.api.routes import documents, generate, health, models, search
 from app.core.config import settings
 from app.core.database import init_db
 
@@ -74,6 +74,12 @@ app.include_router(documents.router, prefix="/api/v1/documents", tags=["document
 app.include_router(search.router, prefix="/api/v1/search", tags=["search"])
 
 app.include_router(models.router, prefix="/api/v1", tags=["models"])
+
+app.include_router(
+    generate.router,
+    prefix="/api/v1/generate",
+    tags=["generate"],
+)
 
 
 @app.get("/")

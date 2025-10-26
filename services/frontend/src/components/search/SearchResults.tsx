@@ -1,32 +1,24 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import type { SearchResult, SearchResponse } from '@/types';
-import { SummaryDisplay } from './SummaryDisplay';
+import type { SearchResult } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 interface SearchResultsProps {
   results: SearchResult[];
   query: string;
-  searchResponse?: SearchResponse;
-  onDocumentClick?: (documentId: string) => void;
+  onChunkClick: (documentId: string, chunkId: string) => void;
 }
 
 /**
- * SearchResults - Displays search results with optional summary.
+ * SearchResults - Displays search results.
  * Click result to open document detail modal.
  */
 export const SearchResults: React.FC<SearchResultsProps> = ({
   results,
   query,
-  searchResponse,
-  onDocumentClick,
+  onChunkClick,
 }) => {
-  const handleResultClick = (documentId: string) => {
-    if (onDocumentClick) {
-      onDocumentClick(documentId);
-    }
-  };
 
   const highlightText = (text: string, query: string) => {
     if (!query.trim()) return text;
@@ -73,14 +65,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Summary if present */}
-      {searchResponse?.summary && searchResponse?.model_used && (
-        <SummaryDisplay
-          summary={searchResponse.summary}
-          modelUsed={searchResponse.model_used}
-        />
-      )}
-
       {/* Results */}
       <div className="space-y-3">
         {results.map((result, index) => (
@@ -92,7 +76,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           >
             <Card
               className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => handleResultClick(result.document_id)}
+              onClick={() => onChunkClick(result.document_id, result.chunk_id)}
             >
               <CardHeader>
                 <div className="flex items-start justify-between gap-2">

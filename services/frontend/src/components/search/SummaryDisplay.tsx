@@ -1,17 +1,20 @@
 import React from 'react';
+import type { SearchResult } from '@/types';
 
 interface SummaryDisplayProps {
   summary: string;
   modelUsed: string;
+  searchResults: SearchResult[];
+  onCitationClick: (docId: string, chunkId: string) => void;
 }
 
 export const SummaryDisplay: React.FC<SummaryDisplayProps> = ({
   summary,
-  modelUsed
+  modelUsed,
+  searchResults,
+  onCitationClick
 }) => {
-  // Parse citations and create clickable links
   const renderSummaryWithCitations = () => {
-    // Match [1], [2], etc.
     const citationPattern = /\[(\d+)\]/g;
     const parts: React.ReactNode[] = [];
     let lastIndex = 0;
@@ -23,17 +26,32 @@ export const SummaryDisplay: React.FC<SummaryDisplayProps> = ({
         parts.push(summary.substring(lastIndex, match.index));
       }
 
-      // Add citation
+      // Add clickable citation
       const citationNum = parseInt(match[1]);
-      parts.push(
-        <span
-          key={`citation-${match.index}`}
-          className="inline-flex items-center px-1.5 py-0.5 mx-0.5 text-xs font-medium text-blue-700 bg-blue-100 rounded"
-          aria-label={`Source ${citationNum}`}
-        >
-          {match[0]}
-        </span>
-      );
+      const result = searchResults[citationNum - 1]; // [1] maps to index 0
+
+      if (result) {
+        parts.push(
+          <button
+            key={`citation-${match.index}`}
+            onClick={() => onCitationClick(result.document_id, result.chunk_id)}
+            className="inline-flex items-center px-1.5 py-0.5 mx-0.5 text-xs font-medium text-blue-700 bg-blue-100 rounded hover:bg-blue-200 cursor-pointer transition-colors"
+            aria-label={`View source ${citationNum}`}
+          >
+            {match[0]}
+          </button>
+        );
+      } else {
+        // Fallback if citation number out of range
+        parts.push(
+          <span
+            key={`citation-${match.index}`}
+            className="inline-flex items-center px-1.5 py-0.5 mx-0.5 text-xs font-medium text-gray-700 bg-gray-100 rounded"
+          >
+            {match[0]}
+          </span>
+        );
+      }
 
       lastIndex = match.index + match[0].length;
     }
