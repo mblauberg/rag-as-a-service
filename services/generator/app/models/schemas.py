@@ -14,7 +14,7 @@ class GenerateRequest(BaseModel):
     """Request to generate summary from chunks."""
     query: str = Field(..., description="User's search query")
     chunks: List[ChunkInput] = Field(..., description="Retrieved document chunks")
-    model: str = Field(..., description="Ollama model to use")
+    model: str = Field(..., description="LLM model to use (e.g., 'openai:gpt-5', 'anthropic:claude-3')")
 
 
 class GenerateResponse(BaseModel):
@@ -26,10 +26,10 @@ class GenerateResponse(BaseModel):
 
 class Model(BaseModel):
     """Model information with provider support."""
-    name: str = Field(..., description="Qualified name: 'openai:gpt-5', 'llama3.2'")
-    display_name: str = Field(..., description="Human-readable: 'GPT-5', 'Llama 3.2'")
-    provider: str = Field(..., description="'ollama', 'openai', 'anthropic', 'google'")
-    size: str = Field(..., description="'70B', 'N/A'")
+    name: str = Field(..., description="Qualified name: 'openai:gpt-5', 'anthropic:claude-3'")
+    display_name: str = Field(..., description="Human-readable: 'GPT-5', 'Claude 3'")
+    provider: str = Field(..., description="'openai', 'anthropic', 'google'")
+    size: str = Field(..., description="'N/A' for cloud models")
     description: str = Field(..., description="Capability description")
     capabilities: List[str] = Field(default_factory=list, description="['reasoning', 'coding']")
     modified_at: str = Field(default="", description="ISO timestamp")
@@ -48,4 +48,4 @@ class HealthResponse(BaseModel):
 class ReadinessResponse(BaseModel):
     """Readiness check response."""
     status: str = Field(..., description="Readiness status")
-    ollama_connected: bool = Field(..., description="Ollama connectivity status")
+    providers_available: int = Field(default=0, description="Number of providers available")

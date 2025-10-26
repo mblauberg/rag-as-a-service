@@ -13,8 +13,8 @@ docker-compose up -d
 echo "Waiting for services..."
 sleep 10
 
-# Test 1: List models (Ollama only)
-echo "Test 1: List models with Ollama only"
+# Test 1: List models from cloud providers
+echo "Test 1: List models from configured providers"
 MODELS=$(curl -s http://localhost:8002/models)
 echo "$MODELS" | jq -e '.models | length > 0' || { echo "FAIL: No models returned"; exit 1; }
 echo "✓ Models endpoint working"

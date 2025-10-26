@@ -74,7 +74,7 @@ export const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
 
   // Group models by provider
   const groupedModels = groupModelsByProvider(models);
-  const providerOrder = ['ollama', 'openai', 'anthropic', 'google'];
+  const providerOrder = ['openai', 'anthropic', 'google'];
 
   return (
     <div className="relative w-full max-w-3xl mx-auto">

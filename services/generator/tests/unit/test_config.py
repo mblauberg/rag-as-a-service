@@ -14,7 +14,6 @@ def test_provider_toggles_with_defaults_enables_openai_only():
     assert test_settings.enable_openai is True
 
     # Other providers disabled by default
-    assert test_settings.enable_ollama is False
     assert test_settings.enable_anthropic is False
     assert test_settings.enable_google is False
 

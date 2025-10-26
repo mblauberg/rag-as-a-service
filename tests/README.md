@@ -96,10 +96,10 @@ curl http://localhost:3000
 
 Use these model identifiers in tests:
 - `openai:gpt-5-mini` - Latest fast OpenAI model (requires API key)
-- `openai:gpt-4o` - Full OpenAI model (requires API key)
-- `llama3.2` - Local Ollama model (if available)
+- `anthropic:claude-sonnet-4-5` - Anthropic model (requires API key)
+- `google:gemini-2.5-pro` - Google model (requires API key)
 
-**Note:** Always use the latest GPT-5 series models (gpt-5, gpt-5-mini, gpt-5-nano) for testing.
+**Note:** Always use cloud provider models with appropriate API keys configured for testing.
 
 ## Debugging Tools
 

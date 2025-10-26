@@ -16,7 +16,7 @@ class ProviderRegistry:
         Register a provider if it's available.
 
         Args:
-            name: Provider identifier (e.g., "ollama", "openai")
+            name: Provider identifier (e.g., "openai", "anthropic", "google")
             provider: ModelProvider instance
         """
         if provider.is_available():
@@ -63,10 +63,13 @@ class ProviderRegistry:
         Extract provider name from model identifier.
 
         Args:
-            model_name: Full model name (e.g., "openai:gpt-5", "llama3.3:70b")
+            model_name: Full model name (e.g., "openai:gpt-5", "anthropic:claude-3")
 
         Returns:
-            Provider name (defaults to "ollama" if no prefix)
+            Provider name (defaults to "openai" if no prefix)
+
+        Raises:
+            ValueError: If provider cannot be determined
         """
         if ":" in model_name:
             parts = model_name.split(":")
@@ -77,5 +80,5 @@ class ProviderRegistry:
             if parts[0] in ["openai", "anthropic", "google"]:
                 return parts[0]
 
-        # Default to ollama for unprefixed models
-        return "ollama"
+        # Default to openai for unprefixed models (for backward compatibility)
+        return "openai"

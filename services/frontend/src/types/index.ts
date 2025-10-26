@@ -73,10 +73,10 @@ export interface SearchResponse {
 }
 
 export interface Model {
-  name: string;              // Unique identifier (e.g., "llama3.3:70b", "openai:gpt-5")
-  display_name: string;      // Human-readable name (e.g., "Llama 3.3 70B")
-  provider: string;          // "ollama", "openai", "anthropic", "google"
-  size: string;              // "8B", "70B", "N/A"
+  name: string;              // Unique identifier (e.g., "openai:gpt-5", "anthropic:claude-sonnet-4-5")
+  display_name: string;      // Human-readable name (e.g., "GPT-5", "Claude Sonnet 4.5")
+  provider: string;          // "openai", "anthropic", "google"
+  size: string;              // "N/A" for cloud models
   description: string;       // Capability description
   capabilities: string[];    // ["reasoning", "coding"]
   modified_at: string;       // ISO timestamp

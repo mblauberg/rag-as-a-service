@@ -6,49 +6,58 @@ import type { Model } from '@/types';
 
 const mockModels: Model[] = [
   {
-    name: 'llama3.3:70b',
-    display_name: 'Llama 3.3 70B',
-    provider: 'ollama',
-    size: '70B',
-    description: 'Most capable Llama model',
-    capabilities: ['reasoning', 'coding'],
-    modified_at: '2024-01-01T00:00:00Z',
-  },
-  {
-    name: 'llama3.2:3b',
-    display_name: 'Llama 3.2 3B',
-    provider: 'ollama',
-    size: '3B',
-    description: 'Smaller, faster Llama model',
-    capabilities: ['general'],
-    modified_at: '2024-01-01T00:00:00Z',
-  },
-  {
-    name: 'openai:gpt-4',
-    display_name: 'GPT-4',
+    name: 'openai:gpt-5',
+    display_name: 'GPT-5',
     provider: 'openai',
     size: 'N/A',
-    description: 'OpenAI flagship model',
+    description: 'Most capable OpenAI model',
     capabilities: ['reasoning', 'coding', 'analysis'],
-    modified_at: '2024-01-01T00:00:00Z',
+    modified_at: '2025-08-01T00:00:00Z',
   },
   {
-    name: 'anthropic:claude-sonnet-4.5',
+    name: 'openai:gpt-5-mini',
+    display_name: 'GPT-5 Mini',
+    provider: 'openai',
+    size: 'N/A',
+    description: 'Cost-effective reasoning model',
+    capabilities: ['reasoning', 'coding', 'fast'],
+    modified_at: '2025-08-01T00:00:00Z',
+  },
+  {
+    name: 'anthropic:claude-sonnet-4-5',
     display_name: 'Claude Sonnet 4.5',
     provider: 'anthropic',
     size: 'N/A',
-    description: 'Anthropic balanced model',
+    description: 'Balanced performance and intelligence',
     capabilities: ['reasoning', 'coding', 'analysis'],
-    modified_at: '2024-01-01T00:00:00Z',
+    modified_at: '2025-01-01T00:00:00Z',
+  },
+  {
+    name: 'anthropic:claude-opus-4-1',
+    display_name: 'Claude Opus 4.1',
+    provider: 'anthropic',
+    size: 'N/A',
+    description: 'Most capable Claude model',
+    capabilities: ['reasoning', 'coding', 'analysis'],
+    modified_at: '2025-01-01T00:00:00Z',
   },
   {
     name: 'google:gemini-2.5-pro',
     display_name: 'Gemini 2.5 Pro',
     provider: 'google',
     size: 'N/A',
-    description: 'Google advanced model',
+    description: 'Advanced multimodal model',
     capabilities: ['reasoning', 'multimodal'],
-    modified_at: '2024-01-01T00:00:00Z',
+    modified_at: '2025-01-01T00:00:00Z',
+  },
+  {
+    name: 'google:gemini-2.5-flash',
+    display_name: 'Gemini 2.5 Flash',
+    provider: 'google',
+    size: 'N/A',
+    description: 'Fast and efficient model',
+    capabilities: ['reasoning', 'fast'],
+    modified_at: '2025-01-01T00:00:00Z',
   },
 ];
 
@@ -211,8 +220,8 @@ describe('EnhancedSearchBar', () => {
     });
 
     it('should display selected model name', () => {
-      render(<EnhancedSearchBar {...defaultProps} selectedModel="llama3.3:70b" />);
-      expect(screen.getByText('Llama 3.3')).toBeInTheDocument();
+      render(<EnhancedSearchBar {...defaultProps} selectedModel="openai:gpt-5-mini" />);
+      expect(screen.getByText('GPT-5 Mini')).toBeInTheDocument();
     });
 
     it('should show "Select model" when no model is selected', () => {
@@ -291,17 +300,17 @@ describe('EnhancedSearchBar', () => {
     });
 
     it('should render SelectTrigger with proper structure', () => {
-      const { container } = render(<EnhancedSearchBar {...defaultProps} selectedModel="llama3.3:70b" />);
+      const { container } = render(<EnhancedSearchBar {...defaultProps} selectedModel="openai:gpt-5" />);
 
       const button = container.querySelector('button[role="combobox"]');
       expect(button).toBeInTheDocument();
     });
 
-    it('should show SelectValue with abbreviated model name', () => {
-      render(<EnhancedSearchBar {...defaultProps} selectedModel="llama3.3:70b" />);
+    it('should show SelectValue with model name', () => {
+      render(<EnhancedSearchBar {...defaultProps} selectedModel="openai:gpt-5" />);
 
-      // Should show abbreviated name (Llama 3.3)
-      expect(screen.getByText('Llama 3.3')).toBeInTheDocument();
+      // Should show model name
+      expect(screen.getByText('GPT-5')).toBeInTheDocument();
     });
 
     it('should render Skeleton when models are loading', () => {

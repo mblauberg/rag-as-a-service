@@ -32,7 +32,4 @@ resources:
 - generator/configmap.yaml
 - generator/secret.yaml
 - generator/hpa.yaml
-- ollama/deployment.yaml
-- ollama/service.yaml
-- ollama/pvc.yaml
 - ingress.yaml
