@@ -2,13 +2,10 @@
 import logging
 from fastapi import APIRouter
 from app.models.schemas import HealthResponse, ReadinessResponse
-from app.services.ollama_client import OllamaClient
+import app.services.generation_service as gen_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-# Initialize Ollama client for health checks
-ollama_client = OllamaClient()
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -25,19 +22,19 @@ async def health_check():
 @router.get("/ready", response_model=ReadinessResponse)
 async def readiness_check():
     """
-    Readiness check that validates Ollama connectivity.
+    Readiness check that validates provider availability.
 
     Returns:
-        Readiness status with Ollama connection details
+        Readiness status with number of available providers
     """
-    # Check Ollama connectivity
-    ollama_connected = await ollama_client.check_health()
+    # Count available providers from the global registry
+    num_providers = len(gen_service.provider_registry.providers) if gen_service.provider_registry else 0
 
-    status = "ready" if ollama_connected else "not_ready"
+    status = "ready" if num_providers > 0 else "not_ready"
 
-    logger.info(f"Readiness check: {status}, Ollama connected: {ollama_connected}")
+    logger.info(f"Readiness check: {status}, Providers available: {num_providers}")
 
     return ReadinessResponse(
         status=status,
-        ollama_connected=ollama_connected
+        providers_available=num_providers
     )

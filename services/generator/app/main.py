@@ -7,7 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.routes import generate, models, health
 from app.providers.registry import ProviderRegistry
-from app.providers.ollama_provider import OllamaProvider
 from app.providers.openai_provider import OpenAIProvider
 from app.providers.anthropic_provider import AnthropicProvider
 from app.providers.google_provider import GoogleProvider
@@ -23,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 # Initialize provider registry
 provider_registry = ProviderRegistry()
-provider_registry.register("ollama", OllamaProvider())
 provider_registry.register("openai", OpenAIProvider())
 provider_registry.register("anthropic", AnthropicProvider())
 provider_registry.register("google", GoogleProvider())
@@ -44,10 +42,10 @@ async def lifespan(app: FastAPI):
     """
     # Startup
     logger.info("Starting RAAS Generator service")
-    logger.info(f"Ollama URL: {settings.ollama_url}")
     logger.info(f"Default model: {settings.default_model}")
     logger.info(f"Max chunks: {settings.max_chunks}")
     logger.info(f"Temperature: {settings.temperature}")
+    logger.info(f"Available providers: {list(provider_registry.providers.keys())}")
 
     yield
 
