@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/services/api';
 import {
@@ -15,6 +15,7 @@ import { formatBytes, formatDate } from '@/utils/formatters';
 
 interface DocumentDetailModalProps {
   documentId: string;
+  highlightChunkId?: string;
   open: boolean;
   onClose: () => void;
 }
@@ -25,6 +26,7 @@ interface DocumentDetailModalProps {
  */
 export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
   documentId,
+  highlightChunkId,
   open,
   onClose,
 }) => {
@@ -33,6 +35,26 @@ export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
     queryFn: () => api.getDocument(documentId),
     enabled: open && !!documentId,
   });
+
+  useEffect(() => {
+    if (highlightChunkId && open) {
+      // Wait for modal to render
+      setTimeout(() => {
+        const element = document.getElementById(`chunk-${highlightChunkId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.classList.add('bg-yellow-100', 'border-l-4', 'border-yellow-500', 'transition-all');
+
+          // Remove highlight after 3 seconds
+          const timer = setTimeout(() => {
+            element.classList.remove('bg-yellow-100', 'border-l-4', 'border-yellow-500');
+          }, 3000);
+
+          return () => clearTimeout(timer);
+        }
+      }, 100);
+    }
+  }, [highlightChunkId, open]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -84,6 +106,7 @@ export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
                     {document.chunks.map((chunk, index) => (
                       <div
                         key={chunk.id}
+                        id={`chunk-${chunk.id}`}
                         className="bg-muted/50 rounded-lg p-4"
                       >
                         <div className="flex items-start gap-2 mb-2">
