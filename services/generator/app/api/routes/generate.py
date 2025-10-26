@@ -12,7 +12,7 @@ prompt_service = PromptService()
 
 
 @router.post("/", response_model=GenerateResponse)
-async def generate_summary(request: GenerateRequest):
+async def generate_summary(request: GenerateRequest) -> GenerateResponse:
     """
     Generate summary from document chunks using specified model via provider registry.
 

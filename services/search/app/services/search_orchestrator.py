@@ -46,8 +46,14 @@ class EmbedderClient:
                 json={"texts": [text]},
             )
             response.raise_for_status()
-            data = response.json()
-            return data["embeddings"][0]
+            data: dict[str, object] = response.json()
+            embeddings = data.get("embeddings")
+            if not isinstance(embeddings, list) or len(embeddings) == 0:
+                raise ValueError("Invalid embedding response from embedder service")
+            first_embedding = embeddings[0]
+            if not isinstance(first_embedding, list):
+                raise ValueError("Invalid embedding format")
+            return first_embedding
 
 
 class SearchOrchestrator:

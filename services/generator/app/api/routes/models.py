@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=ModelsResponse)
-async def list_models():
+async def list_models() -> ModelsResponse:
     """
     List all available models from all providers.
 

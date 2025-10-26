@@ -16,7 +16,7 @@ class RaasException(Exception):
 
     status_code = 500
 
-    def __init__(self, message: str, details: dict | None = None) -> None:
+    def __init__(self, message: str, details: dict[str, object] | None = None) -> None:
         self.message = message
         self.details = details or {}
         super().__init__(self.message)

@@ -1,6 +1,7 @@
 """FastAPI application entrypoint for Generator service."""
 import logging
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator, Dict
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -35,7 +36,7 @@ logger.info(f"Registered providers: {list(provider_registry.providers.keys())}")
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     Application lifespan manager for startup and shutdown events.
 
@@ -127,7 +128,7 @@ app.include_router(
 
 
 @app.get("/")
-async def root():
+async def root() -> Dict[str, str]:
     """Root endpoint."""
     return {
         "message": "RAAS Generator Service",

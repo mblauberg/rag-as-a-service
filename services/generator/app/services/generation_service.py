@@ -8,17 +8,18 @@ from app.models.schemas import (
 )
 from app.services.prompt_service import PromptService
 from app.core.config import settings
+from app.providers.registry import ProviderRegistry
 
 logger = logging.getLogger(__name__)
 
 # Global registry (initialized in main.py)
-provider_registry = None
+provider_registry: ProviderRegistry | None = None
 
 
 class GenerationService:
     """Service for generating summaries from document chunks."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize generation service."""
         self.prompt_service = PromptService()
 
@@ -49,6 +50,8 @@ class GenerationService:
         context = "\n\n".join([chunk.text for chunk in chunks])
 
         # Generate via registry
+        if provider_registry is None:
+            raise RuntimeError("Provider registry not initialized")
         logger.info(f"Generating with {model_to_use}")
         summary, provider_name = await provider_registry.generate(model_to_use, prompt, context)
 
@@ -67,5 +70,7 @@ class GenerationService:
         Returns:
             ModelsResponse with list of models
         """
+        if provider_registry is None:
+            raise RuntimeError("Provider registry not initialized")
         models = await provider_registry.list_all_models()
         return ModelsResponse(models=models)

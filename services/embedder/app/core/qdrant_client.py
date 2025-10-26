@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class QdrantClientWrapper:
     """Wrapper class for Qdrant client operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Qdrant client and ensure collection exists."""
         self.client = QdrantClient(url=settings.qdrant_url)
         self.collection_name = settings.collection_name

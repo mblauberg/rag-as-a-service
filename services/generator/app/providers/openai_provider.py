@@ -41,10 +41,10 @@ class OpenAIProvider(ModelProvider):
         }
     ]
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize OpenAI provider with API key from environment."""
         api_key = os.getenv("OPENAI_API_KEY")
-        self.client = AsyncOpenAI(api_key=api_key) if api_key else None
+        self.client: AsyncOpenAI | None = AsyncOpenAI(api_key=api_key) if api_key else None
 
     def is_available(self) -> bool:
         """Check if OpenAI API key is configured."""
@@ -59,15 +59,15 @@ class OpenAIProvider(ModelProvider):
         """
         from datetime import datetime, timezone
 
-        models = []
+        models: List[Model] = []
         for m in self.MODELS:
             model = Model(
-                name=m["name"],
-                display_name=m["display_name"],
+                name=str(m["name"]),
+                display_name=str(m["display_name"]),
                 provider="openai",
-                size=m["size"],
-                description=m["description"],
-                capabilities=m["capabilities"],
+                size=str(m["size"]),
+                description=str(m["description"]),
+                capabilities=list(m["capabilities"]),
                 modified_at=datetime.now(timezone.utc).isoformat() + "Z"
             )
             models.append(model)
@@ -114,7 +114,10 @@ Provide a concise, accurate summary."""
                 max_completion_tokens=500
             )
 
-            return response.choices[0].message.content
+            content = response.choices[0].message.content
+            if content is None:
+                raise RuntimeError("OpenAI returned empty response")
+            return content
 
         except Exception as e:
             raise RuntimeError(f"OpenAI generation failed: {str(e)}")

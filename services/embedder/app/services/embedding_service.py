@@ -1,7 +1,9 @@
 """Embedding service for generating and storing vector embeddings."""
 import logging
-from typing import List
+from typing import Any, List
 from sentence_transformers import SentenceTransformer
+import numpy as np
+import numpy.typing as npt
 from qdrant_client.models import PointStruct
 from uuid import UUID
 
@@ -15,9 +17,9 @@ logger = logging.getLogger(__name__)
 class EmbeddingService:
     """Service for generating embeddings and storing them in Qdrant."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the embedding service."""
-        self.model = None
+        self.model: SentenceTransformer | None = None
         self.model_loaded = False
 
     def load_model(self) -> None:
@@ -52,13 +54,13 @@ class EmbeddingService:
             raise RuntimeError("Model not loaded. Call load_model() first.")
 
         try:
-            embeddings = self.model.encode(
+            embeddings: npt.NDArray[Any] = self.model.encode(
                 texts,
                 batch_size=settings.batch_size,
                 show_progress_bar=False,
                 convert_to_numpy=True
             )
-            return embeddings.tolist()
+            return embeddings.tolist()  # type: ignore[no-any-return]
         except Exception as e:
             logger.error(f"Error generating embeddings: {e}")
             raise
@@ -124,12 +126,12 @@ class EmbeddingService:
             raise RuntimeError("Model not loaded. Call load_model() first.")
 
         try:
-            embedding = self.model.encode(
+            embedding: npt.NDArray[Any] = self.model.encode(
                 [query],
                 show_progress_bar=False,
                 convert_to_numpy=True
             )[0]
-            return embedding.tolist()
+            return embedding.tolist()  # type: ignore[no-any-return]
         except Exception as e:
             logger.error(f"Error embedding query: {e}")
             raise
