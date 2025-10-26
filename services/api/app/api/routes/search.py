@@ -7,13 +7,12 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.api.dependencies import get_search_documents_use_case
+from app.api.dependencies import get_search_service_client
 from app.api.mappers import chunk_to_search_result
 from app.api.models import SearchRequest, SearchResponse
-from app.application.use_cases.search_documents import (SearchDocumentsUseCase,
-                                                        SearchMode)
+from app.infrastructure.services.search_service import SearchServiceClient
 from app.core.exceptions import EmbeddingServiceError, VectorStoreError
-from app.domain.value_objects.search_query import SearchQuery
+import httpx
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -22,8 +21,8 @@ router = APIRouter()
 @router.post("", response_model=SearchResponse)
 async def search_documents(
     request: SearchRequest,
-    mode: SearchMode = Query(
-        default=SearchMode.HYBRID,
+    mode: str = Query(
+        default="hybrid",
         description="Search mode: 'vector' (semantic only), 'keyword' (BM25 only), or 'hybrid' (RRF fusion - RECOMMENDED, +18-22% accuracy)",
     ),
     use_expansion: bool = Query(
@@ -34,7 +33,7 @@ async def search_documents(
         default=True,
         description="Enable cross-encoder reranking for improved precision (default: True, +8-12% precision@10)",
     ),
-    use_case: SearchDocumentsUseCase = Depends(get_search_documents_use_case),
+    search_client: SearchServiceClient = Depends(get_search_service_client),
 ) -> SearchResponse:
     """Perform document search with hybrid retrieval (RECOMMENDED).
 
@@ -75,31 +74,23 @@ async def search_documents(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Query cannot be empty"
         )
 
-    # Create domain value object
+    # Delegate to search service
     try:
-        search_query = SearchQuery(text=request.query, top_k=request.top_k)
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-
-    # Execute use case
-    try:
-        chunks = await use_case.execute(
-            search_query,
+        chunks = await search_client.search(
+            query=request.query,
             mode=mode,
-            use_expansion=use_expansion,
+            top_k=request.top_k,
             use_reranking=use_reranking,
+            use_expansion=use_expansion,
         )
 
         logger.info(
-            f"Search for '{request.query}' (mode={mode.value}, reranking={use_reranking}) "
+            f"Search for '{request.query}' (mode={mode}, reranking={use_reranking}) "
             f"returned {len(chunks)} results"
         )
 
         # Convert domain entities to response DTOs using actual scores
-        # Scores come from either:
-        # - Cross-encoder reranking (when enabled) - most accurate
-        # - Qdrant vector similarity (semantic search)
-        # - Fallback to rank-based if no score available
+        # Scores come from search service (reranking or vector similarity)
         results = [
             chunk_to_search_result(
                 chunk,
@@ -116,17 +107,28 @@ async def search_documents(
             query=request.query, results=results, total_results=len(results)
         )
 
-    except EmbeddingServiceError as e:
-        logger.error(f"Embedding generation failed: {e}")
+    except httpx.HTTPStatusError as e:
+        logger.error(f"Search service returned error: {e}")
+        if e.response.status_code == 503:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Search service unavailable: {str(e)}",
+            )
+        elif e.response.status_code == 400:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid search request: {str(e)}",
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Search service error: {str(e)}",
+            )
+    except httpx.RequestError as e:
+        logger.error(f"Cannot connect to search service: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Embedding service unavailable: {str(e)}",
-        )
-    except VectorStoreError as e:
-        logger.error(f"Vector search failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Vector database unavailable: {str(e)}",
+            detail=f"Search service unavailable: {str(e)}",
         )
     except Exception as e:
         logger.error(f"Search failed: {e}", exc_info=True)

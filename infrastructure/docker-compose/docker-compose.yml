@@ -50,6 +50,7 @@ services:
       - QDRANT_URL=http://qdrant:6333
       - EMBEDDER_URL=http://embedder:8001
       - GENERATOR_URL=http://generator:8002
+      - SEARCH_SERVICE_URL=http://search:8003
       - UPLOAD_DIR=/app/uploads
       - MAX_UPLOAD_SIZE=104857600
       - API_HOST=0.0.0.0
@@ -66,6 +67,8 @@ services:
       qdrant:
         condition: service_healthy
       generator:
+        condition: service_healthy
+      search:
         condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     networks:

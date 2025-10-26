@@ -39,6 +39,7 @@ from app.infrastructure.search.rrf_fusion_service import RRFFusionServiceImpl
 from app.infrastructure.services.embedding_service import HTTPEmbeddingService
 from app.infrastructure.services.generation_service import \
     HTTPGenerationService
+from app.infrastructure.services.search_service import SearchServiceClient
 from app.infrastructure.vector_store.qdrant_store import QdrantVectorStoreImpl
 # Ports
 from app.ports.repositories import ChunkRepository
@@ -174,6 +175,15 @@ def get_fusion_service() -> FusionService:
 def get_generation_service() -> GenerationService:
     """Create HTTP generation service instance."""
     return HTTPGenerationService(settings.generator.url)
+
+
+# Search Service Client
+def get_search_service_client() -> SearchServiceClient:
+    """Create search service HTTP client."""
+    return SearchServiceClient(
+        search_url=settings.search_service.url,
+        timeout=settings.search_service.timeout
+    )
 
 
 # Query Augmenter

@@ -92,6 +92,15 @@ class GeneratorConfig(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="GENERATOR_", case_sensitive=False)
 
 
+class SearchServiceConfig(BaseSettings):
+    """Search service configuration"""
+
+    url: str = Field("http://search:8003", description="Search service URL")
+    timeout: float = Field(60.0, description="HTTP timeout in seconds")
+
+    model_config = SettingsConfigDict(env_prefix="SEARCH_SERVICE_", case_sensitive=False)
+
+
 class Settings(BaseSettings):
     """Application settings - top-level configuration
 
@@ -110,6 +119,7 @@ class Settings(BaseSettings):
     search: SearchConfig = Field(default_factory=SearchConfig)
     embedder: EmbedderConfig = Field(default_factory=EmbedderConfig)
     generator: GeneratorConfig = Field(default_factory=GeneratorConfig)
+    search_service: SearchServiceConfig = Field(default_factory=SearchServiceConfig)
 
     # Application settings
     log_level: str = Field("INFO", description="Logging level")
