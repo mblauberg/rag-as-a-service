@@ -17,7 +17,8 @@ from app.api.dependencies import (
     get_upload_document_use_case,
     get_list_documents_use_case,
     get_delete_document_use_case,
-    get_search_documents_use_case
+    get_search_documents_use_case,
+    get_get_document_use_case
 )
 from app.domain.entities.document import Document
 from app.domain.entities.chunk import Chunk
@@ -264,6 +265,86 @@ async def test_search_documents_empty_query():
 
         # Pydantic validation returns 422 for empty string with min_length constraint
         assert response.status_code == 422
+
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_get_document_by_id_success():
+    """Test retrieving a single document with chunks via hexagonal route."""
+    mock_use_case = AsyncMock()
+
+    # Create mock document with chunks
+    document_id = uuid4()
+    chunk_id1 = uuid4()
+    chunk_id2 = uuid4()
+
+    mock_document = Document(
+        id=document_id,
+        title="Test Document",
+        file_name="test.pdf",
+        file_type="pdf",
+        created_at=datetime.now(UTC),
+        upload_status=UploadStatus.COMPLETED,
+        description="Test description",
+        file_path="/path/to/test.pdf",
+        file_size=2048
+    )
+
+    mock_chunks = [
+        Chunk(
+            id=chunk_id1,
+            document_id=document_id,
+            content="First chunk content",
+            tokens=50
+        ),
+        Chunk(
+            id=chunk_id2,
+            document_id=document_id,
+            content="Second chunk content",
+            tokens=60
+        )
+    ]
+
+    mock_use_case.execute.return_value = (mock_document, mock_chunks)
+
+    app.dependency_overrides[get_get_document_use_case] = lambda: mock_use_case
+
+    try:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.get(f"/api/v1/documents/{document_id}")
+
+        assert response.status_code == 200
+        result = response.json()
+        assert result["id"] == str(document_id)
+        assert result["title"] == "Test Document"
+        assert result["description"] == "Test description"
+        assert len(result["chunks"]) == 2
+        assert result["chunks"][0]["chunk_text"] == "First chunk content"
+        assert result["chunks"][1]["chunk_text"] == "Second chunk content"
+
+        mock_use_case.execute.assert_called_once_with(document_id)
+
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_get_document_by_id_not_found():
+    """Test retrieving non-existent document returns 404."""
+    mock_use_case = AsyncMock()
+    document_id = uuid4()
+    mock_use_case.execute.side_effect = DocumentNotFoundError(str(document_id))
+
+    app.dependency_overrides[get_get_document_use_case] = lambda: mock_use_case
+
+    try:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.get(f"/api/v1/documents/{document_id}")
+
+        assert response.status_code == 404
+        assert str(document_id) in response.json()["detail"]
 
     finally:
         app.dependency_overrides.clear()

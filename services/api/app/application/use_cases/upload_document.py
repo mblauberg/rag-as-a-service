@@ -20,6 +20,7 @@ class UploadDocumentCommand:
     title: str
     file_name: str
     file_content: bytes
+    file_size: int
     description: str | None = None
 
 
@@ -65,7 +66,8 @@ class UploadDocumentUseCase:
             title=command.title,
             file_name=command.file_name,
             file_type=self._detect_file_type(command.file_name),
-            created_at=datetime.now(timezone.utc),
+            file_size=command.file_size,
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
             upload_status=UploadStatus.PROCESSING,
             description=command.description
         )

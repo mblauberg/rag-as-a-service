@@ -10,6 +10,7 @@ from qdrant_client import AsyncQdrantClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.use_cases.delete_document import DeleteDocumentUseCase
+from app.application.use_cases.get_document import GetDocumentUseCase
 from app.application.use_cases.list_documents import ListDocumentsUseCase
 from app.application.use_cases.search_documents import SearchDocumentsUseCase
 
@@ -140,6 +141,27 @@ def get_delete_document_use_case(
         document_repo=document_repo,
         chunk_repo=chunk_repo,
         vector_store=vector_store
+    )
+
+
+# Get Document Use Case
+def get_get_document_use_case(
+    db: AsyncSession = Depends(get_db)
+) -> GetDocumentUseCase:
+    """Factory for GetDocumentUseCase.
+
+    Args:
+        db: Database session from FastAPI dependency
+
+    Returns:
+        Fully configured GetDocumentUseCase instance
+    """
+    document_repo = DocumentRepositoryImpl(db)
+    chunk_repo = ChunkRepositoryImpl(db)
+
+    return GetDocumentUseCase(
+        document_repo=document_repo,
+        chunk_repo=chunk_repo
     )
 
 

@@ -4,7 +4,7 @@ These mappers provide a centralized place for entity-to-DTO conversions,
 eliminating code duplication across route handlers and ensuring consistent
 mapping logic throughout the HTTP adapter layer.
 """
-from app.api.models import ChunkSearchResult, DocumentResponse
+from app.api.models import ChunkSearchResult, DocumentChunkResponse, DocumentResponse
 from app.domain.entities.chunk import Chunk
 from app.domain.entities.document import Document
 
@@ -91,4 +91,31 @@ def chunk_to_search_result(chunk: Chunk, score: float = 0.0) -> ChunkSearchResul
         content=chunk.content,
         score=score,
         tokens=chunk.tokens
+    )
+
+
+def chunk_to_response(chunk: Chunk) -> DocumentChunkResponse:
+    """Convert a domain Chunk entity to a DocumentChunkResponse DTO.
+
+    Args:
+        chunk: Domain Chunk entity to convert
+
+    Returns:
+        DocumentChunkResponse DTO suitable for API responses
+
+    Note:
+        chunk_index defaults to 0 and should be set by the caller
+    """
+    from datetime import datetime, UTC
+    return DocumentChunkResponse(
+        id=chunk.id,
+        chunk_index=0,  # Default, should be overridden by caller
+        chunk_text=chunk.content,
+        token_count=chunk.tokens,
+        section_title=chunk.section_title,
+        section_level=chunk.section_level or 0,
+        page_number=chunk.page_number,
+        chunk_tokens=chunk.tokens,
+        chunk_metadata=chunk.metadata or {},
+        created_at=datetime.now(UTC)  # Use current time as chunks don't have created_at in domain
     )

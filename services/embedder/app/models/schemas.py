@@ -51,3 +51,16 @@ class ReadinessResponse(BaseModel):
 
     status: str = Field(..., description="Readiness status")
     model_loaded: bool = Field(..., description="Whether the embedding model is loaded")
+
+
+# Batch Text Embedding Schemas (without storage)
+class GenerateEmbeddingsRequest(BaseModel):
+    """Schema for batch text embedding request without storage."""
+
+    texts: List[str] = Field(..., min_items=1, description="List of texts to embed")
+
+
+class GenerateEmbeddingsResponse(BaseModel):
+    """Schema for batch text embedding response."""
+
+    embeddings: List[List[float]] = Field(..., description="List of embedding vectors")

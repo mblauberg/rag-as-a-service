@@ -49,7 +49,7 @@ class TestHTTPEmbeddingService:
 
             # Verify HTTP call
             mock_client.post.assert_called_once_with(
-                f"{embedder_url}/embed",
+                f"{embedder_url}/generate-embeddings",
                 json={"texts": texts},
                 timeout=30.0
             )

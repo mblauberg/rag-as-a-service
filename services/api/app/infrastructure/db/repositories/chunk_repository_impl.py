@@ -38,7 +38,8 @@ class ChunkRepositoryImpl(ChunkRepository):
         Returns:
             Persisted chunks
         """
-        db_chunks = [self._to_model(chunk) for chunk in chunks]
+        # Convert chunks to models with proper chunk_index
+        db_chunks = [self._to_model(chunk, idx) for idx, chunk in enumerate(chunks)]
 
         # Add all chunks to session
         self.session.add_all(db_chunks)
@@ -78,7 +79,7 @@ class ChunkRepositoryImpl(ChunkRepository):
         await self.session.execute(stmt)
         await self.session.commit()
 
-    def _to_model(self, entity: Chunk) -> ChunkModel:
+    def _to_model(self, entity: Chunk, chunk_index: int = 0) -> ChunkModel:
         """Convert domain entity to ORM model.
 
         Note: Embedding vectors are intentionally NOT stored in the database.
@@ -86,6 +87,7 @@ class ChunkRepositoryImpl(ChunkRepository):
 
         Args:
             entity: Chunk domain entity
+            chunk_index: Position of chunk in document (0-indexed)
 
         Returns:
             ChunkModel ORM instance
@@ -93,8 +95,9 @@ class ChunkRepositoryImpl(ChunkRepository):
         return ChunkModel(
             id=entity.id,
             document_id=entity.document_id,
-            content=entity.content,
-            tokens=entity.tokens,
+            chunk_text=entity.content,
+            token_count=entity.tokens,
+            chunk_index=chunk_index,
             chunk_metadata=entity.metadata,
             section_title=entity.section_title,
             section_level=entity.section_level,
@@ -114,8 +117,8 @@ class ChunkRepositoryImpl(ChunkRepository):
         return Chunk(
             id=model.id,
             document_id=model.document_id,
-            content=model.content,
-            tokens=model.tokens,
+            content=model.chunk_text,
+            tokens=model.token_count or 0,
             metadata=model.chunk_metadata or {},  # Ensure not None
             section_title=model.section_title,
             section_level=model.section_level,

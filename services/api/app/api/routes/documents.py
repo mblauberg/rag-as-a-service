@@ -11,15 +11,18 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 
 from app.api.dependencies import (
     get_delete_document_use_case,
+    get_get_document_use_case,
     get_list_documents_use_case,
     get_upload_document_use_case,
 )
-from app.api.mappers import document_to_response
+from app.api.mappers import chunk_to_response, document_to_response
 from app.api.models import (
+    DocumentDetailResponse,
     ListDocumentsResponse,
     UploadDocumentResponse,
 )
 from app.application.use_cases.delete_document import DeleteDocumentUseCase
+from app.application.use_cases.get_document import GetDocumentUseCase
 from app.application.use_cases.list_documents import ListDocumentsUseCase
 from app.application.use_cases.upload_document import UploadDocumentCommand, UploadDocumentUseCase
 from app.core.exceptions import (
@@ -92,6 +95,7 @@ async def upload_document(
         title=title,
         file_name=file.filename,
         file_content=content,
+        file_size=len(content),
         description=description
     )
 
@@ -189,6 +193,59 @@ async def list_documents(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve documents: {str(e)}"
+        )
+
+
+@router.get("/{document_id}", response_model=DocumentDetailResponse)
+async def get_document(
+    document_id: UUID,
+    use_case: GetDocumentUseCase = Depends(get_get_document_use_case)
+):
+    """Get a single document with all its chunks.
+
+    Args:
+        document_id: Document UUID
+        use_case: Injected get document use case
+
+    Returns:
+        Document details with all chunks
+
+    Raises:
+        HTTPException: If document not found
+    """
+    try:
+        document, chunks = await use_case.execute(document_id)
+
+        # Convert to response DTO (enumerate to add chunk_index)
+        chunk_responses = []
+        for idx, chunk in enumerate(chunks):
+            chunk_response = chunk_to_response(chunk)
+            chunk_response.chunk_index = idx
+            chunk_responses.append(chunk_response)
+
+        return DocumentDetailResponse(
+            id=document.id,
+            title=document.title,
+            file_name=document.file_name,
+            file_type=document.file_type,
+            file_size=document.file_size,
+            file_path=document.file_path,
+            upload_status=document.upload_status.value,
+            embedding_status=document.embedding_status.value if hasattr(document, 'embedding_status') else "completed",
+            created_at=document.created_at,
+            updated_at=document.created_at,  # Use created_at as documents don't track updates
+            description=document.description,
+            chunks=chunk_responses
+        )
+
+    except DocumentNotFoundError as e:
+        # DocumentNotFoundError is already an HTTPException with 404 status
+        raise e
+    except Exception as e:
+        logger.error(f"Failed to get document: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve document: {str(e)}"
         )
 
 
