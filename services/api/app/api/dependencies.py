@@ -12,7 +12,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.use_cases.delete_document import DeleteDocumentUseCase
 from app.application.use_cases.get_document import GetDocumentUseCase
 from app.application.use_cases.list_documents import ListDocumentsUseCase
-from app.application.use_cases.search_documents import SearchDocumentsUseCase
 # Domain & Use Cases
 from app.application.use_cases.upload_document import UploadDocumentUseCase
 from app.core.config import settings
@@ -28,13 +27,6 @@ from app.infrastructure.generation.llm_query_augmenter import \
     LLMQueryAugmenterImpl
 from app.infrastructure.processing.file_processor import FileProcessorImpl
 from app.infrastructure.processing.semantic_chunker import SemanticChunkerImpl
-# Infrastructure - Reranking
-from app.infrastructure.reranking.cross_encoder_reranker import \
-    CrossEncoderRerankerImpl
-# Infrastructure - Search
-from app.infrastructure.search.postgres_keyword_store import \
-    PostgresKeywordStoreImpl
-from app.infrastructure.search.rrf_fusion_service import RRFFusionServiceImpl
 # Infrastructure - Services
 from app.infrastructure.services.embedding_service import HTTPEmbeddingService
 from app.infrastructure.services.generation_service import \
@@ -43,9 +35,9 @@ from app.infrastructure.services.search_service import SearchServiceClient
 from app.infrastructure.vector_store.qdrant_store import QdrantVectorStoreImpl
 # Ports
 from app.ports.repositories import ChunkRepository
-from app.ports.services import (EmbeddingService, FusionService,
-                                GenerationService, KeywordStore,
-                                QueryAugmenter, Reranker, VectorStore)
+from app.ports.services import (EmbeddingService,
+                                GenerationService,
+                                QueryAugmenter, VectorStore)
 
 
 # Qdrant Client Dependency
@@ -159,18 +151,6 @@ def get_get_document_use_case(db: AsyncSession = Depends(get_db)) -> GetDocument
     return GetDocumentUseCase(document_repo=document_repo, chunk_repo=chunk_repo)
 
 
-# Keyword Store
-def get_keyword_store(db: AsyncSession = Depends(get_db)) -> KeywordStore:
-    """Create PostgreSQL keyword store instance."""
-    return PostgresKeywordStoreImpl(db)
-
-
-# Fusion Service
-def get_fusion_service() -> FusionService:
-    """Create RRF fusion service instance."""
-    return RRFFusionServiceImpl()
-
-
 # Generation Service
 def get_generation_service() -> GenerationService:
     """Create HTTP generation service instance."""
@@ -192,50 +172,6 @@ def get_query_augmenter(
 ) -> QueryAugmenter:
     """Create LLM query augmenter instance."""
     return LLMQueryAugmenterImpl(generation_service)
-
-
-# Reranker
-def get_reranker() -> Reranker:
-    """Create cross-encoder reranker instance."""
-    return CrossEncoderRerankerImpl()
-
-
-# Search Documents Use Case
-def get_search_documents_use_case(
-    embedding_service: EmbeddingService = Depends(
-        lambda: HTTPEmbeddingService(settings.embedder.url)
-    ),
-    vector_store: VectorStore = Depends(
-        lambda: QdrantVectorStoreImpl(
-            client=qdrant_client.client, collection_name="documents"
-        )
-    ),
-    keyword_store: KeywordStore = Depends(get_keyword_store),
-    fusion_service: FusionService = Depends(get_fusion_service),
-    query_augmenter: QueryAugmenter = Depends(get_query_augmenter),
-    reranker: Reranker = Depends(get_reranker),
-) -> SearchDocumentsUseCase:
-    """Factory for SearchDocumentsUseCase with hybrid capabilities and query expansion.
-
-    Args:
-        embedding_service: Service for generating embeddings
-        vector_store: Store for semantic search
-        keyword_store: Store for BM25 keyword search
-        fusion_service: Service for result fusion
-        query_augmenter: Service for query expansion
-        reranker: Service for reranking results
-
-    Returns:
-        Fully configured SearchDocumentsUseCase instance with hybrid search, query expansion, and reranking support
-    """
-    return SearchDocumentsUseCase(
-        embedding_service=embedding_service,
-        vector_store=vector_store,
-        keyword_store=keyword_store,
-        fusion_service=fusion_service,
-        query_augmenter=query_augmenter,
-        reranker=reranker,
-    )
 
 
 # Chunk Repository
