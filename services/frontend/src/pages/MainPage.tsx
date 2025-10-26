@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { useSearchWithDebounce } from '@/hooks/useSearchWithDebounce';
 import { useDocuments } from '@/hooks/useDocuments';
 import { useModels } from '@/hooks/useModels';
+import { useSummaryGeneration } from '@/hooks/useSummaryGeneration';
 import { DocumentCard } from '@/components/documents/DocumentCard';
 import { SearchResults } from '@/components/search/SearchResults';
+import { SummaryDisplay } from '@/components/search/SummaryDisplay';
 import { motion } from 'framer-motion';
 import { PlusIcon } from '@radix-ui/react-icons';
 import { FileText, FileType, Table, FileCode } from 'lucide-react';
@@ -56,10 +58,19 @@ export const MainPage: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [highlightChunkId, setHighlightChunkId] = useState<string | null>(null);
 
   const searchResults = useSearchWithDebounce(searchQuery, selectedModel);
   const documents = useDocuments(1, 20);
   const models = useModels();
+
+  // Summary generation hook
+  const chunkIds = searchResults.data?.results.map(r => r.chunk_id) || [];
+  const summaryQuery = useSummaryGeneration(
+    searchQuery,
+    chunkIds,
+    selectedModel
+  );
 
   // Auto-select GPT-5 Mini when models load
   useEffect(() => {
@@ -71,6 +82,16 @@ export const MainPage: React.FC = () => {
 
   const handleModelChange = (value: string) => {
     setSelectedModel(value === 'none' ? null : value);
+  };
+
+  const handleChunkClick = (docId: string, chunkId: string) => {
+    setSelectedDocId(docId);
+    setHighlightChunkId(chunkId);
+  };
+
+  const handleModalClose = () => {
+    setSelectedDocId(null);
+    setHighlightChunkId(null);
   };
 
   const showSearch = searchQuery.length > 0;
@@ -177,12 +198,40 @@ export const MainPage: React.FC = () => {
                     {searchResults.data?.total_results || 0} results for "{searchQuery}"
                   </p>
                   {searchResults.data?.results && (
-                    <SearchResults
-                      results={searchResults.data.results}
-                      query={searchQuery}
-                      searchResponse={searchResults.data}
-                      onDocumentClick={(docId: string) => setSelectedDocId(docId)}
-                    />
+                    <>
+                      {/* Summary Section */}
+                      {summaryQuery.isLoading && (
+                        <div className="bg-white rounded-lg shadow-md p-6 mb-6 animate-pulse">
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                        </div>
+                      )}
+
+                      {summaryQuery.data && (
+                        <SummaryDisplay
+                          summary={summaryQuery.data.summary}
+                          modelUsed={summaryQuery.data.model_used}
+                          searchResults={searchResults.data.results}
+                          onCitationClick={handleChunkClick}
+                        />
+                      )}
+
+                      {summaryQuery.error && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                          <p className="text-sm text-red-800">
+                            Failed to generate summary. Showing search results only.
+                          </p>
+                        </div>
+                      )}
+
+                      <SearchResults
+                        results={searchResults.data.results}
+                        query={searchQuery}
+                        searchResponse={searchResults.data}
+                        onChunkClick={handleChunkClick}
+                      />
+                    </>
                   )}
                 </>
               ) : (
@@ -351,8 +400,9 @@ export const MainPage: React.FC = () => {
       {selectedDocId && (
         <DocumentDetailModal
           documentId={selectedDocId}
+          highlightChunkId={highlightChunkId || undefined}
           open={!!selectedDocId}
-          onClose={() => setSelectedDocId(null)}
+          onClose={handleModalClose}
         />
       )}
     </div>
