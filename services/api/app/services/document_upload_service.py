@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-import aiofiles
+import aiofiles  # type: ignore[import-untyped]
 
 from app.core.config import settings
 from app.core.exceptions import FileOperationError
@@ -48,7 +48,7 @@ class DocumentUploadService:
             document_type = self.file_detector.detect_from_filename(filename)
         except ValueError as e:
             logger.error(f"Unsupported file type for {filename}: {e}")
-            raise FileOperationError("detect_file_type", filename, e)
+            raise FileOperationError("detect_file_type", filename, e) from e
 
         # Generate unique file path
         file_id = uuid4()
@@ -62,7 +62,7 @@ class DocumentUploadService:
             logger.info(f"Saved file to {file_path}")
         except Exception as e:
             logger.error(f"Failed to save file {file_path}: {e}")
-            raise FileOperationError("write", str(file_path), e)
+            raise FileOperationError("write", str(file_path), e) from e
 
         # Detect MIME type
         file_type = file_processor.detect_file_type(str(file_path))
@@ -95,7 +95,7 @@ class DocumentUploadService:
                 logger.warning(f"File not found at stored path: {file_path}")
         except Exception as e:
             logger.error(f"Error deleting file {file_path}: {e}")
-            raise FileOperationError("delete", str(file_path), e)
+            raise FileOperationError("delete", str(file_path), e) from e
 
     def get_file_metadata(self, file_path: str) -> dict[str, Any]:
         """
@@ -125,4 +125,4 @@ class DocumentUploadService:
             raise
         except Exception as e:
             logger.error(f"Error getting file metadata for {file_path}: {e}")
-            raise FileOperationError("read", file_path, e)
+            raise FileOperationError("read", file_path, e) from e

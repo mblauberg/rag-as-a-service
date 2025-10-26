@@ -1,10 +1,13 @@
 """FastAPI application for search service."""
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Depends, status
+from typing import AsyncGenerator, Dict, List
+from fastapi import FastAPI, HTTPException, Depends, Request, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.exceptions import RaasException
 from app.models.schemas import (
     SearchRequest,
     SearchResponse,
@@ -25,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager."""
     # Startup
     logger.info("Starting RAAS Search Service")
@@ -55,8 +58,42 @@ app = FastAPI(
 )
 
 
+@app.exception_handler(RaasException)
+async def raas_exception_handler(
+    request: Request, exc: RaasException
+) -> JSONResponse:
+    """Handle all RAAS custom exceptions with structured responses."""
+    logger.error(
+        f"{exc.__class__.__name__}: {exc.message}",
+        extra={"path": str(request.url.path), "details": exc.details},
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": exc.__class__.__name__,
+            "message": exc.message,
+            "details": exc.details,
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(
+    request: Request, exc: Exception
+) -> JSONResponse:
+    """Catch-all for unexpected errors."""
+    logger.exception("Unexpected error", extra={"path": str(request.url.path)})
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "InternalServerError",
+            "message": "An unexpected error occurred",
+        },
+    )
+
+
 @app.get("/")
-async def root():
+async def root() -> Dict[str, object]:
     """Root endpoint."""
     return {
         "message": "RAAS Search Service",
@@ -66,13 +103,13 @@ async def root():
 
 
 @app.get("/api/v1/health", response_model=HealthResponse)
-async def health_check():
+async def health_check() -> HealthResponse:
     """Health check endpoint."""
     return HealthResponse(status="healthy")
 
 
 @app.get("/api/v1/ready", response_model=ReadinessResponse)
-async def readiness_check(db: AsyncSession = Depends(get_db)):
+async def readiness_check(db: AsyncSession = Depends(get_db)) -> ReadinessResponse:
     """Readiness check endpoint."""
     try:
         # Check if reranker is loaded
@@ -110,7 +147,7 @@ async def search(
     request: SearchRequest,
     db: AsyncSession = Depends(get_db),
     orchestrator: SearchOrchestrator = Depends(get_search_orchestrator),
-):
+) -> SearchResponse:
     """Execute intelligent search with hybrid retrieval and reranking.
 
     Supports three modes:

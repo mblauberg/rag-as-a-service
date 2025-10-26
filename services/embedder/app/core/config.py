@@ -31,4 +31,4 @@ class Settings(BaseSettings):
     )
 
 
-settings = Settings()
+settings = Settings(qdrant_url="")

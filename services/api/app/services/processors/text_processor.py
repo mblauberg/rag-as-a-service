@@ -2,9 +2,11 @@
 import re
 from pathlib import Path
 
-from app.services.processors.base_processor import (BaseDocumentProcessor,
-                                                    DocumentElement,
-                                                    ProcessedDocument)
+from app.services.processors.base_processor import (
+    BaseDocumentProcessor,
+    DocumentElement,
+    ProcessedDocument,
+)
 
 
 class TextProcessor(BaseDocumentProcessor):
@@ -50,7 +52,7 @@ class TextProcessor(BaseDocumentProcessor):
         """Parse markdown with heading structure."""
         elements = []
         lines = content.split("\n")
-        current_section = []
+        current_section: list[str] = []
 
         i = 0
         while i < len(lines):

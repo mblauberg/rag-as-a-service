@@ -1,257 +1,117 @@
-"""Custom exception classes for the API service."""
-from fastapi import HTTPException, status
+"""Common exception hierarchy for RAAS API service.
+
+Provides consistent error handling with proper HTTP status codes
+and structured error responses.
+"""
 
 
-class DocumentNotFoundError(HTTPException):
-    """
-    Exception raised when a document is not found.
+class RaasException(Exception):
+    """Base exception for all RAAS errors.
 
-    This exception is raised when attempting to retrieve, update, or delete
-    a document that doesn't exist in the database.
-    """
-
-    def __init__(self, document_id: str, detail: str = None):
-        """
-        Initialize DocumentNotFoundError.
-
-        Args:
-            document_id: The UUID of the document that was not found
-            detail: Optional custom error message
-        """
-        if detail is None:
-            detail = f"Document {document_id} not found"
-        super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
-
-
-class QdrantConnectionError(Exception):
-    """
-    Exception raised when Qdrant operations fail.
-
-    This exception is raised when vector database operations fail,
-    such as search, upsert, or delete operations.
+    Attributes:
+        message: Human-readable error message.
+        details: Additional error context (dict).
+        status_code: HTTP status code for this error type.
     """
 
-    def __init__(self, operation: str, original_error: Exception = None):
-        """
-        Initialize QdrantConnectionError.
+    status_code = 500
 
-        Args:
-            operation: Description of the operation that failed
-            original_error: The original exception that was caught
-        """
-        message = f"Qdrant operation failed: {operation}"
-        if original_error:
-            message += f" - {str(original_error)}"
-        super().__init__(message)
-        self.operation = operation
-        self.original_error = original_error
+    def __init__(self, *args: object, message: str = "", details: dict[str, object] | None = None, **kwargs: object) -> None:
+        # Support multiple initialization patterns for backward compatibility:
+        # 1. RaasException(message, details=dict) - new style
+        # 2. RaasException(message, key=value, ...) - kwargs style
+        # 3. RaasException(arg1, arg2, arg3) - old positional style
+        # 4. RaasException(operation=..., original_error=...) - kwargs only
 
+        if args:
+            # Old-style positional arguments
+            # Convert positional args to a message and details
+            if len(args) == 1:
+                self.message = str(args[0]) if not message else message
+            elif len(args) == 3:
+                # Old FileOperationError style: (operation, filename, exception)
+                self.message = f"{args[0]} operation failed for {args[1]}: {args[2]}" if not message else message
+                kwargs.update({"operation": args[0], "filename": args[1], "original_error": str(args[2])})
+            else:
+                self.message = " ".join(str(arg) for arg in args) if not message else message
+        elif not message and kwargs:
+            # Generate message from kwargs if no message provided
+            if "operation" in kwargs and "original_error" in kwargs:
+                # Clean up operation name for error message
+                operation = str(kwargs['operation']).replace('_', ' ')
+                # Special case for chunking operations
+                if operation.lower().startswith('chunk'):
+                    operation = "Chunking"
+                # Capitalize first letter only
+                elif operation:
+                    operation = operation[0].upper() + operation[1:]
+                self.message = f"{operation} operation failed: {kwargs['original_error']}"
+            else:
+                self.message = "Operation failed"
+        else:
+            self.message = message
 
-class EmbedderServiceError(Exception):
-    """
-    Exception raised when embedder service communication fails.
-
-    This exception is raised when the embedder service is unreachable
-    or returns an error response.
-    """
-
-    def __init__(self, operation: str, original_error: Exception = None):
-        """
-        Initialize EmbedderServiceError.
-
-        Args:
-            operation: Description of the operation that failed
-            original_error: The original exception that was caught
-        """
-        message = f"Embedder service operation failed: {operation}"
-        if original_error:
-            message += f" - {str(original_error)}"
-        super().__init__(message)
-        self.operation = operation
-        self.original_error = original_error
-
-
-class FileOperationError(Exception):
-    """
-    Exception raised when file system operations fail.
-
-    This exception is raised when file operations such as reading,
-    writing, or deleting fail.
-    """
-
-    def __init__(
-        self, operation: str, file_path: str, original_error: Exception = None
-    ):
-        """
-        Initialize FileOperationError.
-
-        Args:
-            operation: Description of the operation that failed (e.g., "read", "write", "delete")
-            file_path: Path to the file that caused the error
-            original_error: The original exception that was caught
-        """
-        message = f"File operation '{operation}' failed for {file_path}"
-        if original_error:
-            message += f" - {str(original_error)}"
-        super().__init__(message)
-        self.operation = operation
-        self.file_path = file_path
-        self.original_error = original_error
+        self.details = details or {}
+        # Merge any additional kwargs into details
+        self.details.update(kwargs)
+        # Also set kwargs as direct attributes for backward compatibility
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        super().__init__(self.message)
 
 
-class TextExtractionError(Exception):
-    """
-    Exception raised when text extraction from documents fails.
+class ServiceUnavailableError(RaasException):
+    """External service unavailable (embedder, generator, search, qdrant).
 
-    This exception is raised when the file processor cannot extract
-    text from a document file.
+    Used when HTTP requests to dependent services fail or timeout.
     """
 
-    def __init__(
-        self, file_path: str, file_type: str, original_error: Exception = None
-    ):
-        """
-        Initialize TextExtractionError.
-
-        Args:
-            file_path: Path to the file that caused the error
-            file_type: Type of the file (e.g., "pdf", "docx")
-            original_error: The original exception that was caught
-        """
-        message = f"Failed to extract text from {file_type} file: {file_path}"
-        if original_error:
-            message += f" - {str(original_error)}"
-        super().__init__(message)
-        self.file_path = file_path
-        self.file_type = file_type
-        self.original_error = original_error
+    status_code = 503
 
 
-# Alias for consistency with service port naming
-EmbeddingServiceError = EmbedderServiceError
+class ResourceNotFoundError(RaasException):
+    """Requested resource not found in database.
 
-
-class VectorStoreError(Exception):
-    """
-    Exception raised when vector store operations fail.
-
-    This exception is raised when vector database operations fail,
-    such as search, upsert, or delete operations.
+    Used for missing documents, chunks, or other database entities.
     """
 
-    def __init__(self, operation: str, original_error: Exception = None):
-        """
-        Initialize VectorStoreError.
-
-        Args:
-            operation: Description of the operation that failed
-            original_error: The original exception that was caught
-        """
-        message = f"Vector store operation failed: {operation}"
-        if original_error:
-            message += f" - {str(original_error)}"
-        super().__init__(message)
-        self.operation = operation
-        self.original_error = original_error
+    status_code = 404
 
 
-class GenerationServiceError(Exception):
-    """
-    Exception raised when LLM generation service operations fail.
+class ValidationError(RaasException):
+    """Input validation failed.
 
-    This exception is raised when the generation service is unreachable
-    or returns an error response.
+    Used for invalid request parameters, malformed data, or
+    business rule violations.
     """
 
-    def __init__(self, operation: str, original_error: Exception = None):
-        """
-        Initialize GenerationServiceError.
-
-        Args:
-            operation: Description of the operation that failed
-            original_error: The original exception that was caught
-        """
-        message = f"Generation service operation failed: {operation}"
-        if original_error:
-            message += f" - {str(original_error)}"
-        super().__init__(message)
-        self.operation = operation
-        self.original_error = original_error
+    status_code = 422
 
 
-class FileProcessingError(Exception):
-    """
-    Exception raised when file processing operations fail.
+class StorageError(RaasException):
+    """Database or vector store operation failed.
 
-    This exception is raised when file processing operations such as
-    text extraction or validation fail.
+    Used for database connection errors, transaction failures,
+    or Qdrant operations that fail unexpectedly.
     """
 
-    def __init__(
-        self, operation: str, file_path: str = None, original_error: Exception = None
-    ):
-        """
-        Initialize FileProcessingError.
-
-        Args:
-            operation: Description of the operation that failed
-            file_path: Optional path to the file that caused the error
-            original_error: The original exception that was caught
-        """
-        message = f"File processing operation failed: {operation}"
-        if file_path:
-            message += f" for {file_path}"
-        if original_error:
-            message += f" - {str(original_error)}"
-        super().__init__(message)
-        self.operation = operation
-        self.file_path = file_path
-        self.original_error = original_error
+    status_code = 500
 
 
-class ChunkingError(Exception):
-    """
-    Exception raised when text chunking operations fail.
+class AuthenticationError(RaasException):
+    """Authentication failed.
 
-    This exception is raised when the text chunker cannot split
-    text into semantic segments.
+    Reserved for future authentication implementation.
     """
 
-    def __init__(self, operation: str, original_error: Exception = None):
-        """
-        Initialize ChunkingError.
-
-        Args:
-            operation: Description of the operation that failed
-            original_error: The original exception that was caught
-        """
-        message = f"Chunking operation failed: {operation}"
-        if original_error:
-            message += f" - {str(original_error)}"
-        super().__init__(message)
-        self.operation = operation
-        self.original_error = original_error
+    status_code = 401
 
 
-class SearchError(Exception):
-    """
-    Exception raised when search operations fail.
-
-    This exception is raised when keyword search, vector search,
-    or hybrid search operations fail.
-    """
-
-    def __init__(self, operation: str, original_error: Exception = None):
-        """
-        Initialize SearchError.
-
-        Args:
-            operation: Description of the operation that failed
-            original_error: The original exception that was caught
-        """
-        message = f"Search operation failed: {operation}"
-        if original_error:
-            message += f" - {str(original_error)}"
-        super().__init__(message)
-        self.operation = operation
-        self.original_error = original_error
+# Backward compatibility aliases
+DocumentNotFoundError = ResourceNotFoundError
+VectorStoreError = StorageError
+ChunkingError = ValidationError
+EmbeddingServiceError = ServiceUnavailableError
+FileOperationError = StorageError
+FileProcessingError = ValidationError
+GenerationServiceError = ServiceUnavailableError

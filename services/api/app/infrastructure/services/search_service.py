@@ -3,8 +3,9 @@
 Delegates all search operations to the dedicated search microservice.
 """
 import logging
-import httpx
 from uuid import UUID
+
+import httpx
 
 from app.domain.entities.chunk import Chunk
 
@@ -37,22 +38,58 @@ class SearchServiceClient:
         use_expansion: bool = True,
         document_id: UUID | None = None,
     ) -> list[Chunk]:
-        """Execute search via search service.
+        """Execute search via dedicated search microservice.
+
+        Delegates all search operations to the search microservice, which
+        handles:
+        - Query embedding generation (via embedder service)
+        - Vector search in Qdrant
+        - Keyword search via PostgreSQL FTS
+        - Hybrid search with RRF fusion
+        - Cross-encoder reranking for precision
+
+        This client implements the microservices pattern, separating search
+        logic into a dedicated service for better scalability and isolation.
 
         Args:
-            query: Search query text
-            mode: Search mode (vector/keyword/hybrid)
-            top_k: Number of results to return
-            use_reranking: Enable cross-encoder reranking
-            use_expansion: Enable query expansion
-            document_id: Optional document ID filter
+            query: Natural language search query text.
+            mode: Search mode - "vector" (semantic), "keyword" (lexical),
+                or "hybrid" (fusion). Defaults to "hybrid" for best results.
+            top_k: Number of final results to return after search/reranking.
+                Defaults to 10.
+            use_reranking: Enable cross-encoder reranking for improved precision.
+                When True, retrieves 50+ candidates and reranks to top_k.
+                Defaults to True.
+            use_expansion: Enable query expansion (reserved for future use).
+                Currently not implemented in search service.
+            document_id: Optional UUID to filter results to specific document.
+                Applied in both vector and keyword search components.
 
         Returns:
-            List of ranked chunks
+            List of Chunk domain entities ranked by relevance (descending).
+            Converted from search service DTOs to API domain model.
 
         Raises:
-            httpx.HTTPStatusError: If search service returns error
-            httpx.RequestError: If cannot connect to search service
+            httpx.HTTPStatusError: If search service returns HTTP error status
+                (4xx/5xx). Error includes response details for debugging.
+            httpx.RequestError: If cannot connect to search service (network
+                error, service down, DNS failure).
+            RuntimeError: For unexpected errors during response parsing or
+                entity conversion.
+
+        Note:
+            This client converts between API domain entities (Chunk) and
+            search service DTOs (ChunkResult). The search service maintains
+            its own database connection for keyword search.
+
+        Example:
+            >>> client = SearchServiceClient("http://search:8003")
+            >>> results = await client.search(
+            ...     query="machine learning algorithms",
+            ...     mode="hybrid",
+            ...     use_reranking=True
+            ... )
+            >>> print(f"Found {len(results)} results")
         """
         request_data = {
             "query": query,
@@ -90,8 +127,8 @@ class SearchServiceClient:
                     score=result["score"],
                 )
                 # Set optional fields
-                chunk.document_title = result.get("document_title")
-                chunk.chunk_index = result.get("chunk_index")
+                chunk.document_title = result.get("document_title")  # type: ignore[attr-defined]
+                chunk.chunk_index = result.get("chunk_index")  # type: ignore[attr-defined]
                 chunks.append(chunk)
 
             logger.info(f"Search service returned {len(chunks)} results")

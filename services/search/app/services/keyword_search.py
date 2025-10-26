@@ -19,16 +19,55 @@ class KeywordSearchService:
         top_k: int = 10,
         document_id: UUID | None = None
     ) -> list[Chunk]:
-        """Search using PostgreSQL full-text search (BM25-like).
+        """Search using PostgreSQL Full-Text Search with BM25-like ranking.
+
+        Performs lexical search using PostgreSQL's built-in full-text search
+        capabilities. Uses tsvector indexes for fast term matching and ts_rank
+        for BM25-style relevance scoring.
+
+        PostgreSQL FTS provides:
+        - Stemming and stop-word removal (configurable language, default: english)
+        - Term frequency scoring with document length normalization
+        - Boolean operators (AND, OR, NOT) via tsquery syntax
+        - Fast indexed search using GIN or GiST indexes
+
+        Keyword search excels at:
+        - Exact term matching (product codes, IDs, technical terms)
+        - Named entity queries (person names, locations, organizations)
+        - Queries with specific terminology not in embedding vocabulary
+
+        Complements vector search in hybrid mode by capturing lexical signals
+        that pure semantic search might miss.
 
         Args:
-            session: Database session
-            query_text: Search query text
-            top_k: Number of results
-            document_id: Optional document filter
+            session: Active AsyncSession for PostgreSQL database queries.
+            query_text: Natural language query text. PostgreSQL tokenizes using
+                plainto_tsquery, which handles stemming and stop-words.
+            top_k: Number of top-ranked results to return. Defaults to 10.
+            document_id: Optional UUID to filter results to single document.
+                Applied as SQL WHERE condition.
 
         Returns:
-            List of chunks ranked by keyword relevance
+            List of Chunk objects ranked by PostgreSQL ts_rank (descending).
+            Each chunk includes:
+            - score: ts_rank value (float, higher = more relevant)
+            - content: Original chunk text with matched terms
+            - document metadata: title, filename, chunk_index
+
+        Note:
+            The search_vector column must be populated via database trigger
+            or application code. It's a tsvector representation of chunk
+            content with stemming applied.
+
+        Example:
+            >>> service = KeywordSearchService()
+            >>> results = await service.search(
+            ...     session=db_session,
+            ...     query_text="machine learning algorithms",
+            ...     top_k=10
+            ... )
+            >>> print(f"Found {len(results)} matches")
+            >>> print(f"Top rank: {results[0].score:.4f}")
         """
         # Build query with FTS ranking
         query = """

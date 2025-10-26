@@ -15,7 +15,7 @@ class ChunkItem(BaseModel):
 class EmbedRequest(BaseModel):
     """Schema for batch embedding request."""
 
-    chunks: List[ChunkItem] = Field(..., min_items=1, description="List of chunks to embed")
+    chunks: List[ChunkItem] = Field(min_length=1, description="List of chunks to embed")
 
 
 class EmbedResponse(BaseModel):
@@ -57,7 +57,7 @@ class ReadinessResponse(BaseModel):
 class GenerateEmbeddingsRequest(BaseModel):
     """Schema for batch text embedding request without storage."""
 
-    texts: List[str] = Field(..., min_items=1, description="List of texts to embed")
+    texts: List[str] = Field(min_length=1, description="List of texts to embed")
 
 
 class GenerateEmbeddingsResponse(BaseModel):

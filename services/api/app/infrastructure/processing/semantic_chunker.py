@@ -56,4 +56,4 @@ class SemanticChunkerImpl(TextChunker):
             return chunks
 
         except Exception as e:
-            raise ChunkingError(operation="chunk_text", original_error=e)
+            raise ChunkingError(operation="chunk_text", original_error=e) from e

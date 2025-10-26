@@ -4,9 +4,11 @@ from pathlib import Path
 from docx import Document
 from docx.opc.exceptions import PackageNotFoundError
 
-from app.services.processors.base_processor import (BaseDocumentProcessor,
-                                                    DocumentElement,
-                                                    ProcessedDocument)
+from app.services.processors.base_processor import (
+    BaseDocumentProcessor,
+    DocumentElement,
+    ProcessedDocument,
+)
 
 
 class DOCXProcessor(BaseDocumentProcessor):
@@ -33,7 +35,7 @@ class DOCXProcessor(BaseDocumentProcessor):
             doc = Document(str(file_path))
             elements: list[DocumentElement] = []
 
-            current_section = []
+            current_section: list[str] = []
             section_level = 0
 
             for para in doc.paragraphs:
@@ -41,13 +43,19 @@ class DOCXProcessor(BaseDocumentProcessor):
                     continue
 
                 # Detect headings by style
-                is_heading = para.style.name.startswith("Heading")
+                if para.style and para.style.name:
+                    is_heading = para.style.name.startswith("Heading")
+                else:
+                    is_heading = False
 
                 if is_heading:
                     # Extract heading level
                     try:
-                        level = int(para.style.name.split()[-1])
-                    except:
+                        if para.style and para.style.name:
+                            level = int(para.style.name.split()[-1])
+                        else:
+                            level = 1
+                    except (ValueError, IndexError):
                         level = 1
 
                     current_section = current_section[: level - 1] + [para.text.strip()]
@@ -92,27 +100,29 @@ class DOCXProcessor(BaseDocumentProcessor):
                 "num_tables": len(doc.tables),
             }
 
-        except PackageNotFoundError:
-            raise ValueError(f"DOCX file not found or invalid: {file_path}")
-        except FileNotFoundError:
-            raise ValueError(f"DOCX file not found: {file_path}")
+        except PackageNotFoundError as e:
+            raise ValueError(f"DOCX file not found or invalid: {file_path}") from e
+        except FileNotFoundError as e:
+            raise ValueError(f"DOCX file not found: {file_path}") from e
         except Exception as e:
-            raise ValueError(f"Error processing DOCX: {e}")
+            raise ValueError(f"Error processing DOCX: {e}") from e
 
         return ProcessedDocument(
             elements=elements, metadata=metadata, document_type="docx"
         )
 
-    def _table_to_markdown(self, table) -> str:
+    def _table_to_markdown(self, table: object) -> str:
         """Convert table to markdown format."""
+        from typing import Any, cast
         rows = []
-        for row in table.rows:
+        table_rows = cast(Any, table).rows
+        for row in table_rows:
             cells = [cell.text.strip() for cell in row.cells]
             rows.append("| " + " | ".join(cells) + " |")
 
         if len(rows) > 1:
             # Add header separator
-            num_cols = len(table.rows[0].cells)
+            num_cols = len(table_rows[0].cells)
             separator = "|" + "|".join(["---"] * num_cols) + "|"
             rows.insert(1, separator)
 

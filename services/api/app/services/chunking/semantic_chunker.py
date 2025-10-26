@@ -3,9 +3,19 @@ Semantic chunking using Chonkie's SemanticChunker.
 Modern, fast, and Python 3.13 compatible semantic text splitting.
 """
 
-from chonkie import SemanticChunker as ChonkieSemanticChunker
-from chonkie.embeddings import AutoEmbeddings
+from typing import TypedDict
+
+from chonkie import SemanticChunker as ChonkieSemanticChunker  # type: ignore[import-untyped]
+from chonkie.embeddings import AutoEmbeddings  # type: ignore[import-untyped]
 from pydantic import BaseModel
+
+
+class ChunkDict(TypedDict):
+    """Type definition for chunk dictionaries used internally."""
+    text: str
+    tokens: int
+    start: int
+    end: int
 
 
 class ChunkResult(BaseModel):
@@ -80,7 +90,7 @@ class SemanticChunker:
         # Convert to ChunkResult format
         results = []
         current_index = 0
-        accumulated_chunks = []
+        accumulated_chunks: list[ChunkDict] = []
 
         for chunk in chunks:
             chunk_text = chunk.text.strip()
@@ -103,12 +113,12 @@ class SemanticChunker:
 
         # Now process accumulated chunks with size constraints
         # Strategy: Merge VERY small fragments (< 10% of min), preserve semantic boundaries otherwise
-        merged_chunks = []
+        merged_chunks: list[ChunkDict] = []
         very_small_threshold = max(
             5, self.min_chunk_size * 0.1
         )  # Chunks smaller than this are fragments
 
-        buffer_chunks = []
+        buffer_chunks: list[ChunkDict] = []
         buffer_tokens = 0
 
         for i, chunk in enumerate(accumulated_chunks):
@@ -262,7 +272,7 @@ class SemanticChunker:
 
         return results
 
-    def _apply_overlap(self, chunks: list[dict]) -> list[dict]:
+    def _apply_overlap(self, chunks: list[ChunkDict]) -> list[ChunkDict]:
         """
         Apply overlap between adjacent chunks for context preservation.
 
@@ -275,7 +285,7 @@ class SemanticChunker:
         Returns:
             List of chunks with overlap chunks inserted between base chunks
         """
-        overlapping_chunks = []
+        overlapping_chunks: list[ChunkDict] = []
         overlap_tokens = int(self.max_chunk_size * self.overlap_ratio)
 
         for i, chunk in enumerate(chunks):
@@ -314,7 +324,7 @@ class SemanticChunker:
                 overlap_start = chunk["end"] - len(" ".join(overlap_from_curr))
                 overlap_end = next_chunk["start"] + len(" ".join(overlap_from_next))
 
-                overlap_chunk = {
+                overlap_chunk: ChunkDict = {
                     "text": overlap_text,
                     "tokens": overlap_token_count,
                     "start": overlap_start,
@@ -326,8 +336,8 @@ class SemanticChunker:
         return overlapping_chunks
 
     async def chunk_document(
-        self, text: str, metadata: dict | None = None
-    ) -> list[dict]:
+        self, text: str, metadata: dict[str, object] | None = None
+    ) -> list[dict[str, object]]:
         """
         Chunk document and return with metadata (API-compatible format).
 

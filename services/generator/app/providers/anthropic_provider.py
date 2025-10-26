@@ -2,6 +2,7 @@
 import os
 from typing import List
 from anthropic import AsyncAnthropic
+from anthropic.types import TextBlock
 from app.providers.base import ModelProvider
 from app.models.schemas import Model
 
@@ -34,10 +35,10 @@ class AnthropicProvider(ModelProvider):
         }
     ]
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Anthropic provider with API key from environment."""
         api_key = os.getenv("ANTHROPIC_API_KEY")
-        self.client = AsyncAnthropic(api_key=api_key) if api_key else None
+        self.client: AsyncAnthropic | None = AsyncAnthropic(api_key=api_key) if api_key else None
 
     def is_available(self) -> bool:
         """Check if Anthropic API key is configured."""
@@ -52,15 +53,15 @@ class AnthropicProvider(ModelProvider):
         """
         from datetime import datetime, timezone
 
-        models = []
+        models: List[Model] = []
         for m in self.MODELS:
             model = Model(
-                name=m["name"],
-                display_name=m["display_name"],
+                name=str(m["name"]),
+                display_name=str(m["display_name"]),
                 provider="anthropic",
-                size=m["size"],
-                description=m["description"],
-                capabilities=m["capabilities"],
+                size=str(m["size"]),
+                description=str(m["description"]),
+                capabilities=list(m["capabilities"]),
                 modified_at=datetime.now(timezone.utc).isoformat() + "Z"
             )
             models.append(model)
@@ -106,7 +107,11 @@ Provide a concise, accurate summary."""
                 ]
             )
 
-            return response.content[0].text
+            # Extract text from content blocks
+            for block in response.content:
+                if isinstance(block, TextBlock):
+                    return block.text
+            raise RuntimeError("Anthropic returned no text content")
 
         except Exception as e:
             raise RuntimeError(f"Anthropic generation failed: {str(e)}")

@@ -18,7 +18,7 @@ class Chunk:
     document_title: str | None = None
     document_filename: str | None = None
     chunk_index: int | None = None
-    metadata: dict = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
     def with_score(self, score: float) -> "Chunk":
         """Create new chunk with updated score."""

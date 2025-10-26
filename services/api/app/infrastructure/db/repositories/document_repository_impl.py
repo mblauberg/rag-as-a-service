@@ -47,14 +47,14 @@ class DocumentRepositoryImpl(DocumentRepository):
 
         if existing:
             # Update existing document
-            existing.title = document.title
-            existing.file_name = document.file_name
-            existing.file_type = document.file_type
-            existing.file_path = document.file_path
-            existing.file_size = document.file_size
-            existing.description = document.description
-            existing.upload_status = document.upload_status.value  # Enum to string
-            existing.created_at = document.created_at
+            existing.title = document.title  # type: ignore[assignment]
+            existing.file_name = document.file_name  # type: ignore[assignment]
+            existing.file_type = document.file_type  # type: ignore[assignment]
+            existing.file_path = document.file_path  # type: ignore[assignment]
+            existing.file_size = document.file_size  # type: ignore[assignment]
+            existing.description = document.description  # type: ignore[assignment]
+            existing.upload_status = document.upload_status.value  # type: ignore[assignment]
+            existing.created_at = document.created_at  # type: ignore[assignment]
         else:
             # Create new document
             db_document = self._to_model(document)
@@ -119,7 +119,7 @@ class DocumentRepositoryImpl(DocumentRepository):
 
         documents = [self._to_entity(db_doc) for db_doc in db_documents]
 
-        return documents, total
+        return documents, total or 0
 
     async def delete(self, document_id: UUID) -> None:
         """Delete document from database.
@@ -166,13 +166,13 @@ class DocumentRepositoryImpl(DocumentRepository):
             Document domain entity
         """
         return Document(
-            id=model.id,
-            title=model.title,
-            file_name=model.file_name,
-            file_type=model.file_type,
-            file_path=model.file_path,
-            file_size=model.file_size,
-            description=model.description,
-            upload_status=UploadStatus(model.upload_status),  # String to enum
-            created_at=model.created_at,
+            id=model.id,  # type: ignore[arg-type]
+            title=model.title,  # type: ignore[arg-type]
+            file_name=model.file_name,  # type: ignore[arg-type]
+            file_type=model.file_type,  # type: ignore[arg-type]
+            file_path=model.file_path,  # type: ignore[arg-type]
+            file_size=model.file_size,  # type: ignore[arg-type]
+            description=model.description,  # type: ignore[arg-type]
+            upload_status=UploadStatus(model.upload_status),
+            created_at=model.created_at,  # type: ignore[arg-type]
         )

@@ -1,9 +1,12 @@
 """FastAPI application entrypoint for the embedder service."""
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, status
+from typing import AsyncGenerator, Dict, Any
+from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.responses import JSONResponse
 
 from app.core.config import settings
+from app.core.exceptions import RaasException
 from app.services.embedding_service import embedding_service
 from app.models.schemas import (
     EmbedRequest,
@@ -26,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     Application lifespan manager for startup and shutdown events.
 
@@ -62,8 +65,42 @@ app = FastAPI(
 )
 
 
+@app.exception_handler(RaasException)
+async def raas_exception_handler(
+    request: Request, exc: RaasException
+) -> JSONResponse:
+    """Handle all RAAS custom exceptions with structured responses."""
+    logger.error(
+        f"{exc.__class__.__name__}: {exc.message}",
+        extra={"path": str(request.url.path), "details": exc.details},
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": exc.__class__.__name__,
+            "message": exc.message,
+            "details": exc.details,
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(
+    request: Request, exc: Exception
+) -> JSONResponse:
+    """Catch-all for unexpected errors."""
+    logger.exception("Unexpected error", extra={"path": str(request.url.path)})
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "InternalServerError",
+            "message": "An unexpected error occurred",
+        },
+    )
+
+
 @app.get("/")
-async def root():
+async def root() -> Dict[str, str]:
     """Root endpoint."""
     return {
         "message": "RAAS Embedder Service",
@@ -73,7 +110,7 @@ async def root():
 
 
 @app.get("/api/v1/health", response_model=HealthResponse)
-async def health_check():
+async def health_check() -> HealthResponse:
     """
     Basic health check endpoint.
 
@@ -84,7 +121,7 @@ async def health_check():
 
 
 @app.get("/api/v1/ready", response_model=ReadinessResponse)
-async def readiness_check():
+async def readiness_check() -> ReadinessResponse:
     """
     Readiness check that validates model loading.
 
@@ -102,7 +139,7 @@ async def readiness_check():
 
 
 @app.post("/api/v1/embed", response_model=EmbedResponse, status_code=status.HTTP_200_OK)
-async def embed_chunks(request: EmbedRequest):
+async def embed_chunks(request: EmbedRequest) -> EmbedResponse:
     """
     Generate embeddings for text chunks and store in Qdrant.
 
@@ -144,7 +181,7 @@ async def embed_chunks(request: EmbedRequest):
 
 
 @app.post("/api/v1/embed-query", response_model=EmbedQueryResponse)
-async def embed_query(request: EmbedQueryRequest):
+async def embed_query(request: EmbedQueryRequest) -> EmbedQueryResponse:
     """
     Generate embedding for a search query.
 
@@ -179,7 +216,7 @@ async def embed_query(request: EmbedQueryRequest):
 
 
 @app.post("/api/v1/generate-embeddings", response_model=GenerateEmbeddingsResponse)
-async def generate_embeddings(request: GenerateEmbeddingsRequest):
+async def generate_embeddings(request: GenerateEmbeddingsRequest) -> GenerateEmbeddingsResponse:
     """
     Generate embeddings for a batch of texts without storing them.
 

@@ -1,15 +1,14 @@
 """Upload document use case."""
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from app.core.enums import UploadStatus
 from app.domain.entities.chunk import Chunk
 from app.domain.entities.document import Document
 from app.ports.repositories import ChunkRepository, DocumentRepository
-from app.ports.services import (EmbeddingService, FileProcessor, TextChunker,
-                                VectorStore)
+from app.ports.services import EmbeddingService, FileProcessor, TextChunker, VectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +67,7 @@ class UploadDocumentUseCase:
             file_name=command.file_name,
             file_type=self._detect_file_type(command.file_name),
             file_size=command.file_size,
-            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+            created_at=datetime.now(UTC).replace(tzinfo=None),
             upload_status=UploadStatus.PROCESSING,
             description=command.description,
         )

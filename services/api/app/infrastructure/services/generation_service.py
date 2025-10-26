@@ -49,9 +49,9 @@ class HTTPGenerationService(GenerationService):
 
             # Extract text from response
             if hasattr(result, "text"):
-                return result.text
+                return result.text  # type: ignore[no-any-return]
             elif isinstance(result, dict) and "text" in result:
-                return result["text"]
+                return result["text"]  # type: ignore[no-any-return]
             elif isinstance(result, str):
                 return result
             else:
@@ -67,4 +67,4 @@ class HTTPGenerationService(GenerationService):
             raise GenerationServiceError(
                 f"Unexpected error during generation: {type(e).__name__}",
                 original_error=e,
-            )
+            ) from e

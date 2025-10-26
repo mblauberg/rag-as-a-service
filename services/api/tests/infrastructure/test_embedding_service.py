@@ -3,8 +3,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
+from tenacity import RetryError
 
-from app.core.exceptions import EmbeddingServiceError
+from app.core.exceptions import EmbeddingServiceError, ValidationError
 from app.infrastructure.services.embedding_service import HTTPEmbeddingService
 
 
@@ -62,7 +63,7 @@ class TestHTTPEmbeddingService:
 
     @pytest.mark.asyncio
     async def test_generate_embeddings_network_error(self, service):
-        """Test handling of network errors."""
+        """Test handling of network errors with retry."""
         texts = ["hello world"]
 
         with patch("httpx.AsyncClient") as mock_client_class:
@@ -74,15 +75,16 @@ class TestHTTPEmbeddingService:
             )
             mock_client_class.return_value = mock_client
 
-            with pytest.raises(EmbeddingServiceError) as exc_info:
+            # Should raise RetryError after exhausting retries
+            with pytest.raises(RetryError):
                 await service.generate_embeddings(texts)
 
-            assert "Failed to connect to embedding service" in str(exc_info.value)
-            assert exc_info.value.original_error is not None
+            # Verify it retried 3 times
+            assert mock_client.post.call_count == 3
 
     @pytest.mark.asyncio
     async def test_generate_embeddings_timeout(self, service):
-        """Test handling of timeout errors."""
+        """Test handling of timeout errors with retry."""
         texts = ["hello world"]
 
         with patch("httpx.AsyncClient") as mock_client_class:
@@ -94,15 +96,16 @@ class TestHTTPEmbeddingService:
             )
             mock_client_class.return_value = mock_client
 
-            with pytest.raises(EmbeddingServiceError) as exc_info:
+            # Should raise RetryError after exhausting retries
+            with pytest.raises(RetryError):
                 await service.generate_embeddings(texts)
 
-            assert "Embedding service request timed out" in str(exc_info.value)
-            assert exc_info.value.original_error is not None
+            # Verify it retried 3 times
+            assert mock_client.post.call_count == 3
 
     @pytest.mark.asyncio
     async def test_generate_embeddings_http_error(self, service):
-        """Test handling of HTTP errors (4xx, 5xx)."""
+        """Test handling of HTTP errors (4xx, 5xx) without retry."""
         texts = ["hello world"]
 
         with patch("httpx.AsyncClient") as mock_client_class:
@@ -120,15 +123,17 @@ class TestHTTPEmbeddingService:
             )
             mock_client_class.return_value = mock_client
 
-            with pytest.raises(EmbeddingServiceError) as exc_info:
+            # ValidationError doesn't trigger retry (only 503 retries)
+            with pytest.raises(ValidationError) as exc_info:
                 await service.generate_embeddings(texts)
 
             assert "Embedding service returned error" in str(exc_info.value)
             assert exc_info.value.original_error is not None
+            assert mock_client.post.call_count == 1
 
     @pytest.mark.asyncio
     async def test_generate_embeddings_invalid_response_structure(self, service):
-        """Test handling of invalid response structure."""
+        """Test handling of invalid response structure without retry."""
         texts = ["hello world"]
 
         with patch("httpx.AsyncClient") as mock_client_class:
@@ -143,14 +148,17 @@ class TestHTTPEmbeddingService:
             mock_client.post = AsyncMock(return_value=mock_response)
             mock_client_class.return_value = mock_client
 
-            with pytest.raises(EmbeddingServiceError) as exc_info:
+            # ValidationError doesn't trigger retry
+            with pytest.raises(ValidationError) as exc_info:
                 await service.generate_embeddings(texts)
 
             assert "Invalid response format" in str(exc_info.value)
+            # Should only try once (no retry)
+            assert mock_client.post.call_count == 1
 
     @pytest.mark.asyncio
     async def test_generate_embeddings_mismatched_count(self, service):
-        """Test handling of response with wrong number of embeddings."""
+        """Test handling of response with wrong number of embeddings without retry."""
         texts = ["hello world", "test document"]
 
         with patch("httpx.AsyncClient") as mock_client_class:
@@ -165,14 +173,16 @@ class TestHTTPEmbeddingService:
             mock_client.post = AsyncMock(return_value=mock_response)
             mock_client_class.return_value = mock_client
 
-            with pytest.raises(EmbeddingServiceError) as exc_info:
+            # ValidationError doesn't trigger retry
+            with pytest.raises(ValidationError) as exc_info:
                 await service.generate_embeddings(texts)
 
             assert "Expected 2 embeddings but got 1" in str(exc_info.value)
+            assert mock_client.post.call_count == 1
 
     @pytest.mark.asyncio
     async def test_generate_embeddings_invalid_json(self, service):
-        """Test handling of invalid JSON response."""
+        """Test handling of invalid JSON response without retry."""
         texts = ["hello world"]
 
         with patch("httpx.AsyncClient") as mock_client_class:
@@ -187,10 +197,12 @@ class TestHTTPEmbeddingService:
             mock_client.post = AsyncMock(return_value=mock_response)
             mock_client_class.return_value = mock_client
 
-            with pytest.raises(EmbeddingServiceError) as exc_info:
+            # ValidationError doesn't trigger retry
+            with pytest.raises(ValidationError) as exc_info:
                 await service.generate_embeddings(texts)
 
             assert "Failed to parse embedding service response" in str(exc_info.value)
+            assert mock_client.post.call_count == 1
 
     @pytest.mark.asyncio
     async def test_generate_embeddings_empty_input(self, service):

@@ -27,12 +27,12 @@ class GoogleProvider(ModelProvider):
         }
     ]
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Google provider with API key from environment."""
         api_key = os.getenv("GOOGLE_API_KEY")
         if api_key:
             genai.configure(api_key=api_key)
-            self.api_key = api_key
+            self.api_key: str | None = api_key
         else:
             self.api_key = None
 
@@ -49,15 +49,15 @@ class GoogleProvider(ModelProvider):
         """
         from datetime import datetime, timezone
 
-        models = []
+        models: List[Model] = []
         for m in self.MODELS:
             model = Model(
-                name=m["name"],
-                display_name=m["display_name"],
+                name=str(m["name"]),
+                display_name=str(m["display_name"]),
                 provider="google",
-                size=m["size"],
-                description=m["description"],
-                capabilities=m["capabilities"],
+                size=str(m["size"]),
+                description=str(m["description"]),
+                capabilities=list(m["capabilities"]),
                 modified_at=datetime.now(timezone.utc).isoformat() + "Z"
             )
             models.append(model)
@@ -104,7 +104,7 @@ Provide a concise, accurate summary."""
                 }
             )
 
-            return response.text
+            return str(response.text)
 
         except Exception as e:
             raise RuntimeError(f"Google Gemini generation failed: {str(e)}")

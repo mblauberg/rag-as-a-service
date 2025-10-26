@@ -7,7 +7,7 @@ from app.models.schemas import Model
 class ProviderRegistry:
     """Registry for managing and routing between model providers."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize empty registry."""
         self.providers: Dict[str, ModelProvider] = {}
 

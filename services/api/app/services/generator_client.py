@@ -3,9 +3,15 @@ import logging
 from typing import Any
 
 import httpx
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from app.core.config import settings
-from app.core.exceptions import GenerationServiceError
+from app.core.exceptions import GenerationServiceError, ServiceUnavailableError
 
 logger = logging.getLogger(__name__)
 
@@ -13,16 +19,22 @@ logger = logging.getLogger(__name__)
 class GeneratorClient:
     """Async HTTP client for Generator service."""
 
-    def __init__(self, base_url: str = None):
+    def __init__(self, base_url: str | None = None):
         """Initialize generator client."""
         self.base_url = base_url or settings.generator.url
         self.timeout = 30.0  # 30 second timeout for generation
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception_type(ServiceUnavailableError),
+    )
     async def generate_summary(
         self, query: str, chunks: list[dict[str, Any]], model: str
     ) -> dict[str, Any] | None:
-        """
-        Generate summary from chunks.
+        """Generate summary from chunks with retry logic.
+
+        Retries up to 3 times with exponential backoff (2-10s) on service unavailability.
 
         Args:
             query: Search query
@@ -31,6 +43,9 @@ class GeneratorClient:
 
         Returns:
             Generation response or None if failed
+
+        Raises:
+            ServiceUnavailableError: If generator service is unavailable (will retry)
         """
         url = f"{self.base_url}/api/v1/generate"
 
@@ -54,20 +69,44 @@ class GeneratorClient:
 
                 if response.status_code == 200:
                     logger.info("Successfully generated summary")
-                    return response.json()
+                    return response.json()  # type: ignore[no-any-return]
+                elif response.status_code == 503:
+                    logger.warning("Generator service temporarily unavailable")
+                    raise ServiceUnavailableError(
+                        "Generator service temporarily unavailable"
+                    )
                 else:
                     logger.warning(f"Generator returned {response.status_code}")
                     return None
 
+        except ServiceUnavailableError:
+            # Re-raise to trigger retry
+            raise
+        except httpx.ConnectError as e:
+            logger.error(f"Failed to connect to generator: {e}")
+            raise ServiceUnavailableError(
+                "Failed to connect to generator service", original_error=e
+            ) from e
+        except httpx.TimeoutException as e:
+            logger.error(f"Generator request timed out: {e}")
+            raise ServiceUnavailableError(
+                "Generator service request timed out", original_error=e
+            ) from e
         except Exception as e:
             logger.error(f"Generator request failed: {e}")
             return None
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception_type(ServiceUnavailableError),
+    )
     async def generate(
         self, prompt: str, max_tokens: int = 150, temperature: float = 0.3
     ) -> Any | None:
-        """
-        Generate text from a prompt using the generator service.
+        """Generate text from a prompt using the generator service with retry logic.
+
+        Retries up to 3 times with exponential backoff (2-10s) on service unavailability.
 
         Args:
             prompt: Text prompt for generation
@@ -76,6 +115,9 @@ class GeneratorClient:
 
         Returns:
             Generation response object with 'text' attribute, or None if failed
+
+        Raises:
+            ServiceUnavailableError: If generator service is unavailable (will retry)
         """
         url = f"{self.base_url}/api/v1/generate"
 
@@ -97,23 +139,48 @@ class GeneratorClient:
                     return type(
                         "GenerateResponse", (), {"text": result.get("text", "")}
                     )()
+                elif response.status_code == 503:
+                    logger.warning("Generator service temporarily unavailable")
+                    raise ServiceUnavailableError(
+                        "Generator service temporarily unavailable"
+                    )
                 else:
                     logger.warning(f"Generator returned {response.status_code}")
                     return None
 
+        except ServiceUnavailableError:
+            # Re-raise to trigger retry
+            raise
+        except httpx.ConnectError as e:
+            logger.error(f"Failed to connect to generator: {e}")
+            raise ServiceUnavailableError(
+                "Failed to connect to generator service", original_error=e
+            ) from e
+        except httpx.TimeoutException as e:
+            logger.error(f"Generator request timed out: {e}")
+            raise ServiceUnavailableError(
+                "Generator service request timed out", original_error=e
+            ) from e
         except Exception as e:
             logger.error(f"Generator request failed: {e}")
             return None
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception_type(ServiceUnavailableError),
+    )
     async def list_models(self) -> list[dict[str, Any]]:
-        """
-        List available models from Generator.
+        """List available models from Generator with retry logic.
+
+        Retries up to 3 times with exponential backoff (2-10s) on service unavailability.
 
         Returns:
             List of model info dictionaries
 
         Raises:
-            GenerationServiceError: If the generator service is unavailable or returns an error
+            ServiceUnavailableError: If the generator service is unavailable (will retry)
+            GenerationServiceError: If the generator service returns an error
         """
         url = f"{self.base_url}/api/v1/models"
 
@@ -123,7 +190,12 @@ class GeneratorClient:
 
                 if response.status_code == 200:
                     data = response.json()
-                    return data.get("models", [])
+                    return data.get("models", [])  # type: ignore[no-any-return]
+                elif response.status_code == 503:
+                    logger.warning("Generator service temporarily unavailable")
+                    raise ServiceUnavailableError(
+                        "Generator service temporarily unavailable"
+                    )
                 else:
                     logger.warning(f"Failed to list models: {response.status_code}")
                     raise GenerationServiceError(
@@ -131,12 +203,19 @@ class GeneratorClient:
                         original_error=Exception(f"HTTP {response.status_code}")
                     )
 
-        except httpx.HTTPError as e:
-            logger.error(f"Failed to list models: {e}")
-            raise GenerationServiceError(
-                operation="list_models",
-                original_error=e
-            )
+        except ServiceUnavailableError:
+            # Re-raise to trigger retry
+            raise
+        except httpx.ConnectError as e:
+            logger.error(f"Failed to connect to generator: {e}")
+            raise ServiceUnavailableError(
+                "Failed to connect to generator service", original_error=e
+            ) from e
+        except httpx.TimeoutException as e:
+            logger.error(f"Generator request timed out: {e}")
+            raise ServiceUnavailableError(
+                "Generator service request timed out", original_error=e
+            ) from e
         except GenerationServiceError:
             # Re-raise our custom exception
             raise
@@ -145,4 +224,4 @@ class GeneratorClient:
             raise GenerationServiceError(
                 operation="list_models",
                 original_error=e
-            )
+            ) from e

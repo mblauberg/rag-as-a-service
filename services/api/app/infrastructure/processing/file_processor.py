@@ -18,7 +18,7 @@ class FileProcessorImpl(FileProcessor):
 
     SUPPORTED_TYPES = {"pdf", "txt", "docx", "md", "markdown", "csv"}
 
-    async def extract_text(self, file_content: bytes, file_type: str) -> str:
+    async def extract_text(self, file_content: bytes, file_type: str) -> str:  # type: ignore[return]
         """Extract text from file content.
 
         Args:
@@ -64,7 +64,7 @@ class FileProcessorImpl(FileProcessor):
         except Exception as e:
             raise FileProcessingError(
                 operation=f"extract_text from {normalized_type}", original_error=e
-            )
+            ) from e
 
     async def _extract_from_pdf(self, file_content: bytes) -> str:
         """Extract text from PDF file.
@@ -93,7 +93,7 @@ class FileProcessorImpl(FileProcessor):
         except Exception as e:
             raise FileProcessingError(
                 operation="Failed to extract text from pdf", original_error=e
-            )
+            ) from e
 
     async def _extract_from_txt(self, file_content: bytes) -> str:
         """Extract text from plain text file.
@@ -112,7 +112,7 @@ class FileProcessorImpl(FileProcessor):
         except UnicodeDecodeError as e:
             raise FileProcessingError(
                 operation="Failed to decode text file", original_error=e
-            )
+            ) from e
 
     async def _extract_from_docx(self, file_content: bytes) -> str:
         """Extract text from DOCX file.
@@ -150,7 +150,7 @@ class FileProcessorImpl(FileProcessor):
         except Exception as e:
             raise FileProcessingError(
                 operation="Failed to extract text from docx", original_error=e
-            )
+            ) from e
 
     async def _extract_from_markdown(self, file_content: bytes) -> str:
         """Extract text from Markdown file.
@@ -171,7 +171,7 @@ class FileProcessorImpl(FileProcessor):
         except UnicodeDecodeError as e:
             raise FileProcessingError(
                 operation="Failed to decode markdown file", original_error=e
-            )
+            ) from e
 
     async def _extract_from_csv(self, file_content: bytes) -> str:
         """Extract text from CSV file.
@@ -206,8 +206,8 @@ class FileProcessorImpl(FileProcessor):
         except UnicodeDecodeError as e:
             raise FileProcessingError(
                 operation="Failed to decode CSV file", original_error=e
-            )
+            ) from e
         except Exception as e:
             raise FileProcessingError(
                 operation="Failed to extract text from csv", original_error=e
-            )
+            ) from e

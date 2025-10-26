@@ -112,7 +112,7 @@ class DocumentChunkResponse(BaseModel):
     section_level: int | None = 0
     page_number: int | None = None
     chunk_tokens: int | None = None
-    chunk_metadata: dict = {}
+    chunk_metadata: dict[str, object] = {}
     created_at: datetime
 
 
@@ -168,9 +168,7 @@ class GenerateSummaryRequest(BaseModel):
     """Request model for summary generation."""
 
     query: str = Field(..., min_length=1, description="Original search query")
-    chunk_ids: list[UUID] = Field(
-        ..., min_items=1, max_items=50, description="Chunk IDs to summarize"
-    )
+    chunk_ids: list[UUID] = Field(..., min_length=1, max_length=50, description="Chunk IDs to summarize")
     model: str = Field(..., min_length=1, description="Model to use for generation")
 
 

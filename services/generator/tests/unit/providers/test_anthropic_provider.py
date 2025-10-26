@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
+from anthropic.types import TextBlock
 from app.providers.anthropic_provider import AnthropicProvider
 from app.models.schemas import Model
 
@@ -51,8 +52,10 @@ async def test_list_models_returns_claude_models(anthropic_provider):
 async def test_generate_calls_anthropic_api(anthropic_provider):
     """generate calls Anthropic API with correct parameters"""
     # Arrange
+    mock_block = Mock(spec=TextBlock)
+    mock_block.text = "Generated summary"
     mock_response = Mock()
-    mock_response.content = [Mock(text="Generated summary")]
+    mock_response.content = [mock_block]
 
     # Act
     with patch.object(anthropic_provider.client.messages, 'create', new_callable=AsyncMock, return_value=mock_response) as mock_create:

@@ -3,12 +3,14 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.routes import documents, generate, health, models, search
 from app.core.config import settings
 from app.core.database import init_db
+from app.core.exceptions import RaasException
 
 # Configure logging
 logging.basicConfig(
@@ -56,6 +58,43 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+logger = logging.getLogger(__name__)
+
+
+@app.exception_handler(RaasException)
+async def raas_exception_handler(
+    request: Request, exc: RaasException
+) -> JSONResponse:
+    """Handle all RAAS custom exceptions with structured responses."""
+    logger.error(
+        f"{exc.__class__.__name__}: {exc.message}",
+        extra={"path": str(request.url.path), "details": exc.details},
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": exc.__class__.__name__,
+            "message": exc.message,
+            "details": exc.details,
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(
+    request: Request, exc: Exception
+) -> JSONResponse:
+    """Catch-all for unexpected errors."""
+    logger.exception("Unexpected error", extra={"path": str(request.url.path)})
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "InternalServerError",
+            "message": "An unexpected error occurred",
+        },
+    )
+
 
 # Configure CORS
 app.add_middleware(

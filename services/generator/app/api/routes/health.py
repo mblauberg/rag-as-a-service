@@ -9,7 +9,7 @@ router = APIRouter()
 
 
 @router.get("/health", response_model=HealthResponse)
-async def health_check():
+async def health_check() -> HealthResponse:
     """
     Basic health check endpoint (liveness probe).
 
@@ -20,7 +20,7 @@ async def health_check():
 
 
 @router.get("/ready", response_model=ReadinessResponse)
-async def readiness_check():
+async def readiness_check() -> ReadinessResponse:
     """
     Readiness check that validates provider availability.
 
