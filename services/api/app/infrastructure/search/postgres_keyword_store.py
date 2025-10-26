@@ -23,32 +23,54 @@ class PostgresKeywordStoreImpl(KeywordStore):
     async def search(
         self, query_text: str, top_k: int, document_id: UUID | None = None
     ) -> list[Chunk]:
-        """Search using PostgreSQL full-text search.
+        """Search using PostgreSQL full-text search or SQLite LIKE fallback.
 
-        Uses text_search_vector column and ts_rank for BM25-like ranking.
+        Uses text_search_vector column and ts_rank for BM25-like ranking in PostgreSQL.
+        Falls back to simple LIKE query for SQLite.
         """
         try:
-            # Build SQL with optional document filter
-            sql = """
-                SELECT
-                    id, document_id, chunk_text, token_count,
-                    chunk_metadata, section_title,
-                    section_level, page_number,
-                    ts_rank(
-                        text_search_vector,
-                        plainto_tsquery('english', :query)
-                    ) as rank
-                FROM document_chunks
-                WHERE text_search_vector @@ plainto_tsquery('english', :query)
-            """
+            # Check if using SQLite (for test compatibility)
+            db_url = str(self.db_session.bind.url)
+            is_sqlite = "sqlite" in db_url.lower()
 
-            params = {"query": query_text, "limit": top_k}
+            if is_sqlite:
+                # SQLite fallback using LIKE
+                sql = """
+                    SELECT
+                        id, document_id, chunk_text, token_count,
+                        chunk_metadata, section_title,
+                        section_level, page_number
+                    FROM document_chunks
+                    WHERE chunk_text LIKE :query
+                """
+                params = {"query": f"%{query_text}%", "limit": top_k}
 
-            if document_id:
-                sql += " AND document_id = :document_id"
-                params["document_id"] = str(document_id)
+                if document_id:
+                    sql += " AND document_id = :document_id"
+                    params["document_id"] = str(document_id)
 
-            sql += " ORDER BY rank DESC LIMIT :limit"
+                sql += " LIMIT :limit"
+            else:
+                # PostgreSQL full-text search
+                sql = """
+                    SELECT
+                        id, document_id, chunk_text, token_count,
+                        chunk_metadata, section_title,
+                        section_level, page_number,
+                        ts_rank(
+                            text_search_vector,
+                            plainto_tsquery('english', :query)
+                        ) as rank
+                    FROM document_chunks
+                    WHERE text_search_vector @@ plainto_tsquery('english', :query)
+                """
+                params = {"query": query_text, "limit": top_k}
+
+                if document_id:
+                    sql += " AND document_id = :document_id"
+                    params["document_id"] = str(document_id)
+
+                sql += " ORDER BY rank DESC LIMIT :limit"
 
             # Execute query
             result = await self.db_session.execute(text(sql), params)

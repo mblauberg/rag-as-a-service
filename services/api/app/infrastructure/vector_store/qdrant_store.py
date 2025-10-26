@@ -119,7 +119,7 @@ class QdrantVectorStoreImpl(VectorStore):
                 query_filter=query_filter,
             )
 
-            # Convert results to Chunk entities
+            # Convert results to Chunk entities with similarity scores
             chunks = []
             for scored_point in results:
                 payload = scored_point.payload
@@ -136,6 +136,8 @@ class QdrantVectorStoreImpl(VectorStore):
                     # Note: We don't retrieve embedding_vector from search results
                     # to save bandwidth - it can be regenerated if needed
                     embedding_vector=None,
+                    # Attach Qdrant similarity score (cosine similarity: -1 to 1, typically 0.5-1.0)
+                    score=scored_point.score,
                 )
                 chunks.append(chunk)
 

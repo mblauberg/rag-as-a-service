@@ -21,7 +21,7 @@ class UploadDocumentCommand:
     title: str
     file_name: str
     file_content: bytes
-    file_size: int
+    file_size: int | None = None
     description: str | None = None
 
 

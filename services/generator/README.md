@@ -64,7 +64,7 @@ Response:
       "modified_at": "2025-10-01T12:00:00Z"
     },
     {
-      "name": "openai:gpt-4o-mini",
+      "name": "openai:gpt-5-mini",
       "display_name": "GPT-4o Mini",
       "provider": "openai",
       "size": "N/A",
@@ -83,13 +83,13 @@ POST /api/v1/generate
 {
   "query": "What is cloud computing?",
   "chunks": [...],
-  "model": "openai:gpt-4o-mini"  # Optional, defaults to DEFAULT_MODEL
+  "model": "openai:gpt-5-mini"  # Optional, defaults to DEFAULT_MODEL
 }
 
 Response:
 {
   "summary": "Cloud computing provides...",
-  "model_used": "openai:gpt-4o-mini",
+  "model_used": "openai:gpt-5-mini",
   "tokens_used": 0
 }
 ```
@@ -100,7 +100,7 @@ Environment variables:
 
 | Variable | Default (.env.example) | Description |
 |----------|---------|-------------|
-| `DEFAULT_MODEL` | `openai:gpt-4o-mini` | Default model if not specified in request |
+| `DEFAULT_MODEL` | `openai:gpt-5-mini` | Default model if not specified in request |
 | `ENABLE_OPENAI` | `true` | Enable OpenAI provider (recommended for production) |
 | `OPENAI_API_KEY` | Required | OpenAI API key |
 | `ENABLE_OLLAMA` | `false` | Enable Ollama provider (local inference) |
@@ -140,7 +140,7 @@ The `ProviderRegistry` manages all providers:
 Models are identified by qualified names:
 
 - **Ollama models**: Simple name (e.g., `llama3.2`, `mistral`)
-- **API models**: Prefixed with provider (e.g., `openai:gpt-4o-mini`, `anthropic:claude-sonnet-4-5`)
+- **API models**: Prefixed with provider (e.g., `openai:gpt-5-mini`, `anthropic:claude-sonnet-4-5`)
 
 The registry routes requests to the appropriate provider based on the prefix.
 
@@ -270,7 +270,7 @@ Ensure environment variables are set correctly and service is restarted.
 
 ### Generation failures
 
-1. Check model name is correctly prefixed (e.g., `openai:gpt-4o-mini`)
+1. Check model name is correctly prefixed (e.g., `openai:gpt-5-mini`)
 2. Verify API key has sufficient credits/quota
 3. Review logs for detailed error messages
 4. Test with Ollama first to isolate provider issues

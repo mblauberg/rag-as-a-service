@@ -142,3 +142,22 @@ class DocumentListResponse(BaseModel):
     page: int
     limit: int
     documents: list[DocumentResponse]
+
+
+# Models Listing
+class ModelInfo(BaseModel):
+    """Information about an available LLM model."""
+
+    name: str
+    display_name: str
+    provider: str
+    size: str
+    description: str
+    capabilities: list[str]
+    modified_at: datetime
+
+
+class ModelsListResponse(BaseModel):
+    """Response model for listing available models."""
+
+    models: list[ModelInfo]

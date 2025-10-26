@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     # Ollama Configuration
     ollama_url: str = "http://localhost:11434"
-    default_model: str = "llama3.2"
+    default_model: str = "openai:gpt-5-mini"
     max_chunks: int = 5
     temperature: float = 0.1
 
@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:3000", "http://localhost:8000"]
 
     # Provider Toggles
-    enable_ollama: bool = True
-    enable_openai: bool = False
+    enable_ollama: bool = False
+    enable_openai: bool = True
     enable_anthropic: bool = False
     enable_google: bool = False
 

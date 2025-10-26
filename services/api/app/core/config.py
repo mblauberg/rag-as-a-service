@@ -87,7 +87,7 @@ class GeneratorConfig(BaseSettings):
     timeout: float = Field(
         GENERATOR_TIMEOUT_SECONDS, description="HTTP timeout in seconds"
     )
-    default_model: str = Field("openai:gpt-4", description="Default LLM model to use")
+    default_model: str = Field("openai:gpt-5-mini", description="Default LLM model to use")
 
     model_config = SettingsConfigDict(env_prefix="GENERATOR_", case_sensitive=False)
 
@@ -114,7 +114,8 @@ class Settings(BaseSettings):
     # Application settings
     log_level: str = Field("INFO", description="Logging level")
     cors_origins: list[str] = Field(
-        default=["http://localhost:3000"], description="Allowed CORS origins"
+        default=["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
+        description="Allowed CORS origins"
     )
 
     # File Upload Configuration

@@ -104,4 +104,4 @@ poetry install --with dev
 
 - Integration tests may require running services (Qdrant, Generator)
 - Use `.env.test` for test-specific configuration
-- Model references use current OpenAI models (gpt-4, gpt-4o-mini)
+- Model references use current OpenAI models (gpt-5, gpt-5-mini)

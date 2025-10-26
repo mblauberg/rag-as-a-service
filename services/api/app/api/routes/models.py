@@ -3,6 +3,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException, status
 
+from app.api.models import ModelsListResponse
 from app.core.exceptions import GenerationServiceError
 from app.services.generator_client import GeneratorClient
 
@@ -10,8 +11,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/models")
-async def list_models() -> dict[str, list[dict[str, str]]]:
+@router.get("/models", response_model=ModelsListResponse)
+async def list_models() -> ModelsListResponse:
     """
     List available LLM models from Generator service.
 
@@ -22,7 +23,7 @@ async def list_models() -> dict[str, list[dict[str, str]]]:
         generator_client = GeneratorClient()
         models = await generator_client.list_models()
 
-        return {"models": models}
+        return ModelsListResponse(models=models)
 
     except GenerationServiceError as e:
         logger.error(f"Generation service error: {e}")

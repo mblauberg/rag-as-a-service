@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { useUploadDocument } from '@/hooks/useDocuments';
 import {
   Dialog,
@@ -39,7 +38,6 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   const uploadDocument = useUploadDocument();
 
@@ -125,28 +123,13 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     }
 
     setError(null);
-    setUploadProgress(0);
 
     try {
-      // Simulate progress (since we don't have real upload progress from backend)
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
-
       const result = await uploadDocument.mutateAsync({
         file,
         title,
         description: description || undefined
       });
-
-      clearInterval(progressInterval);
-      setUploadProgress(100);
 
       // Show success briefly before closing
       setTimeout(() => {
@@ -157,10 +140,8 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         setFile(null);
         setTitle('');
         setDescription('');
-        setUploadProgress(0);
       }, 500);
     } catch (error) {
-      setUploadProgress(0);
       console.error('Upload failed:', error);
       setError(error instanceof Error ? error.message : 'Failed to upload document');
     }
@@ -263,44 +244,12 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             >
               Cancel
             </Button>
-            <div className="flex-1 max-w-xs">
-              {uploadDocument.isPending ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Uploading...</span>
-                    <span className="font-medium">{uploadProgress}%</span>
-                  </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-primary"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${uploadProgress}%` }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </div>
-                  {uploadProgress === 100 && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center gap-2 text-sm text-green-600"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>Upload complete!</span>
-                    </motion.div>
-                  )}
-                </div>
-              ) : (
-                <Button
-                  type="submit"
-                  disabled={!file || !title}
-                  className="w-full"
-                >
-                  Upload
-                </Button>
-              )}
-            </div>
+            <Button
+              type="submit"
+              disabled={!file || !title || uploadDocument.isPending}
+            >
+              {uploadDocument.isPending ? 'Uploading...' : 'Upload'}
+            </Button>
           </div>
         </form>
       </DialogContent>

@@ -95,8 +95,22 @@ async def search_documents(
             f"returned {len(chunks)} results"
         )
 
-        # Convert domain entities to response DTOs
-        results = [chunk_to_search_result(chunk, score=0.0) for chunk in chunks]
+        # Convert domain entities to response DTOs using actual scores
+        # Scores come from either:
+        # - Cross-encoder reranking (when enabled) - most accurate
+        # - Qdrant vector similarity (semantic search)
+        # - Fallback to rank-based if no score available
+        results = [
+            chunk_to_search_result(
+                chunk,
+                score=(
+                    chunk.score
+                    if chunk.score is not None
+                    else max(0.1, 1.0 - (rank * 0.07))  # Fallback rank-based
+                ),
+            )
+            for rank, chunk in enumerate(chunks)
+        ]
 
         return SearchResponse(
             query=request.query, results=results, total_results=len(results)

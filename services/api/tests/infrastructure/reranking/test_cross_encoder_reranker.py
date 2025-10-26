@@ -221,7 +221,7 @@ class TestCrossEncoderRerankerImpl:
             reranker = CrossEncoderRerankerImpl()
 
             # Verify default model is used
-            mock_class.assert_called_once_with("cross-encoder/ms-marco-MiniLM-L-6-v2")
+            mock_class.assert_called_once_with("cross-encoder/ms-marco-MiniLM-L-6-v2", device='cpu')
 
     def test_initialization_custom_model(self):
         """Test initialization with custom model."""
@@ -232,7 +232,7 @@ class TestCrossEncoderRerankerImpl:
             reranker = CrossEncoderRerankerImpl(model_name=custom_model)
 
             # Verify custom model is used
-            mock_class.assert_called_once_with(custom_model)
+            mock_class.assert_called_once_with(custom_model, device='cpu')
 
     @pytest.mark.asyncio
     async def test_rerank_handles_identical_scores(

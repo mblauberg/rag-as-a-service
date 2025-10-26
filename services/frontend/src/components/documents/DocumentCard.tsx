@@ -6,6 +6,7 @@ import { TrashIcon } from '@radix-ui/react-icons';
 import { api } from '@/services/api';
 import type { Document } from '@/types';
 import { formatBytes, formatDate, getFileTypeIcon, getFileTypeColor } from '@/utils/formatters';
+import { FileIcon } from '@/components/ui/file-icon';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -75,8 +76,8 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onClick })
           <CardHeader className="pb-3">
             <div className="flex items-start gap-3">
               {/* File Type Icon */}
-              <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl flex-shrink-0 ${getFileTypeColor(document.file_name)}`}>
-                {getFileTypeIcon(document.file_name)}
+              <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getFileTypeColor(document.file_name)}`}>
+                <FileIcon type={getFileTypeIcon(document.file_name)} className="w-6 h-6" />
               </div>
 
               {/* Title and Description */}

@@ -11,7 +11,7 @@ from sqlalchemy import (JSON, Column, DateTime, ForeignKey, Integer, String,
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.infrastructure.db.base import Base
+from app.core.database import Base
 
 
 class DocumentModel(Base):
@@ -24,9 +24,7 @@ class DocumentModel(Base):
     file_name = Column(String(255), nullable=False)
     file_type = Column(String(50), nullable=False)
     file_path = Column(String(512), nullable=True)
-    file_size = Column(
-        Integer, nullable=False
-    )  # Changed from nullable=True to match schema
+    file_size = Column(Integer, nullable=True)
     description = Column(Text, nullable=True)
     upload_status = Column(String(50), nullable=False)  # Store enum as string
     embedding_status = Column(
