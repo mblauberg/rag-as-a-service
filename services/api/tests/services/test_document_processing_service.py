@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 from app.services.document_processing_service import DocumentProcessingService
-from app.models.schemas import DocumentType
+from app.utils.file_type_detector import DocumentType
 
 
 def test_get_processor_for_pdf():

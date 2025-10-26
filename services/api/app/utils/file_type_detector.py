@@ -1,7 +1,18 @@
 """File type detection utility."""
+from enum import Enum
 from pathlib import Path
 
-from app.models.schemas import DocumentType
+
+class DocumentType(str, Enum):
+    """Supported document types."""
+    PDF = "pdf"
+    DOCX = "docx"
+    TXT = "txt"
+    MD = "md"
+    CSV = "csv"
+    XLSX = "xlsx"
+    PPTX = "pptx"
+    HTML = "html"
 
 
 class FileTypeDetector:

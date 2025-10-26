@@ -3,7 +3,7 @@ import pytest
 import asyncio
 from pathlib import Path
 from app.services.document_processing_service import DocumentProcessingService
-from app.models.schemas import DocumentType
+from app.utils.file_type_detector import DocumentType
 
 
 @pytest.mark.asyncio

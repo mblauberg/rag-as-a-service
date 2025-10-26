@@ -19,8 +19,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlalchemy.pool import StaticPool
 
 from app.main import app
+from app.api.dependencies import get_qdrant_client
 from app.core.database import Base, get_db
-from app.core.dependencies import get_qdrant_client
 from app.core.qdrant_client import QdrantClientWrapper
 from app.models.document import Document, DocumentChunk
 

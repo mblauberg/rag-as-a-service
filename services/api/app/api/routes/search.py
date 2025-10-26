@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.api.dependencies import get_search_documents_use_case
 from app.api.mappers import chunk_to_search_result
-from app.api.models import ChunkSearchResult, SearchRequest, SearchResponse
+from app.api.models import SearchRequest, SearchResponse
 from app.application.use_cases.search_documents import SearchDocumentsUseCase, SearchMode
 from app.core.exceptions import EmbeddingServiceError, VectorStoreError
 from app.domain.value_objects.search_query import SearchQuery

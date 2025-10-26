@@ -16,7 +16,6 @@ from app.api.dependencies import (
 )
 from app.api.mappers import document_to_response
 from app.api.models import (
-    DocumentResponse,
     ListDocumentsResponse,
     UploadDocumentResponse,
 )
