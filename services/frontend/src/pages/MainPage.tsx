@@ -130,18 +130,125 @@ export const MainPage: React.FC = () => {
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-center py-12"
+                      transition={{ duration: 0.4 }}
+                      className="text-center py-16"
                     >
-                      <h3 className="text-lg font-semibold text-foreground mb-2">
-                        No documents yet
-                      </h3>
-                      <p className="text-muted-foreground mb-6">
-                        Upload your first document to get started
-                      </p>
-                      <Button onClick={() => setUploadOpen(true)}>
-                        <PlusIcon className="mr-2 h-4 w-4" />
-                        Upload Document
-                      </Button>
+                      <div className="max-w-2xl mx-auto space-y-8">
+                        {/* Hero Icon */}
+                        <div className="flex justify-center">
+                          <div className="relative">
+                            <motion.div
+                              initial={{ scale: 0.8 }}
+                              animate={{ scale: 1 }}
+                              transition={{ duration: 0.5, type: "spring" }}
+                              className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center"
+                            >
+                              <svg
+                                className="w-12 h-12 text-primary"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                />
+                              </svg>
+                            </motion.div>
+                            <motion.div
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ delay: 0.3, duration: 0.3 }}
+                              className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center"
+                            >
+                              <PlusIcon className="w-5 h-5 text-white" />
+                            </motion.div>
+                          </div>
+                        </div>
+
+                        {/* Heading & Description */}
+                        <div className="space-y-3">
+                          <h2 className="text-3xl font-bold text-foreground">
+                            Welcome to RAAS
+                          </h2>
+                          <p className="text-lg text-muted-foreground max-w-md mx-auto">
+                            Upload your first document to start searching with AI-powered semantic search
+                          </p>
+                        </div>
+
+                        {/* Supported File Types */}
+                        <div className="flex justify-center gap-6">
+                          {[
+                            { icon: "📄", label: "PDF", color: "text-red-600" },
+                            { icon: "📝", label: "DOCX", color: "text-blue-600" },
+                            { icon: "📋", label: "TXT", color: "text-gray-600" },
+                            { icon: "📊", label: "CSV", color: "text-green-600" },
+                            { icon: "📑", label: "MD", color: "text-purple-600" }
+                          ].map((type) => (
+                            <motion.div
+                              key={type.label}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.4 + (["PDF", "DOCX", "TXT", "CSV", "MD"].indexOf(type.label) * 0.1) }}
+                              className="flex flex-col items-center gap-2"
+                            >
+                              <div className="text-3xl">{type.icon}</div>
+                              <span className={`text-xs font-medium ${type.color}`}>
+                                {type.label}
+                              </span>
+                            </motion.div>
+                          ))}
+                        </div>
+
+                        {/* CTA Button */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.6 }}
+                        >
+                          <Button
+                            size="lg"
+                            onClick={() => setUploadOpen(true)}
+                            className="text-base px-8 py-6 h-auto shadow-lg hover:shadow-xl transition-shadow"
+                          >
+                            <PlusIcon className="mr-2 h-5 w-5" />
+                            Upload Your First Document
+                          </Button>
+                        </motion.div>
+
+                        {/* Benefits List */}
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.8 }}
+                          className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 text-left"
+                        >
+                          {[
+                            {
+                              title: "Semantic Search",
+                              description: "Find content by meaning, not just keywords"
+                            },
+                            {
+                              title: "AI Summaries",
+                              description: "Get instant answers from your documents"
+                            },
+                            {
+                              title: "Multiple Formats",
+                              description: "Support for PDF, DOCX, TXT, CSV, and Markdown"
+                            }
+                          ].map((benefit, i) => (
+                            <div
+                              key={i}
+                              className="p-4 bg-card rounded-lg border border-border"
+                            >
+                              <h3 className="font-semibold text-sm mb-1">{benefit.title}</h3>
+                              <p className="text-xs text-muted-foreground">{benefit.description}</p>
+                            </div>
+                          ))}
+                        </motion.div>
+                      </div>
                     </motion.div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
