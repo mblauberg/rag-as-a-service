@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import health, hexagonal_documents, hexagonal_search, models, search
+from app.api.routes import health, hexagonal_documents, hexagonal_search, models
 from app.core.config import settings
 from app.core.database import init_db
 
@@ -77,11 +77,12 @@ app.include_router(
 #     tags=["documents"]
 # )
 
-app.include_router(
-    search.router,
-    prefix="/api/v1/search",
-    tags=["search"]
-)
+# LEGACY ROUTE - REMOVED
+# app.include_router(
+#     search.router,
+#     prefix="/api/v1/search",
+#     tags=["search"]
+# )
 
 app.include_router(
     models.router,
