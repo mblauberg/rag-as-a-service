@@ -60,7 +60,7 @@ class QdrantVectorStoreImpl(VectorStore):
             points = [
                 PointStruct(
                     id=str(chunk.id),
-                    vector=chunk.embedding_vector,
+                    vector=chunk.embedding_vector,  # type: ignore[arg-type]
                     payload={
                         "document_id": str(chunk.document_id),
                         "content": chunk.content,

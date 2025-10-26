@@ -64,7 +64,7 @@ class HTTPEmbeddingService(EmbeddingService):
                         f"Expected {len(texts)} embeddings but got {len(embeddings)}"
                     )
 
-                return embeddings
+                return embeddings  # type: ignore[no-any-return]
 
         except httpx.ConnectError as e:
             raise EmbeddingServiceError(

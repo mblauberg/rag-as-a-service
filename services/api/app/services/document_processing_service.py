@@ -56,7 +56,7 @@ class DocumentProcessingService:
 
     async def process_and_chunk(
         self, file_path: Path, document_type: DocumentType
-    ) -> list[dict]:
+    ) -> list[dict[str, object]]:
         """
         Process document and create chunks with metadata.
 
@@ -76,8 +76,8 @@ class DocumentProcessingService:
 
         # Group elements by section for better chunking
         chunks = []
-        current_section = []
-        current_section_title = None
+        current_section: list[str] = []
+        current_section_title: str | None = None
         current_section_level = 0
         current_page = None
 
@@ -137,7 +137,7 @@ class DocumentProcessingService:
         return chunks
 
     async def _chunk_text(
-        self, text: str, section_context: str = None
+        self, text: str, section_context: str | None = None
     ) -> list[dict[str, Any]]:
         """
         Chunk text using the configured SemanticChunker.

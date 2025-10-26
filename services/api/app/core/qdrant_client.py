@@ -40,7 +40,7 @@ class QdrantClientWrapper:
         limit: int = 10,
         score_threshold: float = 0.0,
         document_ids: list[str] | None = None,
-    ) -> list[dict]:
+    ) -> list[dict[str, object]]:
         """
         Search for similar vectors in Qdrant.
 

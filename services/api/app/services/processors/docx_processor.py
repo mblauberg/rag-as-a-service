@@ -33,7 +33,7 @@ class DOCXProcessor(BaseDocumentProcessor):
             doc = Document(str(file_path))
             elements: list[DocumentElement] = []
 
-            current_section = []
+            current_section: list[str] = []
             section_level = 0
 
             for para in doc.paragraphs:
@@ -41,12 +41,18 @@ class DOCXProcessor(BaseDocumentProcessor):
                     continue
 
                 # Detect headings by style
-                is_heading = para.style.name.startswith("Heading")
+                if para.style and para.style.name:
+                    is_heading = para.style.name.startswith("Heading")
+                else:
+                    is_heading = False
 
                 if is_heading:
                     # Extract heading level
                     try:
-                        level = int(para.style.name.split()[-1])
+                        if para.style and para.style.name:
+                            level = int(para.style.name.split()[-1])
+                        else:
+                            level = 1
                     except:
                         level = 1
 
@@ -103,16 +109,18 @@ class DOCXProcessor(BaseDocumentProcessor):
             elements=elements, metadata=metadata, document_type="docx"
         )
 
-    def _table_to_markdown(self, table) -> str:
+    def _table_to_markdown(self, table: object) -> str:
         """Convert table to markdown format."""
+        from typing import cast, Any
         rows = []
-        for row in table.rows:
+        table_rows = cast(Any, table).rows
+        for row in table_rows:
             cells = [cell.text.strip() for cell in row.cells]
             rows.append("| " + " | ".join(cells) + " |")
 
         if len(rows) > 1:
             # Add header separator
-            num_cols = len(table.rows[0].cells)
+            num_cols = len(table_rows[0].cells)
             separator = "|" + "|".join(["---"] * num_cols) + "|"
             rows.insert(1, separator)
 

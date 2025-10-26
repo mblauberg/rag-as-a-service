@@ -18,7 +18,7 @@ class FileProcessorImpl(FileProcessor):
 
     SUPPORTED_TYPES = {"pdf", "txt", "docx", "md", "markdown", "csv"}
 
-    async def extract_text(self, file_content: bytes, file_type: str) -> str:
+    async def extract_text(self, file_content: bytes, file_type: str) -> str:  # type: ignore[return]
         """Extract text from file content.
 
         Args:

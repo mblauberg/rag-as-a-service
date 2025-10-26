@@ -23,7 +23,7 @@ async def list_models() -> ModelsListResponse:
         generator_client = GeneratorClient()
         models = await generator_client.list_models()
 
-        return ModelsListResponse(models=models)
+        return ModelsListResponse(models=models)  # type: ignore[arg-type]
 
     except GenerationServiceError as e:
         logger.error(f"Generation service error: {e}")

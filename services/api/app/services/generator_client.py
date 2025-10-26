@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class GeneratorClient:
     """Async HTTP client for Generator service."""
 
-    def __init__(self, base_url: str = None):
+    def __init__(self, base_url: str | None = None):
         """Initialize generator client."""
         self.base_url = base_url or settings.generator.url
         self.timeout = 30.0  # 30 second timeout for generation
@@ -54,7 +54,7 @@ class GeneratorClient:
 
                 if response.status_code == 200:
                     logger.info("Successfully generated summary")
-                    return response.json()
+                    return response.json()  # type: ignore[no-any-return]
                 else:
                     logger.warning(f"Generator returned {response.status_code}")
                     return None
@@ -123,7 +123,7 @@ class GeneratorClient:
 
                 if response.status_code == 200:
                     data = response.json()
-                    return data.get("models", [])
+                    return data.get("models", [])  # type: ignore[no-any-return]
                 else:
                     logger.warning(f"Failed to list models: {response.status_code}")
                     raise GenerationServiceError(

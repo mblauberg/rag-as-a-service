@@ -14,7 +14,7 @@ from sqlalchemy.orm import relationship
 from app.core.database import Base
 
 
-class DocumentModel(Base):
+class DocumentModel(Base):  # type: ignore[misc]
     """SQLAlchemy model for documents table."""
 
     __tablename__ = "documents"
@@ -46,7 +46,7 @@ class DocumentModel(Base):
     )
 
 
-class ChunkModel(Base):
+class ChunkModel(Base):  # type: ignore[misc]
     """SQLAlchemy model for chunks table."""
 
     __tablename__ = "document_chunks"

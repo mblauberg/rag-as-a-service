@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-import aiofiles
+import aiofiles  # type: ignore[import-untyped]
 
 from app.core.config import settings
 from app.core.exceptions import FileOperationError

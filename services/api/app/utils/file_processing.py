@@ -78,7 +78,7 @@ class FileProcessor:
     def _extract_text_pdf(file_path: str) -> str:
         """Extract text from PDF file."""
         try:
-            from PyPDF2 import PdfReader
+            from PyPDF2 import PdfReader  # type: ignore[import-not-found]
 
             reader = PdfReader(file_path)
             text = []

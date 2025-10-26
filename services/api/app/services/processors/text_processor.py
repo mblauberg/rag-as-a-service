@@ -50,7 +50,7 @@ class TextProcessor(BaseDocumentProcessor):
         """Parse markdown with heading structure."""
         elements = []
         lines = content.split("\n")
-        current_section = []
+        current_section: list[str] = []
 
         i = 0
         while i < len(lines):

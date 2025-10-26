@@ -90,8 +90,8 @@ class SearchServiceClient:
                     score=result["score"],
                 )
                 # Set optional fields
-                chunk.document_title = result.get("document_title")
-                chunk.chunk_index = result.get("chunk_index")
+                chunk.document_title = result.get("document_title")  # type: ignore[attr-defined]
+                chunk.chunk_index = result.get("chunk_index")  # type: ignore[attr-defined]
                 chunks.append(chunk)
 
             logger.info(f"Search service returned {len(chunks)} results")

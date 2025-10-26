@@ -16,7 +16,7 @@ class RaasException(Exception):
 
     status_code = 500
 
-    def __init__(self, *args, message: str = "", details: dict | None = None, **kwargs) -> None:
+    def __init__(self, *args: object, message: str = "", details: dict[str, object] | None = None, **kwargs: object) -> None:
         # Support multiple initialization patterns for backward compatibility:
         # 1. RaasException(message, details=dict) - new style
         # 2. RaasException(message, key=value, ...) - kwargs style
@@ -38,7 +38,7 @@ class RaasException(Exception):
             # Generate message from kwargs if no message provided
             if "operation" in kwargs and "original_error" in kwargs:
                 # Clean up operation name for error message
-                operation = kwargs['operation'].replace('_', ' ')
+                operation = str(kwargs['operation']).replace('_', ' ')
                 # Special case for chunking operations
                 if operation.lower().startswith('chunk'):
                     operation = "Chunking"

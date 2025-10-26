@@ -115,11 +115,11 @@ class Settings(BaseSettings):
     qdrant_url: str = Field(..., description="Qdrant vector database URL")
 
     # Nested configurations
-    chunking: ChunkingConfig = Field(default_factory=ChunkingConfig)
-    search: SearchConfig = Field(default_factory=SearchConfig)
-    embedder: EmbedderConfig = Field(default_factory=EmbedderConfig)
-    generator: GeneratorConfig = Field(default_factory=GeneratorConfig)
-    search_service: SearchServiceConfig = Field(default_factory=SearchServiceConfig)
+    chunking: ChunkingConfig = Field(default_factory=ChunkingConfig)  # type: ignore[arg-type]
+    search: SearchConfig = Field(default_factory=SearchConfig)  # type: ignore[arg-type]
+    embedder: EmbedderConfig = Field(default_factory=EmbedderConfig)  # type: ignore[arg-type]
+    generator: GeneratorConfig = Field(default_factory=GeneratorConfig)  # type: ignore[arg-type]
+    search_service: SearchServiceConfig = Field(default_factory=SearchServiceConfig)  # type: ignore[arg-type]
 
     # Application settings
     log_level: str = Field("INFO", description="Logging level")
@@ -145,4 +145,4 @@ class Settings(BaseSettings):
 
 
 # Singleton instance
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]

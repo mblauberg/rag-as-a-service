@@ -16,13 +16,9 @@ engine_kwargs = {
 
 # Only add pool settings for non-SQLite databases
 if "sqlite" not in settings.database_url:
-    engine_kwargs.update(
-        {
-            "pool_pre_ping": True,
-            "pool_size": 10,
-            "max_overflow": 20,
-        }
-    )
+    engine_kwargs["pool_pre_ping"] = True
+    engine_kwargs["pool_size"] = 10  # type: ignore[assignment]
+    engine_kwargs["max_overflow"] = 20  # type: ignore[assignment]
 
 engine = create_async_engine(settings.database_url, **engine_kwargs)
 
