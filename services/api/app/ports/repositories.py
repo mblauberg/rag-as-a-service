@@ -95,3 +95,15 @@ class ChunkRepository(ABC):
             document_id: Document UUID
         """
         pass
+
+    @abstractmethod
+    async def get_chunks_by_ids(self, chunk_ids: list[UUID]) -> list[Chunk]:
+        """Retrieve multiple chunks by their IDs.
+
+        Args:
+            chunk_ids: List of chunk UUIDs to retrieve
+
+        Returns:
+            List of Chunk entities (empty list if none found)
+        """
+        pass

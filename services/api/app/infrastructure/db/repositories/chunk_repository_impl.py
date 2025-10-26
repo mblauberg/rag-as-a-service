@@ -79,6 +79,17 @@ class ChunkRepositoryImpl(ChunkRepository):
         await self.session.execute(stmt)
         await self.session.commit()
 
+    async def get_chunks_by_ids(self, chunk_ids: list[UUID]) -> list[Chunk]:
+        """Retrieve multiple chunks by their IDs."""
+        if not chunk_ids:
+            return []
+
+        stmt = select(ChunkModel).where(ChunkModel.id.in_(chunk_ids))
+        result = await self.session.execute(stmt)
+        chunk_models = result.scalars().all()
+
+        return [self._to_entity(model) for model in chunk_models]
+
     def _to_model(self, entity: Chunk, chunk_index: int = 0) -> ChunkModel:
         """Convert domain entity to ORM model.
 
