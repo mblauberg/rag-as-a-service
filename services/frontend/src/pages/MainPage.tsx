@@ -12,6 +12,30 @@ import { SearchResults } from '@/components/search/SearchResults';
 import { motion } from 'framer-motion';
 import { PlusIcon } from '@radix-ui/react-icons';
 
+// Module-level constants for performance
+const FILE_TYPES = [
+  { icon: "📄", label: "PDF", color: "text-red-600" },
+  { icon: "📝", label: "DOCX", color: "text-blue-600" },
+  { icon: "📋", label: "TXT", color: "text-gray-600" },
+  { icon: "📊", label: "CSV", color: "text-green-600" },
+  { icon: "📑", label: "MD", color: "text-purple-600" }
+] as const;
+
+const BENEFITS = [
+  {
+    title: "Semantic Search",
+    description: "Find content by meaning, not just keywords"
+  },
+  {
+    title: "AI Summaries",
+    description: "Get instant answers from your documents"
+  },
+  {
+    title: "Multiple Formats",
+    description: "Support for PDF, DOCX, TXT, CSV, and Markdown"
+  }
+] as const;
+
 /**
  * MainPage - Single-page search-centric application.
  *
@@ -56,6 +80,7 @@ export const MainPage: React.FC = () => {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -148,6 +173,7 @@ export const MainPage: React.FC = () => {
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
+                                aria-hidden="true"
                               >
                                 <path
                                   strokeLinecap="round"
@@ -179,19 +205,13 @@ export const MainPage: React.FC = () => {
                         </div>
 
                         {/* Supported File Types */}
-                        <div className="flex justify-center gap-6">
-                          {[
-                            { icon: "📄", label: "PDF", color: "text-red-600" },
-                            { icon: "📝", label: "DOCX", color: "text-blue-600" },
-                            { icon: "📋", label: "TXT", color: "text-gray-600" },
-                            { icon: "📊", label: "CSV", color: "text-green-600" },
-                            { icon: "📑", label: "MD", color: "text-purple-600" }
-                          ].map((type) => (
+                        <div className="flex flex-wrap justify-center gap-6">
+                          {FILE_TYPES.map((type, index) => (
                             <motion.div
                               key={type.label}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: 0.4 + (["PDF", "DOCX", "TXT", "CSV", "MD"].indexOf(type.label) * 0.1) }}
+                              transition={{ delay: 0.4 + (index * 0.1) }}
                               className="flex flex-col items-center gap-2"
                             >
                               <div className="text-3xl">{type.icon}</div>
@@ -225,20 +245,7 @@ export const MainPage: React.FC = () => {
                           transition={{ delay: 0.8 }}
                           className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 text-left"
                         >
-                          {[
-                            {
-                              title: "Semantic Search",
-                              description: "Find content by meaning, not just keywords"
-                            },
-                            {
-                              title: "AI Summaries",
-                              description: "Get instant answers from your documents"
-                            },
-                            {
-                              title: "Multiple Formats",
-                              description: "Support for PDF, DOCX, TXT, CSV, and Markdown"
-                            }
-                          ].map((benefit, i) => (
+                          {BENEFITS.map((benefit, i) => (
                             <div
                               key={i}
                               className="p-4 bg-card rounded-lg border border-border"
