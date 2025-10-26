@@ -61,8 +61,10 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onClick })
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        variants={{
+          hidden: { opacity: 0, y: 20 },
+          show: { opacity: 1, y: 0 }
+        }}
         whileHover={{ y: -6, transition: { duration: 0.2 } }}
         transition={{ duration: 0.2 }}
       >

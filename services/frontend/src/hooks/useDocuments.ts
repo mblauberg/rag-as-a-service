@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { api } from '../services/api';
 import type { DocumentUploadResponse } from '../types';
 
@@ -48,7 +49,16 @@ export function useUploadDocument() {
       queryClient.invalidateQueries({ queryKey: documentKeys.lists() });
       // Set the new document in the cache
       queryClient.setQueryData(documentKeys.detail(data.id), data);
+      // Show success toast
+      toast.success('Document uploaded successfully', {
+        description: `"${data.title}" is now available for search`
+      });
     },
+    onError: (error) => {
+      toast.error('Upload failed', {
+        description: error instanceof Error ? error.message : 'Failed to upload document'
+      });
+    }
   });
 }
 
@@ -63,6 +73,13 @@ export function useDeleteDocument() {
       queryClient.removeQueries({ queryKey: documentKeys.detail(documentId) });
       // Invalidate list to refetch
       queryClient.invalidateQueries({ queryKey: documentKeys.lists() });
+      // Show success toast
+      toast.success('Document deleted');
     },
+    onError: (error) => {
+      toast.error('Delete failed', {
+        description: error instanceof Error ? error.message : 'Failed to delete document'
+      });
+    }
   });
 }
