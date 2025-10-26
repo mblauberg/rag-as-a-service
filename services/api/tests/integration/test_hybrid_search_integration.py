@@ -33,7 +33,7 @@ async def test_hybrid_search_endpoint_returns_results(async_client, sample_docum
 
     try:
         response = await async_client.post(
-            "/api/v1/hexagonal/search",
+            "/api/v1/search",
             json={
                 "query": "test content",
                 "top_k": 10
@@ -96,7 +96,7 @@ async def test_hybrid_vs_vector_search_return_different_results(async_client, sa
         app.dependency_overrides[get_search_documents_use_case] = lambda: create_mock_use_case([vector_chunk])
 
         vector_response = await async_client.post(
-            "/api/v1/hexagonal/search",
+            "/api/v1/search",
             json={"query": query, "top_k": 5},
             params={"mode": "vector"}
         )
@@ -105,7 +105,7 @@ async def test_hybrid_vs_vector_search_return_different_results(async_client, sa
         app.dependency_overrides[get_search_documents_use_case] = lambda: create_mock_use_case([hybrid_chunk, vector_chunk])
 
         hybrid_response = await async_client.post(
-            "/api/v1/hexagonal/search",
+            "/api/v1/search",
             json={"query": query, "top_k": 5},
             params={"mode": "hybrid"}
         )
@@ -155,7 +155,7 @@ async def test_keyword_search_mode_works(async_client, sample_document_with_chun
 
     try:
         response = await async_client.post(
-            "/api/v1/hexagonal/search",
+            "/api/v1/search",
             json={"query": "test", "top_k": 5},
             params={"mode": "keyword"}
         )
@@ -175,7 +175,7 @@ async def test_keyword_search_mode_works(async_client, sample_document_with_chun
 async def test_hybrid_search_with_empty_query_fails(async_client):
     """Test that hybrid search rejects empty queries."""
     response = await async_client.post(
-        "/api/v1/hexagonal/search",
+        "/api/v1/search",
         json={"query": "", "top_k": 10},
         params={"mode": "hybrid"}
     )
@@ -213,7 +213,7 @@ async def test_hybrid_search_default_mode(async_client, sample_document_with_chu
     try:
         # Search without specifying mode parameter
         response = await async_client.post(
-            "/api/v1/hexagonal/search",
+            "/api/v1/search",
             json={"query": "test content", "top_k": 5}
         )
 

@@ -57,7 +57,7 @@ async def test_upload_document_success():
             data = {"title": "Test Doc", "description": "Test description"}
 
             response = await client.post(
-                "/api/v1/hexagonal/documents/upload",
+                "/api/v1/documents/upload",
                 files=files,
                 data=data
             )
@@ -87,7 +87,7 @@ async def test_upload_document_empty_file():
             data = {"title": "Test Doc"}
 
             response = await client.post(
-                "/api/v1/hexagonal/documents/upload",
+                "/api/v1/documents/upload",
                 files=files,
                 data=data
             )
@@ -130,7 +130,7 @@ async def test_list_documents_success():
 
     try:
         async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.get("/api/v1/hexagonal/documents?page=1&limit=20")
+            response = await client.get("/api/v1/documents?page=1&limit=20")
 
         assert response.status_code == 200
         result = response.json()
@@ -156,7 +156,7 @@ async def test_list_documents_invalid_pagination():
 
     try:
         async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.get("/api/v1/hexagonal/documents?page=0&limit=20")
+            response = await client.get("/api/v1/documents?page=0&limit=20")
 
         assert response.status_code == 400
         assert "Page must be >= 1" in response.json()["detail"]
@@ -177,7 +177,7 @@ async def test_delete_document_success():
 
     try:
         async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.delete(f"/api/v1/hexagonal/documents/{document_id}")
+            response = await client.delete(f"/api/v1/documents/{document_id}")
 
         assert response.status_code == 204
         mock_use_case.execute.assert_called_once_with(document_id)
@@ -197,7 +197,7 @@ async def test_delete_document_not_found():
 
     try:
         async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.delete(f"/api/v1/hexagonal/documents/{document_id}")
+            response = await client.delete(f"/api/v1/documents/{document_id}")
 
         assert response.status_code == 404
         assert str(document_id) in response.json()["detail"]
@@ -232,7 +232,7 @@ async def test_search_documents_success():
     try:
         async with AsyncClient(app=app, base_url="http://test") as client:
             response = await client.post(
-                "/api/v1/hexagonal/search",
+                "/api/v1/search",
                 json={"query": "test query", "top_k": 10}
             )
 
@@ -258,7 +258,7 @@ async def test_search_documents_empty_query():
     try:
         async with AsyncClient(app=app, base_url="http://test") as client:
             response = await client.post(
-                "/api/v1/hexagonal/search",
+                "/api/v1/search",
                 json={"query": "", "top_k": 10}
             )
 
