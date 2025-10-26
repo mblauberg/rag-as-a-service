@@ -95,11 +95,11 @@ curl http://localhost:3000
 ### Valid Models for Testing
 
 Use these model identifiers in tests:
-- `openai:gpt-4o-mini` - Fast OpenAI model (requires API key)
+- `openai:gpt-5-mini` - Latest fast OpenAI model (requires API key)
 - `openai:gpt-4o` - Full OpenAI model (requires API key)
 - `llama3.2` - Local Ollama model (if available)
 
-**Note:** Model `gpt-5-mini` is invalid and should not be used in tests.
+**Note:** Always use the latest GPT-5 series models (gpt-5, gpt-5-mini, gpt-5-nano) for testing.
 
 ## Debugging Tools
 
