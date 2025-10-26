@@ -72,7 +72,7 @@ describe('UploadModal', () => {
       render(<UploadModal {...defaultProps} />, { wrapper: createWrapper() });
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
       expect(fileInput).toBeInTheDocument();
-      expect(fileInput.accept).toBe('.pdf,.docx,.txt');
+      expect(fileInput.accept).toBe('.pdf,.docx,.txt,.md,.markdown,.csv');
     });
 
     it('should render title input field', () => {

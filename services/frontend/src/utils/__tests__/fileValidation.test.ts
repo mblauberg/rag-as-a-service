@@ -29,6 +29,24 @@ describe('fileValidation', () => {
       expect(result.valid).toBe(true);
     });
 
+    it('should accept valid Markdown file with .md extension', () => {
+      const file = new File(['content'], 'readme.md', { type: 'text/markdown' });
+      const result = validateUploadFile(file);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should accept valid Markdown file with .markdown extension', () => {
+      const file = new File(['content'], 'notes.markdown', { type: 'text/markdown' });
+      const result = validateUploadFile(file);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should accept valid CSV file', () => {
+      const file = new File(['content'], 'data.csv', { type: 'text/csv' });
+      const result = validateUploadFile(file);
+      expect(result.valid).toBe(true);
+    });
+
     it('should accept uppercase extensions', () => {
       const file = new File(['content'], 'TEST.PDF', { type: 'application/pdf' });
       const result = validateUploadFile(file);
@@ -39,7 +57,7 @@ describe('fileValidation', () => {
       const file = new File(['content'], 'image.jpg', { type: 'image/jpeg' });
       const result = validateUploadFile(file);
       expect(result.valid).toBe(false);
-      expect(result.error).toBe('Please upload a PDF, DOCX, or TXT file');
+      expect(result.error).toBe('Please upload a PDF, DOCX, TXT, Markdown (.md), or CSV file');
     });
 
     it('should reject file exceeding size limit', () => {
@@ -84,7 +102,7 @@ describe('fileValidation', () => {
 
   describe('constants', () => {
     it('should export correct allowed extensions', () => {
-      expect(ALLOWED_EXTENSIONS).toEqual(['.pdf', '.docx', '.txt']);
+      expect(ALLOWED_EXTENSIONS).toEqual(['.pdf', '.docx', '.txt', '.md', '.markdown', '.csv']);
     });
 
     it('should export correct max file size', () => {

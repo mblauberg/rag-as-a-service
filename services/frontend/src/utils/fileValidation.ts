@@ -3,7 +3,7 @@
  * Centralizes validation logic to avoid duplication.
  */
 
-export const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.txt'] as const;
+export const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.txt', '.md', '.markdown', '.csv'] as const;
 export const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export interface FileValidationResult {
@@ -23,7 +23,7 @@ export function validateUploadFile(file: File): FileValidationResult {
   if (!hasValidExtension) {
     return {
       valid: false,
-      error: 'Please upload a PDF, DOCX, or TXT file'
+      error: 'Please upload a PDF, DOCX, TXT, Markdown (.md), or CSV file'
     };
   }
 
