@@ -22,13 +22,12 @@ import tempfile
 import os
 from pathlib import Path
 from httpx import AsyncClient
-from app.main import app
-from app.models.database import get_db
 import asyncio
 
 
 # Test data paths
-TEST_CORPUS_DIR = Path(__file__).parent.parent.parent / "data" / "rag_test_corpus"
+# Navigate from services/api/tests/integration/ to project root
+TEST_CORPUS_DIR = Path(__file__).parent.parent.parent.parent.parent / "data" / "rag_test_corpus"
 
 # Document type test cases - (filename, expected_type, should_have_content)
 SUPPORTED_DOCUMENT_TYPES = [
@@ -71,9 +70,10 @@ class TestDocumentTypeSupport:
         # Step 1: Upload document
         with open(file_path, "rb") as f:
             files = {"file": (filename, f, self._get_mime_type(expected_type))}
-            response = await async_client.post("/api/documents/upload", files=files)
+            data = {"title": f"Test: {filename}"}
+            response = await async_client.post("/api/v1/documents/upload", files=files, data=data)
 
-        assert response.status_code == 200, f"Upload failed for {filename}: {response.text}"
+        assert response.status_code == 201, f"Upload failed for {filename}: {response.text}"
         upload_data = response.json()
 
         # Verify response structure
@@ -92,7 +92,7 @@ class TestDocumentTypeSupport:
         await asyncio.sleep(2)
 
         # Step 4: Retrieve document details
-        response = await async_client.get(f"/api/documents/{document_id}")
+        response = await async_client.get(f"/api/v1/documents/{document_id}")
         assert response.status_code == 200
         document_data = response.json()
 
@@ -110,7 +110,7 @@ class TestDocumentTypeSupport:
         # Step 6: Search for document
         # Use a generic search term that should match most documents
         search_response = await async_client.post(
-            "/api/search",
+            "/api/v1/search",
             json={"query": "test", "limit": 10}
         )
         assert search_response.status_code == 200
@@ -121,7 +121,7 @@ class TestDocumentTypeSupport:
         assert "results" in search_results or "documents" in search_results
 
         # Step 7: Cleanup - delete the document
-        delete_response = await async_client.delete(f"/api/documents/{document_id}")
+        delete_response = await async_client.delete(f"/api/v1/documents/{document_id}")
         assert delete_response.status_code in [200, 204]
 
     @pytest.mark.asyncio
@@ -135,9 +135,10 @@ class TestDocumentTypeSupport:
         try:
             with open(temp_path, "rb") as f:
                 files = {"file": ("test.markdown", f, "text/markdown")}
-                response = await async_client.post("/api/documents/upload", files=files)
+                data = {"title": "Test markdown"}
+                response = await async_client.post("/api/v1/documents/upload", files=files, data=data)
 
-            assert response.status_code == 200
+            assert response.status_code == 201
             data = response.json()
             assert data["file_type"] == "md"
 
@@ -184,7 +185,8 @@ class TestDocumentTypeFailures:
             try:
                 with open(temp_path, "rb") as f:
                     files = {"file": (filename, f, mime_type)}
-                    response = await async_client.post("/api/documents/upload", files=files)
+                    data = {"title": "Test test"}
+                    response = await async_client.post("/api/v1/documents/upload", files=files, data=data)
 
                 # Should reject with 400 Bad Request or 422 Unprocessable Entity
                 assert response.status_code in [400, 422], \
@@ -212,17 +214,18 @@ class TestDocumentTypeFailures:
         try:
             with open(temp_path, "rb") as f:
                 files = {"file": ("large_file.txt", f, "text/plain")}
-                response = await async_client.post("/api/documents/upload", files=files)
+                data = {"title": "Test large_file.txt"}
+                response = await async_client.post("/api/v1/documents/upload", files=files, data=data)
 
             # This should succeed as it's under 100MB
             # A real >100MB test would need different infrastructure
-            assert response.status_code in [200, 400, 413, 422]
+            assert response.status_code in [201, 400, 413, 422]
 
-            if response.status_code == 200:
+            if response.status_code == 201:
                 # Cleanup if successful
                 data = response.json()
                 if "id" in data:
-                    await async_client.delete(f"/api/documents/{data['id']}")
+                    await async_client.delete(f"/api/v1/documents/{data['id']}")
         finally:
             os.unlink(temp_path)
 
@@ -237,20 +240,21 @@ class TestDocumentTypeFailures:
         try:
             with open(temp_path, "rb") as f:
                 files = {"file": ("empty.txt", f, "text/plain")}
-                response = await async_client.post("/api/documents/upload", files=files)
+                data = {"title": "Test empty.txt"}
+                response = await async_client.post("/api/v1/documents/upload", files=files, data=data)
 
             # System should either reject or accept with warning
             # Both are acceptable behaviors
-            assert response.status_code in [200, 400, 422]
+            assert response.status_code in [201, 400, 422]
 
-            if response.status_code == 200:
+            if response.status_code == 201:
                 data = response.json()
                 # If accepted, file_size should be 0
                 assert data.get("file_size") == 0
 
                 # Cleanup
                 if "id" in data:
-                    await async_client.delete(f"/api/documents/{data['id']}")
+                    await async_client.delete(f"/api/v1/documents/{data['id']}")
         finally:
             os.unlink(temp_path)
 
@@ -265,25 +269,26 @@ class TestDocumentTypeFailures:
         try:
             with open(temp_path, "rb") as f:
                 files = {"file": ("corrupted.pdf", f, "application/pdf")}
-                response = await async_client.post("/api/documents/upload", files=files)
+                data = {"title": "Test corrupted.pdf"}
+                response = await async_client.post("/api/v1/documents/upload", files=files, data=data)
 
             # Should either reject during upload or fail during processing
             # But should not crash the server
-            assert response.status_code in [200, 400, 422, 500]
+            assert response.status_code in [201, 400, 422, 500]
 
-            if response.status_code == 200:
+            if response.status_code == 201:
                 # If upload succeeded, processing might fail later
                 data = response.json()
                 if "id" in data:
                     # Check document status
-                    detail_response = await async_client.get(f"/api/documents/{data['id']}")
+                    detail_response = await async_client.get(f"/api/v1/documents/{data['id']}")
                     if detail_response.status_code == 200:
                         detail_data = detail_response.json()
                         # Processing should have failed
                         assert detail_data.get("embedding_status") in ["failed", "error", "pending"]
 
                     # Cleanup
-                    await async_client.delete(f"/api/documents/{data['id']}")
+                    await async_client.delete(f"/api/v1/documents/{data['id']}")
         finally:
             os.unlink(temp_path)
 
@@ -299,16 +304,17 @@ class TestDocumentTypeFailures:
             with open(temp_path, "rb") as f:
                 files = {"file": ("corrupted.docx", f,
                         "application/vnd.openxmlformats-officedocument.wordprocessingml.document")}
-                response = await async_client.post("/api/documents/upload", files=files)
+                data = {"title": "Test corrupted.docx"}
+                response = await async_client.post("/api/v1/documents/upload", files=files, data=data)
 
             # Should either reject during upload or fail during processing
-            assert response.status_code in [200, 400, 422, 500]
+            assert response.status_code in [201, 400, 422, 500]
 
-            if response.status_code == 200:
+            if response.status_code == 201:
                 data = response.json()
                 if "id" in data:
                     # Cleanup
-                    await async_client.delete(f"/api/documents/{data['id']}")
+                    await async_client.delete(f"/api/v1/documents/{data['id']}")
         finally:
             os.unlink(temp_path)
 
@@ -323,9 +329,10 @@ class TestDocumentContentExtraction:
 
         with open(file_path, "rb") as f:
             files = {"file": ("doc_pdf_01.pdf", f, "application/pdf")}
-            response = await async_client.post("/api/documents/upload", files=files)
+            data = {"title": "Test PDF content extraction"}
+            response = await async_client.post("/api/v1/documents/upload", files=files, data=data)
 
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         document_id = data["id"]
 
@@ -333,7 +340,7 @@ class TestDocumentContentExtraction:
         await asyncio.sleep(2)
 
         # Retrieve document
-        response = await async_client.get(f"/api/documents/{document_id}")
+        response = await async_client.get(f"/api/v1/documents/{document_id}")
         assert response.status_code == 200
         doc_data = response.json()
 
@@ -342,7 +349,7 @@ class TestDocumentContentExtraction:
         assert doc_data.get("embedding_status") is not None
 
         # Cleanup
-        await async_client.delete(f"/api/documents/{document_id}")
+        await async_client.delete(f"/api/v1/documents/{document_id}")
 
     @pytest.mark.asyncio
     async def test_csv_content_extraction(self, async_client: AsyncClient):
@@ -351,9 +358,10 @@ class TestDocumentContentExtraction:
 
         with open(file_path, "rb") as f:
             files = {"file": ("doc_csv_01.csv", f, "text/csv")}
-            response = await async_client.post("/api/documents/upload", files=files)
+            data = {"title": "Test CSV content extraction"}
+            response = await async_client.post("/api/v1/documents/upload", files=files, data=data)
 
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         document_id = data["id"]
 
@@ -362,13 +370,13 @@ class TestDocumentContentExtraction:
 
         # CSV should be processed and searchable
         search_response = await async_client.post(
-            "/api/search",
+            "/api/v1/search",
             json={"query": "Employee Engineering", "limit": 10}
         )
         assert search_response.status_code == 200
 
         # Cleanup
-        await async_client.delete(f"/api/documents/{document_id}")
+        await async_client.delete(f"/api/v1/documents/{document_id}")
 
     @pytest.mark.asyncio
     async def test_markdown_content_extraction(self, async_client: AsyncClient):
@@ -377,9 +385,10 @@ class TestDocumentContentExtraction:
 
         with open(file_path, "rb") as f:
             files = {"file": ("doc_md_01.md", f, "text/markdown")}
-            response = await async_client.post("/api/documents/upload", files=files)
+            data = {"title": "Test Markdown content extraction"}
+            response = await async_client.post("/api/v1/documents/upload", files=files, data=data)
 
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         document_id = data["id"]
 
@@ -388,10 +397,10 @@ class TestDocumentContentExtraction:
 
         # Markdown should preserve structure and be searchable
         search_response = await async_client.post(
-            "/api/search",
+            "/api/v1/search",
             json={"query": "neural networks machine learning", "limit": 10}
         )
         assert search_response.status_code == 200
 
         # Cleanup
-        await async_client.delete(f"/api/documents/{document_id}")
+        await async_client.delete(f"/api/v1/documents/{document_id}")
