@@ -11,7 +11,7 @@ python = "^3.13"
 # Core framework (Python 3.13 compatible)
 fastapi = "^0.115.0"
 uvicorn = {extras = ["standard"], version = "^0.32.0"}
-pydantic = "^2.8.0"            # CRITICAL: >=2.8.0 for Python 3.13
+pydantic = "^2.12.0"           # CRITICAL: >=2.12.0 for Python 3.14 support
 pydantic-settings = "^2.6.0"
 
 # Database

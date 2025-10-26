@@ -7,7 +7,7 @@ import aiofiles
 
 from app.services.document_upload_service import DocumentUploadService
 from app.core.exceptions import FileOperationError
-from app.models.schemas import DocumentType
+from app.utils.file_type_detector import DocumentType
 
 
 @pytest.fixture

@@ -3,13 +3,13 @@ from pathlib import Path
 from typing import Any
 
 from app.core.config import settings
-from app.models.schemas import DocumentType
 from app.services.chunking.semantic_chunker import SemanticChunker
 from app.services.processors.base_processor import BaseDocumentProcessor
 from app.services.processors.csv_processor import CSVProcessor
 from app.services.processors.docx_processor import DOCXProcessor
 from app.services.processors.pdf_processor import PDFProcessor
 from app.services.processors.text_processor import TextProcessor
+from app.utils.file_type_detector import DocumentType
 
 
 class DocumentProcessingService:

@@ -7,10 +7,10 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.api.models import DocumentDetailResponse, DocumentListResponse, DocumentResponse
 from app.core.enums import EmbeddingStatus, UploadStatus
 from app.core.exceptions import DocumentNotFoundError
 from app.models.document import Document, DocumentChunk
-from app.models.schemas import DocumentDetailResponse, DocumentListResponse, DocumentResponse
 
 logger = logging.getLogger(__name__)
 

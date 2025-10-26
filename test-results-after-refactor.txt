@@ -1,0 +1,1544 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.3, pytest-8.4.2, pluggy-1.6.0 -- /Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/user/Documents/01_Active/UQ/INFS3208/Individual Project/raas/services/api
+configfile: pytest.ini
+testpaths: tests
+plugins: asyncio-0.24.0, mock-3.15.1, anyio-4.11.0, cov-6.3.0
+asyncio: mode=Mode.AUTO, default_loop_scope=None
+collecting ... collected 281 items
+
+tests/api/test_health.py::test_health_check PASSED                       [  0%]
+tests/api/test_health.py::test_root_endpoint PASSED                      [  0%]
+tests/api/test_health.py::test_readiness_check_all_services_healthy PASSED [  1%]
+tests/api/test_health.py::test_readiness_check_database_unavailable PASSED [  1%]
+tests/api/test_health.py::test_readiness_check_qdrant_unavailable FAILED [  1%]
+tests/api/test_health.py::test_readiness_check_qdrant_exception FAILED   [  2%]
+tests/api/test_health.py::test_readiness_check_embedder_unavailable PASSED [  2%]
+tests/api/test_health.py::test_readiness_check_embedder_exception PASSED [  2%]
+tests/api/test_health.py::test_readiness_check_multiple_services_down FAILED [  3%]
+tests/api/test_hexagonal_routes.py::test_upload_document_success FAILED  [  3%]
+tests/api/test_hexagonal_routes.py::test_upload_document_empty_file FAILED [  3%]
+tests/api/test_hexagonal_routes.py::test_list_documents_success FAILED   [  4%]
+tests/api/test_hexagonal_routes.py::test_list_documents_invalid_pagination FAILED [  4%]
+tests/api/test_hexagonal_routes.py::test_delete_document_success FAILED  [  4%]
+tests/api/test_hexagonal_routes.py::test_delete_document_not_found FAILED [  5%]
+tests/api/test_hexagonal_routes.py::test_search_documents_success FAILED [  5%]
+tests/api/test_hexagonal_routes.py::test_search_documents_empty_query FAILED [  6%]
+tests/application/test_delete_document.py::test_delete_document_success PASSED [  6%]
+tests/application/test_delete_document.py::test_delete_document_not_found PASSED [  6%]
+tests/application/test_list_documents.py::test_list_documents_success PASSED [  7%]
+tests/application/test_list_documents.py::test_list_documents_empty PASSED [  7%]
+tests/application/test_list_documents.py::test_list_documents_invalid_page PASSED [  7%]
+tests/application/test_list_documents.py::test_list_documents_invalid_limit PASSED [  8%]
+tests/application/test_search_documents.py::test_search_documents_success PASSED [  8%]
+tests/application/test_search_documents.py::test_search_documents_empty_results PASSED [  8%]
+tests/application/test_search_documents.py::test_search_with_query_expansion PASSED [  9%]
+tests/application/test_search_documents.py::test_search_with_expansion_disabled PASSED [  9%]
+tests/application/test_search_documents.py::test_search_without_augmenter PASSED [  9%]
+tests/application/test_search_documents.py::test_search_expansion_with_single_result_set PASSED [ 10%]
+tests/application/test_search_documents.py::test_search_with_reranking PASSED [ 10%]
+tests/application/test_search_documents.py::test_search_with_reranking_disabled PASSED [ 11%]
+tests/application/test_search_documents.py::test_search_without_reranker PASSED [ 11%]
+tests/application/test_search_documents.py::test_search_with_reranking_different_top_k PASSED [ 11%]
+tests/application/test_search_documents.py::test_search_with_reranking_and_expansion PASSED [ 12%]
+tests/application/test_search_hybrid.py::test_hybrid_search_calls_both_stores PASSED [ 12%]
+tests/application/test_search_hybrid.py::test_hybrid_search_retrieves_2x_before_fusion PASSED [ 12%]
+tests/application/test_upload_document.py::test_upload_document_success PASSED [ 13%]
+tests/application/test_upload_document.py::test_upload_document_failure_marks_failed PASSED [ 13%]
+tests/domain/test_chunk.py::test_chunk_creation PASSED                   [ 13%]
+tests/domain/test_chunk.py::test_chunk_has_embedding PASSED              [ 14%]
+tests/domain/test_chunk.py::test_chunk_metadata PASSED                   [ 14%]
+tests/domain/test_document.py::test_document_creation PASSED             [ 14%]
+tests/domain/test_document.py::test_document_mark_completed PASSED       [ 15%]
+tests/domain/test_document.py::test_document_mark_failed PASSED          [ 15%]
+tests/domain/test_search_query.py::test_search_query_creation PASSED     [ 16%]
+tests/domain/test_search_query.py::test_search_query_default_top_k PASSED [ 16%]
+tests/domain/test_search_query.py::test_search_query_immutable PASSED    [ 16%]
+tests/domain/test_search_query.py::test_search_query_validates_top_k_min PASSED [ 17%]
+tests/domain/test_search_query.py::test_search_query_validates_top_k_max PASSED [ 17%]
+tests/infrastructure/generation/test_llm_query_augmenter.py::test_expand_generates_variants PASSED [ 17%]
+tests/infrastructure/generation/test_llm_query_augmenter.py::test_expand_handles_numbered_variants PASSED [ 18%]
+tests/infrastructure/generation/test_llm_query_augmenter.py::test_expand_handles_quoted_variants PASSED [ 18%]
+tests/infrastructure/generation/test_llm_query_augmenter.py::test_expand_handles_markdown_formatting PASSED [ 18%]
+tests/infrastructure/generation/test_llm_query_augmenter.py::test_expand_handles_empty_lines PASSED [ 19%]
+tests/infrastructure/generation/test_llm_query_augmenter.py::test_expand_limits_to_num_variants PASSED [ 19%]
+tests/infrastructure/generation/test_llm_query_augmenter.py::test_expand_graceful_degradation_on_error PASSED [ 19%]
+tests/infrastructure/generation/test_llm_query_augmenter.py::test_expand_graceful_degradation_on_unexpected_error PASSED [ 20%]
+tests/infrastructure/generation/test_llm_query_augmenter.py::test_expand_rejects_unsupported_method PASSED [ 20%]
+tests/infrastructure/generation/test_llm_query_augmenter.py::test_expand_builds_correct_prompt PASSED [ 20%]
+tests/infrastructure/generation/test_llm_query_augmenter.py::test_expand_with_single_variant PASSED [ 21%]
+tests/infrastructure/reranking/test_cross_encoder_reranker.py::TestCrossEncoderRerankerImpl::test_rerank_basic_functionality PASSED [ 21%]
+tests/infrastructure/reranking/test_cross_encoder_reranker.py::TestCrossEncoderRerankerImpl::test_rerank_with_top_k PASSED [ 22%]
+tests/infrastructure/reranking/test_cross_encoder_reranker.py::TestCrossEncoderRerankerImpl::test_rerank_top_k_larger_than_chunks PASSED [ 22%]
+tests/infrastructure/reranking/test_cross_encoder_reranker.py::TestCrossEncoderRerankerImpl::test_rerank_empty_chunks PASSED [ 22%]
+tests/infrastructure/reranking/test_cross_encoder_reranker.py::TestCrossEncoderRerankerImpl::test_rerank_single_chunk PASSED [ 23%]
+tests/infrastructure/reranking/test_cross_encoder_reranker.py::TestCrossEncoderRerankerImpl::test_rerank_chunks_reordered_by_relevance PASSED [ 23%]
+tests/infrastructure/reranking/test_cross_encoder_reranker.py::TestCrossEncoderRerankerImpl::test_rerank_with_zero_top_k PASSED [ 23%]
+tests/infrastructure/reranking/test_cross_encoder_reranker.py::TestCrossEncoderRerankerImpl::test_rerank_preserves_chunk_properties PASSED [ 24%]
+tests/infrastructure/reranking/test_cross_encoder_reranker.py::TestCrossEncoderRerankerImpl::test_initialization_default_model PASSED [ 24%]
+tests/infrastructure/reranking/test_cross_encoder_reranker.py::TestCrossEncoderRerankerImpl::test_initialization_custom_model PASSED [ 24%]
+tests/infrastructure/reranking/test_cross_encoder_reranker.py::TestCrossEncoderRerankerImpl::test_rerank_handles_identical_scores PASSED [ 25%]
+tests/infrastructure/search/test_postgres_keyword_store.py::test_postgres_keyword_store_searches_with_fts PASSED [ 25%]
+tests/infrastructure/search/test_postgres_keyword_store.py::test_postgres_keyword_store_handles_document_filter PASSED [ 25%]
+tests/infrastructure/search/test_rrf_fusion.py::test_rrf_fusion_combines_two_lists PASSED [ 26%]
+tests/infrastructure/search/test_rrf_fusion.py::test_rrf_fusion_handles_empty_lists PASSED [ 26%]
+tests/infrastructure/search/test_rrf_fusion.py::test_rrf_fusion_deduplicates_chunks PASSED [ 27%]
+tests/infrastructure/search/test_rrf_fusion.py::test_rrf_fusion_raises_error_for_unsupported_method PASSED [ 27%]
+tests/infrastructure/services/test_generation_service.py::test_generate_returns_text_response PASSED [ 27%]
+tests/infrastructure/services/test_generation_service.py::test_generate_handles_dict_response PASSED [ 28%]
+tests/infrastructure/services/test_generation_service.py::test_generate_handles_string_response PASSED [ 28%]
+tests/infrastructure/services/test_generation_service.py::test_generate_raises_error_on_none_response PASSED [ 28%]
+tests/infrastructure/services/test_generation_service.py::test_generate_raises_error_on_unexpected_format PASSED [ 29%]
+tests/infrastructure/services/test_generation_service.py::test_generate_wraps_unexpected_exceptions PASSED [ 29%]
+tests/infrastructure/test_chunk_repository.py::test_save_batch_chunks PASSED [ 29%]
+tests/infrastructure/test_chunk_repository.py::test_save_batch_with_metadata PASSED [ 30%]
+tests/infrastructure/test_chunk_repository.py::test_save_batch_with_optional_fields PASSED [ 30%]
+tests/infrastructure/test_chunk_repository.py::test_save_batch_with_embedding PASSED [ 30%]
+tests/infrastructure/test_chunk_repository.py::test_find_by_document_id PASSED [ 31%]
+tests/infrastructure/test_chunk_repository.py::test_find_by_document_id_empty PASSED [ 31%]
+tests/infrastructure/test_chunk_repository.py::test_find_by_document_id_multiple_documents PASSED [ 32%]
+tests/infrastructure/test_chunk_repository.py::test_delete_by_document_id PASSED [ 32%]
+tests/infrastructure/test_chunk_repository.py::test_delete_by_document_id_leaves_other_documents PASSED [ 32%]
+tests/infrastructure/test_chunk_repository.py::test_empty_metadata_default PASSED [ 33%]
+tests/infrastructure/test_chunk_repository.py::test_cascade_delete_on_document_deletion PASSED [ 33%]
+tests/infrastructure/test_document_repository.py::test_save_document PASSED [ 33%]
+tests/infrastructure/test_document_repository.py::test_find_by_id PASSED [ 34%]
+tests/infrastructure/test_document_repository.py::test_find_by_id_not_found PASSED [ 34%]
+tests/infrastructure/test_document_repository.py::test_update_document PASSED [ 34%]
+tests/infrastructure/test_document_repository.py::test_find_all_pagination PASSED [ 35%]
+tests/infrastructure/test_document_repository.py::test_find_all_second_page PASSED [ 35%]
+tests/infrastructure/test_document_repository.py::test_delete_document PASSED [ 35%]
+tests/infrastructure/test_document_repository.py::test_enum_mapping PASSED [ 36%]
+tests/infrastructure/test_document_repository.py::test_optional_fields PASSED [ 36%]
+tests/infrastructure/test_document_repository.py::test_optional_fields_none PASSED [ 37%]
+tests/infrastructure/test_embedding_service.py::TestHTTPEmbeddingService::test_generate_embeddings_success PASSED [ 37%]
+tests/infrastructure/test_embedding_service.py::TestHTTPEmbeddingService::test_generate_embeddings_network_error PASSED [ 37%]
+tests/infrastructure/test_embedding_service.py::TestHTTPEmbeddingService::test_generate_embeddings_timeout PASSED [ 38%]
+tests/infrastructure/test_embedding_service.py::TestHTTPEmbeddingService::test_generate_embeddings_http_error PASSED [ 38%]
+tests/infrastructure/test_embedding_service.py::TestHTTPEmbeddingService::test_generate_embeddings_invalid_response_structure PASSED [ 38%]
+tests/infrastructure/test_embedding_service.py::TestHTTPEmbeddingService::test_generate_embeddings_mismatched_count PASSED [ 39%]
+tests/infrastructure/test_embedding_service.py::TestHTTPEmbeddingService::test_generate_embeddings_invalid_json PASSED [ 39%]
+tests/infrastructure/test_embedding_service.py::TestHTTPEmbeddingService::test_generate_embeddings_empty_input PASSED [ 39%]
+tests/infrastructure/test_embedding_service.py::TestHTTPEmbeddingService::test_client_context_manager PASSED [ 40%]
+tests/infrastructure/test_embedding_service.py::TestHTTPEmbeddingService::test_timeout_configuration PASSED [ 40%]
+tests/infrastructure/test_file_processor.py::TestFileProcessorImpl::test_extract_text_from_txt_file PASSED [ 40%]
+tests/infrastructure/test_file_processor.py::TestFileProcessorImpl::test_extract_text_from_pdf_file PASSED [ 41%]
+tests/infrastructure/test_file_processor.py::TestFileProcessorImpl::test_extract_text_from_empty_txt_file PASSED [ 41%]
+tests/infrastructure/test_file_processor.py::TestFileProcessorImpl::test_extract_text_from_txt_with_special_chars PASSED [ 41%]
+tests/infrastructure/test_file_processor.py::TestFileProcessorImpl::test_extract_text_unsupported_file_type PASSED [ 42%]
+tests/infrastructure/test_file_processor.py::TestFileProcessorImpl::test_extract_text_from_corrupted_pdf PASSED [ 42%]
+tests/infrastructure/test_file_processor.py::TestFileProcessorImpl::test_extract_text_from_pdf_with_no_text PASSED [ 43%]
+tests/infrastructure/test_file_processor.py::TestFileProcessorImpl::test_extract_text_invalid_utf8 PASSED [ 43%]
+tests/infrastructure/test_file_processor.py::TestFileProcessorImpl::test_extract_text_case_insensitive_file_type PASSED [ 43%]
+tests/infrastructure/test_file_processor.py::TestFileProcessorImpl::test_extract_text_with_file_type_extension PASSED [ 44%]
+tests/infrastructure/test_qdrant_store.py::test_upsert_success PASSED    [ 44%]
+tests/infrastructure/test_qdrant_store.py::test_upsert_with_optional_fields PASSED [ 44%]
+tests/infrastructure/test_qdrant_store.py::test_upsert_without_optional_fields PASSED [ 45%]
+tests/infrastructure/test_qdrant_store.py::test_upsert_empty_list PASSED [ 45%]
+tests/infrastructure/test_qdrant_store.py::test_upsert_without_embeddings_raises_error PASSED [ 45%]
+tests/infrastructure/test_qdrant_store.py::test_upsert_client_error_raises_vector_store_error PASSED [ 46%]
+tests/infrastructure/test_qdrant_store.py::test_search_success PASSED    [ 46%]
+tests/infrastructure/test_qdrant_store.py::test_search_with_document_filter PASSED [ 46%]
+tests/infrastructure/test_qdrant_store.py::test_search_uuid_conversion PASSED [ 47%]
+tests/infrastructure/test_qdrant_store.py::test_search_empty_results PASSED [ 47%]
+tests/infrastructure/test_qdrant_store.py::test_search_client_error_raises_vector_store_error PASSED [ 48%]
+tests/infrastructure/test_qdrant_store.py::test_delete_by_document_success PASSED [ 48%]
+tests/infrastructure/test_qdrant_store.py::test_delete_by_document_client_error_raises_vector_store_error PASSED [ 48%]
+tests/infrastructure/test_qdrant_store.py::test_metadata_serialization PASSED [ 49%]
+tests/infrastructure/test_semantic_chunker.py::TestSemanticChunkerImpl::test_chunk_text_success PASSED [ 49%]
+tests/infrastructure/test_semantic_chunker.py::TestSemanticChunkerImpl::test_chunk_empty_text PASSED [ 49%]
+tests/infrastructure/test_semantic_chunker.py::TestSemanticChunkerImpl::test_chunk_single_sentence PASSED [ 50%]
+tests/infrastructure/test_semantic_chunker.py::TestSemanticChunkerImpl::test_chunk_with_special_characters PASSED [ 50%]
+tests/infrastructure/test_semantic_chunker.py::TestSemanticChunkerImpl::test_chunk_long_text PASSED [ 50%]
+tests/infrastructure/test_semantic_chunker.py::TestSemanticChunkerImpl::test_chunk_error_handling PASSED [ 51%]
+tests/infrastructure/test_semantic_chunker.py::TestSemanticChunkerImpl::test_chunk_whitespace_only PASSED [ 51%]
+tests/infrastructure/test_semantic_chunker.py::TestSemanticChunkerImpl::test_chunk_preserves_order PASSED [ 51%]
+tests/infrastructure/test_semantic_chunker.py::TestSemanticChunkerImpl::test_chunk_with_newlines PASSED [ 52%]
+tests/infrastructure/test_semantic_chunker.py::TestSemanticChunkerImpl::test_chunker_initialization PASSED [ 52%]
+tests/infrastructure/test_semantic_chunker.py::TestSemanticChunkerImpl::test_chunk_extracts_text_from_chunk_results PASSED [ 53%]
+tests/integration/test_document_upload_async.py::test_process_and_chunk_in_async_context PASSED [ 53%]
+tests/integration/test_document_upload_async.py::test_semantic_chunker_directly PASSED [ 53%]
+tests/integration/test_enhanced_search_features.py::test_search_with_all_enhancements_enabled ERROR [ 54%]
+tests/integration/test_enhanced_search_features.py::test_search_with_query_expansion_only ERROR [ 54%]
+tests/integration/test_enhanced_search_features.py::test_search_with_reranking_only ERROR [ 54%]
+tests/integration/test_enhanced_search_features.py::test_search_with_all_enhancements_disabled ERROR [ 55%]
+tests/integration/test_enhanced_search_features.py::test_vector_mode_with_enhancements ERROR [ 55%]
+tests/integration/test_enhanced_search_features.py::test_keyword_mode_with_enhancements ERROR [ 55%]
+tests/integration/test_enhanced_search_features.py::test_default_parameters_use_all_enhancements ERROR [ 56%]
+tests/integration/test_enhanced_search_features.py::test_search_parameter_combinations ERROR [ 56%]
+tests/integration/test_enhanced_search_features.py::test_search_respects_top_k_with_reranking ERROR [ 56%]
+tests/integration/test_enhanced_search_features.py::test_search_empty_query_fails ERROR [ 57%]
+tests/integration/test_hybrid_search_integration.py::test_hybrid_search_endpoint_returns_results FAILED [ 57%]
+tests/integration/test_hybrid_search_integration.py::test_hybrid_vs_vector_search_return_different_results FAILED [ 58%]
+tests/integration/test_hybrid_search_integration.py::test_keyword_search_mode_works FAILED [ 58%]
+tests/integration/test_hybrid_search_integration.py::test_hybrid_search_with_empty_query_fails FAILED [ 58%]
+tests/integration/test_hybrid_search_integration.py::test_hybrid_search_default_mode FAILED [ 59%]
+tests/ports/test_fusion_service.py::test_fusion_service_port_contract PASSED [ 59%]
+tests/ports/test_keyword_store.py::test_keyword_store_port_contract PASSED [ 59%]
+tests/ports/test_query_augmenter.py::test_query_augmenter_port_contract PASSED [ 60%]
+tests/ports/test_query_augmenter.py::test_query_augmenter_returns_original_query PASSED [ 60%]
+tests/ports/test_query_augmenter.py::test_query_augmenter_respects_num_variants PASSED [ 60%]
+tests/ports/test_query_augmenter.py::test_query_augmenter_method_parameter PASSED [ 61%]
+tests/ports/test_reranker.py::test_reranker_port_contract PASSED         [ 61%]
+tests/ports/test_reranker.py::test_reranker_respects_top_k PASSED        [ 61%]
+tests/ports/test_reranker.py::test_reranker_preserves_chunk_data PASSED  [ 62%]
+tests/ports/test_reranker.py::test_reranker_handles_empty_chunks PASSED  [ 62%]
+tests/ports/test_reranker.py::test_reranker_handles_single_chunk PASSED  [ 62%]
+tests/services/processors/test_csv_processor.py::test_csv_processor_supports_csv PASSED [ 63%]
+tests/services/processors/test_csv_processor.py::test_process_csv PASSED [ 63%]
+tests/services/processors/test_docx_processor.py::test_docx_processor_supports_docx PASSED [ 64%]
+tests/services/processors/test_docx_processor.py::test_process_simple_docx PASSED [ 64%]
+tests/services/processors/test_docx_processor.py::test_process_docx_with_headings PASSED [ 64%]
+tests/services/processors/test_docx_processor.py::test_process_docx_with_tables PASSED [ 65%]
+tests/services/processors/test_docx_processor.py::test_process_docx_metadata PASSED [ 65%]
+tests/services/processors/test_docx_processor.py::test_process_docx_error_handling PASSED [ 65%]
+tests/services/processors/test_pdf_processor.py::test_pdf_processor_supports_pdf PASSED [ 66%]
+tests/services/processors/test_text_processor.py::test_text_processor_supports_txt PASSED [ 66%]
+tests/services/processors/test_text_processor.py::test_process_simple_text PASSED [ 66%]
+tests/services/processors/test_text_processor.py::test_process_markdown_with_headings PASSED [ 67%]
+tests/services/test_document_processing_service.py::test_get_processor_for_pdf PASSED [ 67%]
+tests/services/test_document_processing_service.py::test_get_processor_for_docx PASSED [ 67%]
+tests/services/test_document_processing_service.py::test_get_processor_unsupported PASSED [ 68%]
+tests/services/test_semantic_chunker_overlap.py::test_chunking_with_overlap_creates_overlap_chunks PASSED [ 68%]
+tests/services/test_semantic_chunker_overlap.py::test_overlap_chunks_preserve_context PASSED [ 69%]
+tests/services/test_semantic_chunker_overlap.py::test_overlap_ratio_zero_disables_overlap PASSED [ 69%]
+tests/services/test_semantic_chunker_overlap.py::test_single_chunk_no_overlap PASSED [ 69%]
+tests/services/test_semantic_chunker_overlap.py::test_overlap_chunk_size PASSED [ 70%]
+tests/services/test_semantic_chunker_overlap.py::test_overlap_maintains_text_order PASSED [ 70%]
+tests/services/test_semantic_chunker_overlap.py::test_overlap_with_different_ratios PASSED [ 70%]
+tests/unit/core/test_config.py::test_chunking_config_defaults PASSED     [ 71%]
+tests/unit/core/test_config.py::test_chunking_config_from_env PASSED     [ 71%]
+tests/unit/core/test_config.py::test_chunking_config_validation PASSED   [ 71%]
+tests/unit/core/test_config.py::test_search_config_defaults PASSED       [ 72%]
+tests/unit/core/test_config.py::test_search_config_from_env PASSED       [ 72%]
+tests/unit/core/test_config.py::test_embedder_config_required_url PASSED [ 72%]
+tests/unit/core/test_config.py::test_embedder_config_defaults PASSED     [ 73%]
+tests/unit/core/test_config.py::test_generator_config_defaults PASSED    [ 73%]
+tests/unit/core/test_config.py::test_settings_nested_configs PASSED      [ 74%]
+tests/unit/core/test_constants.py::test_embedding_dimension PASSED       [ 74%]
+tests/unit/core/test_constants.py::test_search_limits PASSED             [ 74%]
+tests/unit/core/test_constants.py::test_chunking_sizes PASSED            [ 75%]
+tests/unit/core/test_constants.py::test_semantic_percentile PASSED       [ 75%]
+tests/unit/core/test_constants.py::test_upload_size PASSED               [ 75%]
+tests/unit/core/test_constants.py::test_timeout_values PASSED            [ 76%]
+tests/unit/core/test_enums.py::TestUploadStatus::test_enum_has_expected_values PASSED [ 76%]
+tests/unit/core/test_enums.py::TestUploadStatus::test_enum_values_are_strings PASSED [ 76%]
+tests/unit/core/test_enums.py::TestUploadStatus::test_enum_value_comparison PASSED [ 77%]
+tests/unit/core/test_enums.py::TestUploadStatus::test_enum_member_comparison PASSED [ 77%]
+tests/unit/core/test_enums.py::TestUploadStatus::test_enum_has_four_members PASSED [ 77%]
+tests/unit/core/test_enums.py::TestUploadStatus::test_enum_membership PASSED [ 78%]
+tests/unit/core/test_enums.py::TestEmbeddingStatus::test_enum_has_expected_values PASSED [ 78%]
+tests/unit/core/test_enums.py::TestEmbeddingStatus::test_enum_values_are_strings PASSED [ 79%]
+tests/unit/core/test_enums.py::TestEmbeddingStatus::test_enum_value_comparison PASSED [ 79%]
+tests/unit/core/test_enums.py::TestEmbeddingStatus::test_enum_member_comparison PASSED [ 79%]
+tests/unit/core/test_enums.py::TestEmbeddingStatus::test_enum_has_four_members PASSED [ 80%]
+tests/unit/core/test_enums.py::TestEmbeddingStatus::test_enum_membership PASSED [ 80%]
+tests/unit/core/test_enums.py::TestProcessingStatus::test_enum_has_expected_values PASSED [ 80%]
+tests/unit/core/test_enums.py::TestProcessingStatus::test_enum_values_are_strings PASSED [ 81%]
+tests/unit/core/test_enums.py::TestProcessingStatus::test_enum_value_comparison PASSED [ 81%]
+tests/unit/core/test_enums.py::TestProcessingStatus::test_enum_member_comparison PASSED [ 81%]
+tests/unit/core/test_enums.py::TestProcessingStatus::test_enum_has_four_members PASSED [ 82%]
+tests/unit/core/test_enums.py::TestProcessingStatus::test_enum_membership PASSED [ 82%]
+tests/unit/core/test_enums.py::TestEnumsIndependence::test_upload_and_embedding_status_are_different_types PASSED [ 82%]
+tests/unit/core/test_enums.py::TestEnumsIndependence::test_enum_types_not_equal_despite_same_value PASSED [ 83%]
+tests/unit/core/test_enums.py::TestEnumsIndependence::test_each_enum_is_independent PASSED [ 83%]
+tests/unit/models/test_document.py::test_document_column_defaults_use_enums PASSED [ 83%]
+tests/unit/models/test_document.py::test_document_can_set_enum_status PASSED [ 84%]
+tests/unit/models/test_document.py::test_document_status_is_string_type PASSED [ 84%]
+tests/unit/services/test_semantic_chunker.py::test_semantic_chunker_creates_coherent_chunks PASSED [ 85%]
+tests/unit/services/test_semantic_chunker.py::test_semantic_chunker_respects_size_limits PASSED [ 85%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_create_document_success PASSED [ 85%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_get_documents_success PASSED [ 86%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_get_documents_empty PASSED [ 86%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_get_documents_pagination PASSED [ 86%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_get_document_by_id_success PASSED [ 87%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_get_document_by_id_not_found PASSED [ 87%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_delete_document_success PASSED [ 87%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_delete_document_not_found PASSED [ 88%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_update_embedding_status_success PASSED [ 88%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_update_embedding_status_not_found PASSED [ 88%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_update_upload_status_success PASSED [ 89%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_create_chunk_records_success PASSED [ 89%]
+tests/unit/test_document_metadata_service.py::TestDocumentMetadataService::test_create_chunk_records_empty PASSED [ 90%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_save_file_success_pdf PASSED [ 90%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_save_file_success_txt PASSED [ 90%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_save_file_success_docx PASSED [ 91%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_save_file_unsupported_type PASSED [ 91%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_save_file_write_error PASSED [ 91%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_save_file_creates_directory PASSED [ 92%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_delete_file_success PASSED [ 92%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_delete_file_not_found PASSED [ 92%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_delete_file_error PASSED [ 93%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_get_file_metadata_success PASSED [ 93%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_get_file_metadata_not_found PASSED [ 93%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_save_file_preserves_extension PASSED [ 94%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_save_file_unique_ids PASSED [ 94%]
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_save_file_all_supported_types PASSED [ 95%]
+tests/utils/test_file_type_detector.py::test_detect_pdf PASSED           [ 95%]
+tests/utils/test_file_type_detector.py::test_detect_docx PASSED          [ 95%]
+tests/utils/test_file_type_detector.py::test_detect_txt PASSED           [ 96%]
+tests/utils/test_file_type_detector.py::test_detect_markdown PASSED      [ 96%]
+tests/utils/test_file_type_detector.py::test_detect_csv PASSED           [ 96%]
+tests/utils/test_file_type_detector.py::test_detect_unsupported PASSED   [ 97%]
+tests/utils/test_file_type_detector.py::test_is_supported_true PASSED    [ 97%]
+tests/utils/test_file_type_detector.py::test_is_supported_false PASSED   [ 97%]
+tests/utils/test_token_counter.py::test_count_tokens_simple_text PASSED  [ 98%]
+tests/utils/test_token_counter.py::test_count_tokens_empty_string PASSED [ 98%]
+tests/utils/test_token_counter.py::test_count_tokens_long_text PASSED    [ 98%]
+tests/utils/test_token_counter.py::test_truncate_to_tokens_basic PASSED  [ 99%]
+tests/utils/test_token_counter.py::test_truncate_no_truncation_needed PASSED [ 99%]
+tests/utils/test_token_counter.py::test_truncate_exact_match PASSED      [100%]
+
+==================================== ERRORS ====================================
+_________ ERROR at setup of test_search_with_all_enhancements_enabled __________
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: documents.embedding_status
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_enhanced_search_features.py:32: in setup_test_data
+    await db_session.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py:449: in execute
+    result = await greenlet_spawn(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2258: in _execute_internal
+    result = conn.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1419: in execute
+    return meth(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+E   [SQL: 
+E               INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+E               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+E           ]
+E   [parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+___________ ERROR at setup of test_search_with_query_expansion_only ____________
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: documents.embedding_status
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_enhanced_search_features.py:32: in setup_test_data
+    await db_session.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py:449: in execute
+    result = await greenlet_spawn(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2258: in _execute_internal
+    result = conn.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1419: in execute
+    return meth(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+E   [SQL: 
+E               INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+E               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+E           ]
+E   [parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+______________ ERROR at setup of test_search_with_reranking_only _______________
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: documents.embedding_status
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_enhanced_search_features.py:32: in setup_test_data
+    await db_session.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py:449: in execute
+    result = await greenlet_spawn(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2258: in _execute_internal
+    result = conn.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1419: in execute
+    return meth(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+E   [SQL: 
+E               INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+E               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+E           ]
+E   [parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+_________ ERROR at setup of test_search_with_all_enhancements_disabled _________
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: documents.embedding_status
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_enhanced_search_features.py:32: in setup_test_data
+    await db_session.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py:449: in execute
+    result = await greenlet_spawn(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2258: in _execute_internal
+    result = conn.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1419: in execute
+    return meth(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+E   [SQL: 
+E               INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+E               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+E           ]
+E   [parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+_____________ ERROR at setup of test_vector_mode_with_enhancements _____________
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: documents.embedding_status
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_enhanced_search_features.py:32: in setup_test_data
+    await db_session.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py:449: in execute
+    result = await greenlet_spawn(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2258: in _execute_internal
+    result = conn.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1419: in execute
+    return meth(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+E   [SQL: 
+E               INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+E               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+E           ]
+E   [parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+____________ ERROR at setup of test_keyword_mode_with_enhancements _____________
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: documents.embedding_status
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_enhanced_search_features.py:32: in setup_test_data
+    await db_session.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py:449: in execute
+    result = await greenlet_spawn(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2258: in _execute_internal
+    result = conn.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1419: in execute
+    return meth(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+E   [SQL: 
+E               INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+E               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+E           ]
+E   [parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+________ ERROR at setup of test_default_parameters_use_all_enhancements ________
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: documents.embedding_status
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_enhanced_search_features.py:32: in setup_test_data
+    await db_session.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py:449: in execute
+    result = await greenlet_spawn(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2258: in _execute_internal
+    result = conn.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1419: in execute
+    return meth(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+E   [SQL: 
+E               INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+E               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+E           ]
+E   [parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+_____________ ERROR at setup of test_search_parameter_combinations _____________
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: documents.embedding_status
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_enhanced_search_features.py:32: in setup_test_data
+    await db_session.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py:449: in execute
+    result = await greenlet_spawn(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2258: in _execute_internal
+    result = conn.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1419: in execute
+    return meth(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+E   [SQL: 
+E               INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+E               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+E           ]
+E   [parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+_________ ERROR at setup of test_search_respects_top_k_with_reranking __________
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: documents.embedding_status
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_enhanced_search_features.py:32: in setup_test_data
+    await db_session.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py:449: in execute
+    result = await greenlet_spawn(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2258: in _execute_internal
+    result = conn.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1419: in execute
+    return meth(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+E   [SQL: 
+E               INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+E               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+E           ]
+E   [parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+_______________ ERROR at setup of test_search_empty_query_fails ________________
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: documents.embedding_status
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_enhanced_search_features.py:32: in setup_test_data
+    await db_session.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py:449: in execute
+    result = await greenlet_spawn(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2258: in _execute_internal
+    result = conn.execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1419: in execute
+    return meth(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/engine/default.py:951: in do_execute
+    cursor.execute(statement, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:180: in execute
+    self._adapt_connection._handle_exception(error)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:340: in _handle_exception
+    raise error
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py:162: in execute
+    self.await_(_cursor.execute(operation, parameters))
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:48: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/cursor.py:40: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:133: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/aiosqlite/core.py:106: in run
+    result = function()
+             ^^^^^^^^^^
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+E   [SQL: 
+E               INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+E               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+E           ]
+E   [parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+=================================== FAILURES ===================================
+___________________ test_readiness_check_qdrant_unavailable ____________________
+tests/api/test_health.py:123: in test_readiness_check_qdrant_unavailable
+    assert data["status"] == "not_ready"
+E   AssertionError: assert 'ready' == 'not_ready'
+E     
+E     - not_ready
+E     + ready
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:56:53", "level": "INFO", "message": "HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK""}
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: GET http://localhost:8001/health "HTTP/1.1 200 OK""}
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: GET http://test/api/v1/ready "HTTP/1.1 200 OK""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1786 HTTP Request: GET http://localhost:8001/health "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1786 HTTP Request: GET http://test/api/v1/ready "HTTP/1.1 200 OK"
+____________________ test_readiness_check_qdrant_exception _____________________
+tests/api/test_health.py:150: in test_readiness_check_qdrant_exception
+    assert data["status"] == "not_ready"
+E   AssertionError: assert 'ready' == 'not_ready'
+E     
+E     - not_ready
+E     + ready
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK""}
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: GET http://localhost:8001/health "HTTP/1.1 200 OK""}
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: GET http://test/api/v1/ready "HTTP/1.1 200 OK""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1786 HTTP Request: GET http://localhost:8001/health "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1786 HTTP Request: GET http://test/api/v1/ready "HTTP/1.1 200 OK"
+_________________ test_readiness_check_multiple_services_down __________________
+tests/api/test_health.py:276: in test_readiness_check_multiple_services_down
+    assert service["status"] == "not_ready"
+E   AssertionError: assert 'ready' == 'not_ready'
+E     
+E     - not_ready
+E     + ready
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK""}
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: GET http://test/api/v1/ready "HTTP/1.1 200 OK""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1786 HTTP Request: GET http://test/api/v1/ready "HTTP/1.1 200 OK"
+_________________________ test_upload_document_success _________________________
+tests/api/test_hexagonal_routes.py:65: in test_upload_document_success
+    assert response.status_code == 201
+E   assert 404 == 201
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: POST http://test/api/v1/hexagonal/documents/upload "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: POST http://test/api/v1/hexagonal/documents/upload "HTTP/1.1 404 Not Found"
+_______________________ test_upload_document_empty_file ________________________
+tests/api/test_hexagonal_routes.py:95: in test_upload_document_empty_file
+    assert response.status_code == 400
+E   assert 404 == 400
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: POST http://test/api/v1/hexagonal/documents/upload "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: POST http://test/api/v1/hexagonal/documents/upload "HTTP/1.1 404 Not Found"
+_________________________ test_list_documents_success __________________________
+tests/api/test_hexagonal_routes.py:135: in test_list_documents_success
+    assert response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: GET http://test/api/v1/hexagonal/documents?page=1&limit=20 "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: GET http://test/api/v1/hexagonal/documents?page=1&limit=20 "HTTP/1.1 404 Not Found"
+____________________ test_list_documents_invalid_pagination ____________________
+tests/api/test_hexagonal_routes.py:161: in test_list_documents_invalid_pagination
+    assert response.status_code == 400
+E   assert 404 == 400
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: GET http://test/api/v1/hexagonal/documents?page=0&limit=20 "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: GET http://test/api/v1/hexagonal/documents?page=0&limit=20 "HTTP/1.1 404 Not Found"
+_________________________ test_delete_document_success _________________________
+tests/api/test_hexagonal_routes.py:182: in test_delete_document_success
+    assert response.status_code == 204
+E   assert 404 == 204
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: DELETE http://test/api/v1/hexagonal/documents/154cfced-e54a-46a8-b02f-396a5eeaa08b "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: DELETE http://test/api/v1/hexagonal/documents/154cfced-e54a-46a8-b02f-396a5eeaa08b "HTTP/1.1 404 Not Found"
+________________________ test_delete_document_not_found ________________________
+tests/api/test_hexagonal_routes.py:203: in test_delete_document_not_found
+    assert str(document_id) in response.json()["detail"]
+E   AssertionError: assert '85e88280-8ed9-4235-abcd-6a5811629a03' in 'Not Found'
+E    +  where '85e88280-8ed9-4235-abcd-6a5811629a03' = str(UUID('85e88280-8ed9-4235-abcd-6a5811629a03'))
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: DELETE http://test/api/v1/hexagonal/documents/85e88280-8ed9-4235-abcd-6a5811629a03 "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: DELETE http://test/api/v1/hexagonal/documents/85e88280-8ed9-4235-abcd-6a5811629a03 "HTTP/1.1 404 Not Found"
+________________________ test_search_documents_success _________________________
+tests/api/test_hexagonal_routes.py:239: in test_search_documents_success
+    assert response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: POST http://test/api/v1/hexagonal/search "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: POST http://test/api/v1/hexagonal/search "HTTP/1.1 404 Not Found"
+______________________ test_search_documents_empty_query _______________________
+tests/api/test_hexagonal_routes.py:266: in test_search_documents_empty_query
+    assert response.status_code == 422
+E   assert 404 == 422
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:56:54", "level": "INFO", "message": "HTTP Request: POST http://test/api/v1/hexagonal/search "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: POST http://test/api/v1/hexagonal/search "HTTP/1.1 404 Not Found"
+_________________ test_hybrid_search_endpoint_returns_results __________________
+tests/integration/test_hybrid_search_integration.py:44: in test_hybrid_search_endpoint_returns_results
+    assert response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:57:40", "level": "INFO", "message": "HTTP Request: POST http://test/api/v1/hexagonal/search?mode=hybrid "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: POST http://test/api/v1/hexagonal/search?mode=hybrid "HTTP/1.1 404 Not Found"
+____________ test_hybrid_vs_vector_search_return_different_results _____________
+tests/integration/test_hybrid_search_integration.py:114: in test_hybrid_vs_vector_search_return_different_results
+    assert vector_response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:57:40", "level": "INFO", "message": "HTTP Request: POST http://test/api/v1/hexagonal/search?mode=vector "HTTP/1.1 404 Not Found""}
+{"time": "2025-10-26 10:57:40", "level": "INFO", "message": "HTTP Request: POST http://test/api/v1/hexagonal/search?mode=hybrid "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: POST http://test/api/v1/hexagonal/search?mode=vector "HTTP/1.1 404 Not Found"
+INFO     httpx:_client.py:1786 HTTP Request: POST http://test/api/v1/hexagonal/search?mode=hybrid "HTTP/1.1 404 Not Found"
+________________________ test_keyword_search_mode_works ________________________
+tests/integration/test_hybrid_search_integration.py:163: in test_keyword_search_mode_works
+    assert response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:57:40", "level": "INFO", "message": "HTTP Request: POST http://test/api/v1/hexagonal/search?mode=keyword "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: POST http://test/api/v1/hexagonal/search?mode=keyword "HTTP/1.1 404 Not Found"
+__________________ test_hybrid_search_with_empty_query_fails ___________________
+tests/integration/test_hybrid_search_integration.py:184: in test_hybrid_search_with_empty_query_fails
+    assert response.status_code in [400, 422]
+E   assert 404 in [400, 422]
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:57:40", "level": "INFO", "message": "HTTP Request: POST http://test/api/v1/hexagonal/search?mode=hybrid "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: POST http://test/api/v1/hexagonal/search?mode=hybrid "HTTP/1.1 404 Not Found"
+_______________________ test_hybrid_search_default_mode ________________________
+tests/integration/test_hybrid_search_integration.py:220: in test_hybrid_search_default_mode
+    assert response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stderr call -----------------------------
+{"time": "2025-10-26 10:57:40", "level": "INFO", "message": "HTTP Request: POST http://test/api/v1/hexagonal/search "HTTP/1.1 404 Not Found""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1786 HTTP Request: POST http://test/api/v1/hexagonal/search "HTTP/1.1 404 Not Found"
+=============================== warnings summary ===============================
+tests/api/test_health.py: 9 warnings
+tests/api/test_hexagonal_routes.py: 8 warnings
+tests/integration/test_hybrid_search_integration.py: 5 warnings
+  /Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/httpx/_client.py:1437: DeprecationWarning: The 'app' shortcut is now deprecated. Use the explicit style 'transport=ASGITransport(app=...)' instead.
+    warnings.warn(message, DeprecationWarning)
+
+tests/integration/test_hybrid_search_integration.py: 20 warnings
+  /Users/user/Library/Caches/pypoetry/virtualenvs/raas-api-fOnvJlEA-py3.13/lib/python3.13/site-packages/sqlalchemy/sql/schema.py:3624: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+
+tests/unit/test_document_upload_service.py::TestDocumentUploadService::test_get_file_metadata_not_found
+  tests/unit/test_document_upload_service.py:141: PytestWarning: The test <Function test_get_file_metadata_not_found> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_get_file_metadata_not_found(self, upload_service):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform darwin, python 3.13.3-final-0 _______________
+
+Name                                                             Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------------------------------------------------------
+app/__init__.py                                                      0      0      0      0   100%
+app/api/__init__.py                                                  0      0      0      0   100%
+app/api/dependencies.py                                             53     21      0      0    60%   54-55, 78-94, 116-117, 132-139, 151, 157, 163, 171, 177, 205
+app/api/mappers.py                                                   7      2      0      0    71%   44, 88
+app/api/models.py                                                   79      0      0      0   100%
+app/api/routes/__init__.py                                           0      0      0      0   100%
+app/api/routes/documents.py                                         70     52      4      0    24%   67-143, 169-189, 214-229
+app/api/routes/health.py                                            46      4      4      1    90%   66, 87-93
+app/api/routes/models.py                                            14      7      0      0    50%   20-28
+app/api/routes/search.py                                            32     20      2      0    35%   72-127
+app/application/__init__.py                                          0      0      0      0   100%
+app/application/use_cases/__init__.py                                0      0      0      0   100%
+app/application/use_cases/delete_document.py                        22      0      2      0   100%
+app/application/use_cases/list_documents.py                         16      0      4      0   100%
+app/application/use_cases/search_documents.py                       80     10     26      5    84%   114, 118, 155, 159, 193-202, 215
+app/application/use_cases/upload_document.py                        57      1      4      1    97%   112
+app/core/__init__.py                                                 0      0      0      0   100%
+app/core/config.py                                                  60      1      6      1    97%   58
+app/core/constants.py                                               13      0      0      0   100%
+app/core/database.py                                                20      9      2      1    55%   18, 52-57, 65-66
+app/core/enums.py                                                   16      0      0      0   100%
+app/core/exceptions.py                                              84     20     22      6    70%   21->23, 45-50, 95->97, 120-126, 150->152, 200, 201->203, 226->228, 249-254
+app/core/qdrant_client.py                                           33     17      6      0    41%   26-41, 62-84, 100-102, 124-125
+app/domain/__init__.py                                               0      0      0      0   100%
+app/domain/entities/__init__.py                                      3      0      0      0   100%
+app/domain/entities/chunk.py                                        16      0      0      0   100%
+app/domain/entities/document.py                                     23      2      0      0    91%   43, 47
+app/domain/value_objects/__init__.py                                 2      0      0      0   100%
+app/domain/value_objects/search_query.py                             9      0      2      0   100%
+app/infrastructure/__init__.py                                       0      0      0      0   100%
+app/infrastructure/db/__init__.py                                    0      0      0      0   100%
+app/infrastructure/db/base.py                                        2      0      0      0   100%
+app/infrastructure/db/models.py                                     28      0      0      0   100%
+app/infrastructure/db/repositories/__init__.py                       0      0      0      0   100%
+app/infrastructure/db/repositories/chunk_repository_impl.py         29      0      2      0   100%
+app/infrastructure/db/repositories/document_repository_impl.py      61      0      8      1    99%   129->exit
+app/infrastructure/generation/__init__.py                            0      0      0      0   100%
+app/infrastructure/generation/llm_query_augmenter.py                41      0     12      2    96%   120->124, 129->110
+app/infrastructure/processing/__init__.py                            0      0      0      0   100%
+app/infrastructure/processing/file_processor.py                     38      3     12      2    90%   34, 51->exit, 56-57
+app/infrastructure/processing/semantic_chunker.py                   13      0      0      0   100%
+app/infrastructure/reranking/__init__.py                             0      0      0      0   100%
+app/infrastructure/reranking/cross_encoder_reranker.py              14      0      2      0   100%
+app/infrastructure/search/__init__.py                                0      0      0      0   100%
+app/infrastructure/search/postgres_keyword_store.py                 26      2      4      0    93%   76-77
+app/infrastructure/search/rrf_fusion_service.py                     15      0      6      0   100%
+app/infrastructure/services/__init__.py                              0      0      0      0   100%
+app/infrastructure/services/embedding_service.py                    31      2      4      0    94%   88-90
+app/infrastructure/services/generation_service.py                   22      0      8      0   100%
+app/infrastructure/vector_store/__init__.py                          0      0      0      0   100%
+app/infrastructure/vector_store/qdrant_store.py                     43      1     10      0    98%   82
+app/main.py                                                         32     12      0      0    62%   30-46
+app/models/__init__.py                                               0      0      0      0   100%
+app/models/document.py                                              38      0      0      0   100%
+app/ports/__init__.py                                                0      0      0      0   100%
+app/ports/repositories.py                                           27      7      0      0    74%   26, 38, 51, 60, 76, 88, 97
+app/ports/services.py                                               45     11      0      0    76%   28, 44, 63, 75, 101, 121, 140, 167, 194, 221, 248
+app/services/__init__.py                                             0      0      0      0   100%
+app/services/chunking/__init__.py                                    2      0      0      0   100%
+app/services/chunking/semantic_chunker.py                          109     32     36      4    70%   113-127, 156-179, 201-211, 303-320
+app/services/document_metadata_service.py                           71      1     10      1    98%   212
+app/services/document_processing_service.py                         51     10     18      4    74%   91-112, 118, 121->138, 169
+app/services/document_upload_service.py                             57      3      4      0    95%   135-137
+app/services/generator_client.py                                    51     39      6      0    21%   37-68, 87-109, 118-133
+app/services/processors/__init__.py                                  2      0      0      0   100%
+app/services/processors/base_processor.py                           24      2      0      0    92%   41, 54
+app/services/processors/csv_processor.py                            17      0      2      0   100%
+app/services/processors/docx_processor.py                           49      7     12      2    85%   43, 52-53, 95-98, 113->119
+app/services/processors/pdf_processor.py                            26     19      6      0    22%   33-68
+app/services/processors/text_processor.py                           50      3     14      2    92%   34, 89-90
+app/utils/__init__.py                                                0      0      0      0   100%
+app/utils/file_processing.py                                        62     39     16      1    31%   4, 37-42, 61-68, 73-74, 79-90, 95-105
+app/utils/file_type_detector.py                                     21      0      2      0   100%
+app/utils/token_counter.py                                          13      0      4      0   100%
+------------------------------------------------------------------------------------------------------------
+TOTAL                                                             1865    359    282     34    79%
+Coverage HTML written to dir htmlcov
+=========================== short test summary info ============================
+FAILED tests/api/test_health.py::test_readiness_check_qdrant_unavailable - AssertionError: assert 'ready' == 'not_ready'
+  
+  - not_ready
+  + ready
+FAILED tests/api/test_health.py::test_readiness_check_qdrant_exception - AssertionError: assert 'ready' == 'not_ready'
+  
+  - not_ready
+  + ready
+FAILED tests/api/test_health.py::test_readiness_check_multiple_services_down - AssertionError: assert 'ready' == 'not_ready'
+  
+  - not_ready
+  + ready
+FAILED tests/api/test_hexagonal_routes.py::test_upload_document_success - assert 404 == 201
+ +  where 404 = <Response [404 Not Found]>.status_code
+FAILED tests/api/test_hexagonal_routes.py::test_upload_document_empty_file - assert 404 == 400
+ +  where 404 = <Response [404 Not Found]>.status_code
+FAILED tests/api/test_hexagonal_routes.py::test_list_documents_success - assert 404 == 200
+ +  where 404 = <Response [404 Not Found]>.status_code
+FAILED tests/api/test_hexagonal_routes.py::test_list_documents_invalid_pagination - assert 404 == 400
+ +  where 404 = <Response [404 Not Found]>.status_code
+FAILED tests/api/test_hexagonal_routes.py::test_delete_document_success - assert 404 == 204
+ +  where 404 = <Response [404 Not Found]>.status_code
+FAILED tests/api/test_hexagonal_routes.py::test_delete_document_not_found - AssertionError: assert '85e88280-8ed9-4235-abcd-6a5811629a03' in 'Not Found'
+ +  where '85e88280-8ed9-4235-abcd-6a5811629a03' = str(UUID('85e88280-8ed9-4235-abcd-6a5811629a03'))
+FAILED tests/api/test_hexagonal_routes.py::test_search_documents_success - assert 404 == 200
+ +  where 404 = <Response [404 Not Found]>.status_code
+FAILED tests/api/test_hexagonal_routes.py::test_search_documents_empty_query - assert 404 == 422
+ +  where 404 = <Response [404 Not Found]>.status_code
+FAILED tests/integration/test_hybrid_search_integration.py::test_hybrid_search_endpoint_returns_results - assert 404 == 200
+ +  where 404 = <Response [404 Not Found]>.status_code
+FAILED tests/integration/test_hybrid_search_integration.py::test_hybrid_vs_vector_search_return_different_results - assert 404 == 200
+ +  where 404 = <Response [404 Not Found]>.status_code
+FAILED tests/integration/test_hybrid_search_integration.py::test_keyword_search_mode_works - assert 404 == 200
+ +  where 404 = <Response [404 Not Found]>.status_code
+FAILED tests/integration/test_hybrid_search_integration.py::test_hybrid_search_with_empty_query_fails - assert 404 in [400, 422]
+ +  where 404 = <Response [404 Not Found]>.status_code
+FAILED tests/integration/test_hybrid_search_integration.py::test_hybrid_search_default_mode - assert 404 == 200
+ +  where 404 = <Response [404 Not Found]>.status_code
+ERROR tests/integration/test_enhanced_search_features.py::test_search_with_all_enhancements_enabled - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+[SQL: 
+            INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        ]
+[parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR tests/integration/test_enhanced_search_features.py::test_search_with_query_expansion_only - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+[SQL: 
+            INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        ]
+[parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR tests/integration/test_enhanced_search_features.py::test_search_with_reranking_only - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+[SQL: 
+            INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        ]
+[parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR tests/integration/test_enhanced_search_features.py::test_search_with_all_enhancements_disabled - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+[SQL: 
+            INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        ]
+[parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR tests/integration/test_enhanced_search_features.py::test_vector_mode_with_enhancements - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+[SQL: 
+            INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        ]
+[parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR tests/integration/test_enhanced_search_features.py::test_keyword_mode_with_enhancements - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+[SQL: 
+            INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        ]
+[parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR tests/integration/test_enhanced_search_features.py::test_default_parameters_use_all_enhancements - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+[SQL: 
+            INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        ]
+[parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR tests/integration/test_enhanced_search_features.py::test_search_parameter_combinations - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+[SQL: 
+            INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        ]
+[parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR tests/integration/test_enhanced_search_features.py::test_search_respects_top_k_with_reranking - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+[SQL: 
+            INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        ]
+[parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR tests/integration/test_enhanced_search_features.py::test_search_empty_query_fails - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: documents.embedding_status
+[SQL: 
+            INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        ]
+[parameters: ('00000000-0000-0000-0000-000000000001', 'Kubernetes Scaling Guide', 'k8s-guide.txt', 'text/plain', 100, 'completed')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+====== 16 failed, 255 passed, 43 warnings, 10 errors in 96.89s (0:01:36) =======

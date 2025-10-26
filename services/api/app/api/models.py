@@ -23,6 +23,8 @@ class UploadDocumentRequest(BaseModel):
 class DocumentResponse(BaseModel):
     """Response model for document entity."""
 
+    model_config = {"from_attributes": True}
+
     id: UUID
     title: str
     file_name: str
@@ -32,6 +34,8 @@ class DocumentResponse(BaseModel):
     description: str | None = None
     file_path: str | None = None
     file_size: int | None = None
+    embedding_status: str | None = None
+    updated_at: datetime | None = None
 
 
 class UploadDocumentResponse(BaseModel):
@@ -92,3 +96,49 @@ class ErrorResponse(BaseModel):
 
     detail: str
     error_code: str | None = None
+
+
+# Legacy document metadata schemas (used by document_metadata_service)
+class DocumentChunkResponse(BaseModel):
+    """Schema for document chunk response."""
+
+    model_config = {"from_attributes": True}
+
+    id: UUID
+    chunk_index: int
+    chunk_text: str
+    token_count: int | None = None
+    section_title: str | None = None
+    section_level: int | None = 0
+    page_number: int | None = None
+    chunk_tokens: int | None = None
+    chunk_metadata: dict = {}
+    created_at: datetime
+
+
+class DocumentDetailResponse(BaseModel):
+    """Schema for detailed document response with chunks."""
+
+    model_config = {"from_attributes": True}
+
+    id: UUID
+    title: str
+    file_name: str
+    file_type: str
+    file_size: int
+    file_path: str | None = None
+    upload_status: str
+    embedding_status: str
+    created_at: datetime
+    updated_at: datetime
+    description: str | None = None
+    chunks: list[DocumentChunkResponse] = []
+
+
+class DocumentListResponse(BaseModel):
+    """Schema for paginated document list."""
+
+    total: int
+    page: int
+    limit: int
+    documents: list[DocumentResponse]

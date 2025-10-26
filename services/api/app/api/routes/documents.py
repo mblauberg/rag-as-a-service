@@ -1,46 +1,67 @@
-"""Document management endpoints."""
+"""Document management endpoints using hexagonal architecture.
+
+These routes implement the HTTP adapter layer, translating between
+HTTP requests/responses and domain use cases. They follow clean architecture
+principles with dependency injection and proper error handling.
+"""
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
-from app.core.dependencies import get_document_service
-from app.models.schemas import (
-    DocumentDetailResponse,
-    DocumentListResponse,
-    DocumentResponse,
-    DocumentUploadResponse,
+from app.api.dependencies import (
+    get_delete_document_use_case,
+    get_list_documents_use_case,
+    get_upload_document_use_case,
+)
+from app.api.mappers import document_to_response
+from app.api.models import (
+    ListDocumentsResponse,
+    UploadDocumentResponse,
+)
+from app.application.use_cases.delete_document import DeleteDocumentUseCase
+from app.application.use_cases.list_documents import ListDocumentsUseCase
+from app.application.use_cases.upload_document import UploadDocumentCommand, UploadDocumentUseCase
+from app.core.exceptions import (
+    ChunkingError,
+    DocumentNotFoundError,
+    EmbeddingServiceError,
+    FileProcessingError,
+    VectorStoreError,
 )
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/upload", response_model=DocumentUploadResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/upload", response_model=UploadDocumentResponse, status_code=status.HTTP_201_CREATED)
 async def upload_document(
     file: UploadFile = File(..., description="File to upload"),
     title: str = Form(..., description="Document title"),
-    description: str = Form(None, description="Optional document description"),
-    db: AsyncSession = Depends(get_db)
+    description: str | None = Form(None, description="Optional document description"),
+    use_case: UploadDocumentUseCase = Depends(get_upload_document_use_case)
 ):
-    """
-    Upload a document file.
+    """Upload a document file with hexagonal architecture.
 
-    Accepts multipart form data with a file and metadata.
-    The file is saved, text is extracted, chunked, and queued for embedding.
+    This endpoint orchestrates the complete document upload workflow:
+    1. File validation
+    2. Text extraction
+    3. Semantic chunking
+    4. Embedding generation
+    5. Vector storage
+    6. Metadata persistence
 
     Args:
         file: Uploaded file
         title: Document title
         description: Optional description
-        db: Database session
-        document_service: Injected document service facade
+        use_case: Injected upload document use case
 
     Returns:
-        Document details and processing status
+        Document details and chunk count
 
     Raises:
-        HTTPException: If file processing fails
+        HTTPException: On validation or processing failures
     """
     # Validate file
     if not file.filename:
@@ -53,6 +74,7 @@ async def upload_document(
     try:
         content = await file.read()
     except Exception as e:
+        logger.error(f"Failed to read file: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Could not read file: {str(e)}"
@@ -65,23 +87,96 @@ async def upload_document(
             detail="File is empty"
         )
 
-    # Create document service instance
-    document_service = get_document_service()
+    # Create command
+    command = UploadDocumentCommand(
+        title=title,
+        file_name=file.filename,
+        file_content=content,
+        description=description
+    )
 
-    # Process document
+    # Execute use case
     try:
-        document, chunk_count = await document_service.create_document(
-            db=db,
-            file_content=content,
-            filename=file.filename,
-            title=title,
-            description=description
+        document, chunk_count = await use_case.execute(command)
+
+        logger.info(f"Document {document.id} uploaded successfully with {chunk_count} chunks")
+
+        # Convert domain entity to response DTO
+        return UploadDocumentResponse(
+            document=document_to_response(document),
+            chunk_count=chunk_count,
+            message="Document uploaded and processed successfully"
         )
 
-        return DocumentUploadResponse(
-            **DocumentResponse.model_validate(document).model_dump(),
-            message="Document uploaded and processed successfully",
-            chunk_count=chunk_count
+    except FileProcessingError as e:
+        logger.error(f"File processing failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to process file: {str(e)}"
+        )
+    except ChunkingError as e:
+        logger.error(f"Chunking failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to chunk document: {str(e)}"
+        )
+    except EmbeddingServiceError as e:
+        logger.error(f"Embedding generation failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Embedding service unavailable: {str(e)}"
+        )
+    except VectorStoreError as e:
+        logger.error(f"Vector store operation failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Vector database unavailable: {str(e)}"
+        )
+    except ValueError as e:
+        logger.error(f"Validation error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error during upload: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to process document: {str(e)}"
+        )
+
+
+@router.get("", response_model=ListDocumentsResponse)
+async def list_documents(
+    page: int = 1,
+    limit: int = 20,
+    use_case: ListDocumentsUseCase = Depends(get_list_documents_use_case)
+):
+    """Get paginated list of documents.
+
+    Args:
+        page: Page number (1-indexed)
+        limit: Items per page (1-100)
+        use_case: Injected list documents use case
+
+    Returns:
+        Paginated list of documents
+
+    Raises:
+        HTTPException: On validation errors
+    """
+    # Validation is done by use case, but we catch exceptions
+    try:
+        documents, total = await use_case.execute(page=page, limit=limit)
+
+        # Convert domain entities to response DTOs
+        document_responses = [document_to_response(doc) for doc in documents]
+
+        return ListDocumentsResponse(
+            documents=document_responses,
+            total=total,
+            page=page,
+            limit=limit
         )
 
     except ValueError as e:
@@ -90,94 +185,48 @@ async def upload_document(
             detail=str(e)
         )
     except Exception as e:
+        logger.error(f"Failed to list documents: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to process document: {str(e)}"
+            detail=f"Failed to retrieve documents: {str(e)}"
         )
-
-
-@router.get("", response_model=DocumentListResponse)
-async def list_documents(
-    page: int = 1,
-    limit: int = 20,
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Get paginated list of documents.
-
-    Args:
-        page: Page number (1-indexed)
-        limit: Items per page
-        db: Database session
-
-    Returns:
-        Paginated list of documents
-    """
-    if page < 1:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Page must be >= 1"
-        )
-
-    if limit < 1 or limit > 100:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Limit must be between 1 and 100"
-        )
-
-    document_service = get_document_service()
-    return await document_service.get_documents(db, page=page, limit=limit)
-
-
-@router.get("/{document_id}", response_model=DocumentDetailResponse)
-async def get_document(
-    document_id: UUID,
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Get detailed document information including chunks.
-
-    Args:
-        document_id: Document UUID
-        db: Database session
-
-    Returns:
-        Document details with chunks
-
-    Raises:
-        HTTPException: If document not found
-    """
-    document_service = get_document_service()
-    document = await document_service.get_document_detail(db, document_id)
-
-    if not document:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Document {document_id} not found"
-        )
-
-    return document
 
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_document(
     document_id: UUID,
-    db: AsyncSession = Depends(get_db)
+    use_case: DeleteDocumentUseCase = Depends(get_delete_document_use_case)
 ):
-    """
-    Delete a document and all associated data.
+    """Delete a document and all associated data.
 
-    Removes document metadata, chunks, vectors from Qdrant, and file from disk.
+    Removes:
+    - Document metadata (PostgreSQL)
+    - Chunks (PostgreSQL)
+    - Vectors (Qdrant)
 
     Args:
         document_id: Document UUID
-        db: Database session
+        use_case: Injected delete document use case
 
     Raises:
-        DocumentNotFoundError: If document not found (raised by service)
-        QdrantConnectionError: If vector deletion fails
-        FileOperationError: If file deletion fails
+        HTTPException: If document not found or deletion fails
     """
-    document_service = get_document_service()
-    # Service now raises DocumentNotFoundError instead of returning False
-    await document_service.delete_document(db, document_id)
+    try:
+        await use_case.execute(document_id)
+        logger.info(f"Document {document_id} deleted successfully")
+
+    except DocumentNotFoundError as e:
+        # DocumentNotFoundError is already an HTTPException with 404 status
+        raise e
+    except VectorStoreError as e:
+        logger.error(f"Vector store deletion failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Failed to delete vectors: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"Failed to delete document: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete document: {str(e)}"
+        )

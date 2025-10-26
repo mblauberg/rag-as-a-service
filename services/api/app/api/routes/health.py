@@ -1,14 +1,33 @@
 """Health and readiness check endpoints."""
 import httpx
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.dependencies import get_qdrant_client
-from app.core.qdrant_client import QdrantClientWrapper
-from app.models.schemas import HealthResponse, ReadinessResponse, ServiceStatus
+from app.core.qdrant_client import qdrant_client
+
+
+# Health check response models
+class HealthResponse(BaseModel):
+    """Schema for health check response."""
+    status: str
+
+
+class ServiceStatus(BaseModel):
+    """Schema for individual service status."""
+    name: str
+    status: str
+    details: str | None = None
+
+
+class ReadinessResponse(BaseModel):
+    """Schema for readiness check response."""
+    status: str
+    services: list[ServiceStatus]
+
 
 router = APIRouter()
 
@@ -26,8 +45,7 @@ async def health_check():
 
 @router.get("/ready", response_model=ReadinessResponse)
 async def readiness_check(
-    db: AsyncSession = Depends(get_db),
-    qdrant_client: QdrantClientWrapper = Depends(get_qdrant_client)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Readiness check that validates connectivity to dependencies.

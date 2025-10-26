@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.document_metadata_service import DocumentMetadataService
 from app.models.document import Document, DocumentChunk
-from app.models.schemas import DocumentListResponse, DocumentDetailResponse
+from app.api.models import DocumentListResponse, DocumentDetailResponse
 from app.core.exceptions import DocumentNotFoundError
 
 
