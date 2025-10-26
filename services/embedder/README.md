@@ -72,7 +72,7 @@ docker run -p 8001:8001 \
 
 ## API Endpoints
 
-### POST /embed
+### POST /api/v1/embed
 
 Generate embeddings for text chunks and store in Qdrant.
 
@@ -101,7 +101,7 @@ Generate embeddings for text chunks and store in Qdrant.
 }
 ```
 
-### POST /embed-query
+### POST /api/v1/embed-query
 
 Generate embedding for a search query.
 
@@ -119,7 +119,33 @@ Generate embedding for a search query.
 }
 ```
 
-### GET /health
+### POST /api/v1/generate-embeddings
+
+Generate embeddings for a batch of texts without storing them in Qdrant. This endpoint is used by the API service which handles its own vector storage.
+
+**Request:**
+```json
+{
+  "texts": [
+    "First text to embed",
+    "Second text to embed",
+    "Third text to embed"
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "embeddings": [
+    [0.123, -0.456, 0.789, ...],
+    [0.234, -0.567, 0.890, ...],
+    [0.345, -0.678, 0.901, ...]
+  ]
+}
+```
+
+### GET /api/v1/health
 
 Basic health check.
 
@@ -130,7 +156,7 @@ Basic health check.
 }
 ```
 
-### GET /ready
+### GET /api/v1/ready
 
 Readiness check (indicates model loading status).
 
@@ -160,8 +186,8 @@ poetry run pytest --cov=app tests/
 
 The API service calls this embedder service:
 
-1. **After document upload**: API sends chunks to `/embed` endpoint
-2. **During search**: API sends query to `/embed-query` endpoint
+1. **After document upload**: API sends chunks to `/api/v1/embed` endpoint
+2. **During search**: API sends query to `/api/v1/embed-query` endpoint
 
 ## Model Information
 

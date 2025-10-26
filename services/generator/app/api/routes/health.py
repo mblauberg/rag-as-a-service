@@ -11,7 +11,7 @@ router = APIRouter()
 ollama_client = OllamaClient()
 
 
-@router.get("/", response_model=HealthResponse)
+@router.get("/health", response_model=HealthResponse)
 async def health_check():
     """
     Basic health check endpoint (liveness probe).

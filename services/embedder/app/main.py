@@ -10,6 +10,8 @@ from app.models.schemas import (
     EmbedResponse,
     EmbedQueryRequest,
     EmbedQueryResponse,
+    GenerateEmbeddingsRequest,
+    GenerateEmbeddingsResponse,
     HealthResponse,
     ReadinessResponse
 )
@@ -70,7 +72,7 @@ async def root():
     }
 
 
-@app.get("/health", response_model=HealthResponse)
+@app.get("/api/v1/health", response_model=HealthResponse)
 async def health_check():
     """
     Basic health check endpoint.
@@ -81,7 +83,7 @@ async def health_check():
     return HealthResponse(status="healthy")
 
 
-@app.get("/ready", response_model=ReadinessResponse)
+@app.get("/api/v1/ready", response_model=ReadinessResponse)
 async def readiness_check():
     """
     Readiness check that validates model loading.
@@ -99,7 +101,7 @@ async def readiness_check():
     )
 
 
-@app.post("/embed", response_model=EmbedResponse, status_code=status.HTTP_200_OK)
+@app.post("/api/v1/embed", response_model=EmbedResponse, status_code=status.HTTP_200_OK)
 async def embed_chunks(request: EmbedRequest):
     """
     Generate embeddings for text chunks and store in Qdrant.
@@ -141,7 +143,7 @@ async def embed_chunks(request: EmbedRequest):
         )
 
 
-@app.post("/embed-query", response_model=EmbedQueryResponse)
+@app.post("/api/v1/embed-query", response_model=EmbedQueryResponse)
 async def embed_query(request: EmbedQueryRequest):
     """
     Generate embedding for a search query.
@@ -173,4 +175,42 @@ async def embed_query(request: EmbedQueryRequest):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Query embedding failed: {str(e)}"
+        )
+
+
+@app.post("/api/v1/generate-embeddings", response_model=GenerateEmbeddingsResponse)
+async def generate_embeddings(request: GenerateEmbeddingsRequest):
+    """
+    Generate embeddings for a batch of texts without storing them.
+
+    This endpoint is designed for use by the API service which handles
+    its own vector storage. It only generates and returns embeddings.
+
+    Args:
+        request: Batch embedding request with list of texts
+
+    Returns:
+        List of embedding vectors (one per input text)
+
+    Raises:
+        HTTPException: If embedding generation fails
+    """
+    try:
+        logger.info(f"Generating embeddings for {len(request.texts)} texts")
+
+        embeddings = embedding_service.generate_embeddings(request.texts)
+
+        return GenerateEmbeddingsResponse(embeddings=embeddings)
+
+    except RuntimeError as e:
+        logger.error(f"Model not ready: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Model not loaded yet. Please wait for service to be ready."
+        )
+    except Exception as e:
+        logger.error(f"Error in generate-embeddings endpoint: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Embedding generation failed: {str(e)}"
         )
