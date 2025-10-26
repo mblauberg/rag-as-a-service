@@ -11,7 +11,104 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/models", response_model=ModelsListResponse)
+@router.get(
+    "/models",
+    response_model=ModelsListResponse,
+    summary="List available LLM models",
+    description="""
+    List all available LLM models for summary generation with capabilities.
+
+    **Model Categories:**
+    - Flagship: Highest quality, premium pricing (GPT-4, Claude Opus)
+    - Balanced: Good quality/cost ratio (GPT-4o-mini, Claude Sonnet)
+    - Fast: Lower latency, economical (GPT-3.5, Claude Haiku)
+    - Open Source: Self-hosted via Ollama (Llama 3, Mistral)
+    """,
+    responses={
+        200: {
+            "description": "List of available models retrieved successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "models": [
+                            {
+                                "model_id": "gpt-4o-mini",
+                                "display_name": "GPT-4 Omni Mini",
+                                "provider": "openai",
+                                "max_tokens": 128000,
+                                "supports_streaming": True,
+                                "cost_per_1k_tokens": 0.0002,
+                                "recommended": True,
+                                "description": "Fast and affordable model, good for most tasks"
+                            },
+                            {
+                                "model_id": "claude-3-5-sonnet-20241022",
+                                "display_name": "Claude 3.5 Sonnet",
+                                "provider": "anthropic",
+                                "max_tokens": 200000,
+                                "supports_streaming": True,
+                                "cost_per_1k_tokens": 0.003,
+                                "recommended": True,
+                                "description": "Excellent reasoning and long context"
+                            },
+                            {
+                                "model_id": "gemini-1.5-flash",
+                                "display_name": "Gemini 1.5 Flash",
+                                "provider": "google",
+                                "max_tokens": 1000000,
+                                "supports_streaming": True,
+                                "cost_per_1k_tokens": 0.0001,
+                                "recommended": False,
+                                "description": "Very fast and economical"
+                            },
+                            {
+                                "model_id": "llama-3.1-8b",
+                                "display_name": "Llama 3.1 8B",
+                                "provider": "ollama",
+                                "max_tokens": 128000,
+                                "supports_streaming": True,
+                                "cost_per_1k_tokens": 0.0,
+                                "recommended": False,
+                                "description": "Open source, requires local deployment"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        503: {
+            "description": "Generator service unavailable",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "service_down": {
+                            "summary": "Generator microservice unavailable",
+                            "value": {
+                                "detail": "Generator service unavailable: Connection timeout"
+                            }
+                        },
+                        "network_error": {
+                            "summary": "Network connection failure",
+                            "value": {
+                                "detail": "Generator service unavailable: Cannot reach service endpoint"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error during model catalog retrieval",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Failed to retrieve model list"
+                    }
+                }
+            }
+        }
+    }
+)
 async def list_models() -> ModelsListResponse:
     """List all available LLM models for summary generation with capabilities.
 

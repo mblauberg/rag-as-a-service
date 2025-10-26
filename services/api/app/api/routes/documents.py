@@ -34,6 +34,113 @@ router = APIRouter()
     "/upload",
     response_model=UploadDocumentResponse,
     status_code=status.HTTP_201_CREATED,
+    summary="Upload a document for semantic search",
+    description="""
+    Upload a document for semantic search with full RAG pipeline processing.
+
+    **Supported formats:** TXT, PDF, DOCX
+    **Max file size:** 100MB
+    **Processing stages:** Validation → Chunking → Embedding → Storage
+    """,
+    responses={
+        201: {
+            "description": "Document uploaded and processed successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "document": {
+                            "id": "550e8400-e29b-41d4-a716-446655440000",
+                            "title": "Machine Learning Research Paper",
+                            "file_name": "ml_paper.pdf",
+                            "file_type": "application/pdf",
+                            "file_size": 2048576,
+                            "upload_status": "completed",
+                            "embedding_status": "completed",
+                            "created_at": "2025-10-26T10:30:00Z",
+                            "updated_at": "2025-10-26T10:30:05Z",
+                            "description": "Survey of transformer architectures"
+                        },
+                        "chunk_count": 12,
+                        "message": "Document uploaded and processed successfully"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Invalid file or validation failure",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "empty_file": {
+                            "summary": "Empty file uploaded",
+                            "value": {
+                                "detail": "File is empty"
+                            }
+                        },
+                        "no_filename": {
+                            "summary": "No filename provided",
+                            "value": {
+                                "detail": "No file provided"
+                            }
+                        },
+                        "processing_error": {
+                            "summary": "File processing failed",
+                            "value": {
+                                "detail": "Failed to process file: Unsupported file encoding"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        422: {
+            "description": "Request validation error",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": [
+                            {
+                                "loc": ["body", "title"],
+                                "msg": "field required",
+                                "type": "value_error.missing"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error during chunking",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Failed to chunk document: Unexpected error during text segmentation"
+                    }
+                }
+            }
+        },
+        503: {
+            "description": "External service unavailable",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "embedder_down": {
+                            "summary": "Embedder service unavailable",
+                            "value": {
+                                "detail": "Embedding service unavailable: Connection timeout"
+                            }
+                        },
+                        "qdrant_down": {
+                            "summary": "Vector database unavailable",
+                            "value": {
+                                "detail": "Vector database unavailable: Cannot connect to Qdrant"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 )
 async def upload_document(
     file: UploadFile = File(..., description="File to upload"),
@@ -230,7 +337,88 @@ async def upload_document(
         )
 
 
-@router.get("", response_model=ListDocumentsResponse)
+@router.get(
+    "",
+    response_model=ListDocumentsResponse,
+    summary="List all uploaded documents",
+    description="""
+    Retrieve paginated list of all uploaded documents with metadata.
+
+    **Pagination:** 1-indexed, default 20 per page
+    **Ordering:** Newest first (by created_at)
+    """,
+    responses={
+        200: {
+            "description": "List of documents retrieved successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "documents": [
+                            {
+                                "id": "550e8400-e29b-41d4-a716-446655440000",
+                                "title": "Research Paper 2024",
+                                "file_name": "paper.pdf",
+                                "file_type": "application/pdf",
+                                "file_size": 2048576,
+                                "upload_status": "completed",
+                                "embedding_status": "completed",
+                                "created_at": "2025-10-26T10:30:00Z",
+                                "updated_at": "2025-10-26T10:30:00Z",
+                                "description": "Machine learning survey"
+                            },
+                            {
+                                "id": "660e8400-e29b-41d4-a716-446655440111",
+                                "title": "Technical Documentation",
+                                "file_name": "docs.txt",
+                                "file_type": "text/plain",
+                                "file_size": 512000,
+                                "upload_status": "completed",
+                                "embedding_status": "completed",
+                                "created_at": "2025-10-26T09:15:00Z",
+                                "updated_at": "2025-10-26T09:15:00Z",
+                                "description": null
+                            }
+                        ],
+                        "total": 47,
+                        "page": 1,
+                        "limit": 20
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Invalid pagination parameters",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "invalid_page": {
+                            "summary": "Page number too low",
+                            "value": {
+                                "detail": "Page must be >= 1"
+                            }
+                        },
+                        "invalid_limit": {
+                            "summary": "Limit out of range",
+                            "value": {
+                                "detail": "Limit must be between 1 and 100"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error during retrieval",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Failed to retrieve documents: Database connection error"
+                    }
+                }
+            }
+        }
+    }
+)
 async def list_documents(
     page: int = 1,
     limit: int = 20,
@@ -355,7 +543,100 @@ async def list_documents(
         )
 
 
-@router.get("/{document_id}", response_model=DocumentDetailResponse)
+@router.get(
+    "/{document_id}",
+    response_model=DocumentDetailResponse,
+    summary="Get document details with all chunks",
+    description="""
+    Retrieve detailed information for a specific document including all text chunks.
+
+    **Includes:** Full document metadata + all chunks with content
+    **Use for:** Document detail views, content inspection, debugging
+    """,
+    responses={
+        200: {
+            "description": "Document details retrieved successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "title": "Machine Learning Research",
+                        "file_name": "ml_paper.pdf",
+                        "file_type": "application/pdf",
+                        "file_size": 2048576,
+                        "upload_status": "completed",
+                        "embedding_status": "completed",
+                        "created_at": "2025-10-26T10:30:00Z",
+                        "updated_at": "2025-10-26T10:30:05Z",
+                        "description": "Survey of transformer architectures",
+                        "chunks": [
+                            {
+                                "id": "660e8400-e29b-41d4-a716-446655440111",
+                                "content": "Transformers are neural network architectures that use self-attention mechanisms to process sequential data. Unlike RNNs, transformers can process all positions simultaneously, enabling parallel computation.",
+                                "chunk_index": 0,
+                                "document_id": "550e8400-e29b-41d4-a716-446655440000",
+                                "token_count": 512,
+                                "metadata": {
+                                    "start_char": 0,
+                                    "end_char": 2450,
+                                    "embedding_model": "all-MiniLM-L6-v2"
+                                }
+                            },
+                            {
+                                "id": "660e8400-e29b-41d4-a716-446655440222",
+                                "content": "Attention mechanisms enable models to focus on relevant parts of the input when generating outputs. The self-attention layer computes relationships between all positions in the sequence.",
+                                "chunk_index": 1,
+                                "document_id": "550e8400-e29b-41d4-a716-446655440000",
+                                "token_count": 498,
+                                "metadata": {
+                                    "start_char": 2400,
+                                    "end_char": 4820,
+                                    "embedding_model": "all-MiniLM-L6-v2"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "Document not found",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Document with ID 550e8400-e29b-41d4-a716-446655440000 not found"
+                    }
+                }
+            }
+        },
+        422: {
+            "description": "Invalid UUID format",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": [
+                            {
+                                "loc": ["path", "document_id"],
+                                "msg": "value is not a valid uuid",
+                                "type": "type_error.uuid"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error during retrieval",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Failed to retrieve document: Database connection error"
+                    }
+                }
+            }
+        }
+    }
+)
 async def get_document(
     document_id: UUID, use_case: GetDocumentUseCase = Depends(get_get_document_use_case)
 ) -> DocumentDetailResponse:
@@ -519,7 +800,72 @@ async def get_document(
         )
 
 
-@router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{document_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a document permanently",
+    description="""
+    Permanently delete a document and all associated data from all storage systems.
+
+    **Removes data from:**
+    - PostgreSQL (metadata + chunks)
+    - Qdrant (vectors)
+    - File storage (if applicable)
+
+    **Warning:** This operation is irreversible.
+    """,
+    responses={
+        204: {
+            "description": "Document deleted successfully (empty response)"
+        },
+        404: {
+            "description": "Document not found",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Document with ID 550e8400-e29b-41d4-a716-446655440000 not found"
+                    }
+                }
+            }
+        },
+        422: {
+            "description": "Invalid UUID format",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": [
+                            {
+                                "loc": ["path", "document_id"],
+                                "msg": "value is not a valid uuid",
+                                "type": "type_error.uuid"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        503: {
+            "description": "Vector store unavailable",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Failed to delete vectors: Cannot connect to Qdrant"
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error during deletion",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Failed to delete document: Database transaction error"
+                    }
+                }
+            }
+        }
+    }
+)
 async def delete_document(
     document_id: UUID,
     use_case: DeleteDocumentUseCase = Depends(get_delete_document_use_case),
