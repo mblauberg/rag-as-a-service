@@ -254,7 +254,15 @@ describe('DocumentCard', () => {
       const { container } = render(<DocumentCard document={mockDocument} />, {
         wrapper: createWrapper(),
       });
-      const card = container.querySelector('.hover\\:shadow-md');
+      const card = container.querySelector('.hover\\:shadow-lg');
+      expect(card).toBeInTheDocument();
+    });
+
+    it('should have hover border class on card', () => {
+      const { container } = render(<DocumentCard document={mockDocument} />, {
+        wrapper: createWrapper(),
+      });
+      const card = container.querySelector('.hover\\:border-primary\\/20');
       expect(card).toBeInTheDocument();
     });
 

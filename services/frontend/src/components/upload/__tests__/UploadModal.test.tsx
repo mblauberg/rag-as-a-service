@@ -571,9 +571,9 @@ describe('UploadModal', () => {
       fireEvent.change(fileInput);
 
       await waitFor(() => {
-        const uploadButton = screen.getByRole('button', { name: /uploading.../i });
+        // During upload, progress indicator replaces the Upload button
+        expect(screen.getByText('Uploading...')).toBeInTheDocument();
         const cancelButton = screen.getByRole('button', { name: /cancel/i });
-        expect(uploadButton).toBeDisabled();
         expect(cancelButton).toBeDisabled();
       });
     });
