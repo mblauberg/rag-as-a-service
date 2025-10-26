@@ -24,7 +24,7 @@ from app.api.dependencies import get_qdrant_client
 from app.core.database import Base, get_db
 from app.core.qdrant_client import QdrantClientWrapper
 from app.main import app
-from app.models.document import Document, DocumentChunk
+from app.infrastructure.db.models import DocumentModel, ChunkModel
 
 # Test database URL - use PostgreSQL if DATABASE_URL env var is set, otherwise SQLite
 TEST_DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
@@ -259,13 +259,13 @@ async def async_client(db_session, mock_qdrant_client, mock_embedder_client, moc
 
 
 @pytest_asyncio.fixture
-async def sample_document(db_session) -> Document:
+async def sample_document(db_session) -> DocumentModel:
     """
     Create sample document in database.
 
-    Returns a Document instance for testing.
+    Returns a DocumentModel instance for testing.
     """
-    document = Document(
+    document = DocumentModel(
         id=uuid4(),
         title="Test Document",
         description="Test description",
@@ -285,13 +285,13 @@ async def sample_document(db_session) -> Document:
 
 
 @pytest_asyncio.fixture
-async def sample_document_with_chunks(db_session) -> Document:
+async def sample_document_with_chunks(db_session) -> DocumentModel:
     """
     Create sample document with chunks in database.
 
-    Returns a Document instance with associated chunks for testing.
+    Returns a DocumentModel instance with associated chunks for testing.
     """
-    document = Document(
+    document = DocumentModel(
         id=uuid4(),
         title="Test Document with Chunks",
         description="Test description",
@@ -308,7 +308,7 @@ async def sample_document_with_chunks(db_session) -> Document:
 
     # Add chunks
     for i in range(3):
-        chunk = DocumentChunk(
+        chunk = ChunkModel(
             id=uuid4(),
             document_id=document.id,
             chunk_index=i,

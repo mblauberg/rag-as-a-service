@@ -141,10 +141,10 @@ class TestFileProcessorImpl:
         sample_bytes = b"Some content"
 
         with pytest.raises(FileProcessingError) as exc_info:
-            await file_processor.extract_text(sample_bytes, "docx")
+            await file_processor.extract_text(sample_bytes, "xyz")
 
         assert "Unsupported file type" in str(exc_info.value)
-        assert "docx" in str(exc_info.value)
+        assert "xyz" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_extract_text_from_corrupted_pdf(self, file_processor):

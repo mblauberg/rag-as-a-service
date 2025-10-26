@@ -21,6 +21,7 @@ class Chunk:
     section_title: str | None = None
     section_level: int | None = None
     page_number: int | None = None
+    score: float | None = None  # Similarity/relevance score from search/reranking
 
     def has_embedding(self) -> bool:
         """Check if chunk has been embedded.

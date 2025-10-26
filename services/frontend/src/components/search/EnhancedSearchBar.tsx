@@ -140,9 +140,11 @@ export const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
                                     <span className="font-medium text-gray-900">
                                       {model.display_name}
                                     </span>
-                                    <span className="text-xs text-gray-500">
-                                      {model.size}
-                                    </span>
+                                    {model.size && model.size !== 'N/A' && (
+                                      <span className="text-xs text-gray-500">
+                                        {model.size}
+                                      </span>
+                                    )}
                                   </div>
                                   <p className="text-xs text-gray-600 mt-0.5 truncate">
                                     {model.description}

@@ -6,8 +6,8 @@ metadata:
 data:
   # Ollama Configuration
   OLLAMA_URL: "http://ollama:11434"
-  DEFAULT_MODEL: "llama3.2"
-  ENABLE_OLLAMA: "true"
+  DEFAULT_MODEL: "openai:gpt-5-mini"
+  ENABLE_OLLAMA: "false"
 
   # Generation Settings
   MAX_CHUNKS: "5"
@@ -16,6 +16,6 @@ data:
   TIMEOUT: "30"
 
   # External Provider Flags (API keys in secret)
-  ENABLE_OPENAI: "false"
+  ENABLE_OPENAI: "true"
   ENABLE_ANTHROPIC: "false"
   ENABLE_GOOGLE: "false"

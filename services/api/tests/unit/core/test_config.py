@@ -93,7 +93,7 @@ def test_generator_config_defaults(monkeypatch):
     config = GeneratorConfig()
     assert config.url == "http://localhost:8002"
     assert config.timeout == 60.0
-    assert config.default_model == "openai:gpt-4"
+    assert config.default_model == "openai:gpt-5-mini"
 
 
 def test_settings_nested_configs(monkeypatch):

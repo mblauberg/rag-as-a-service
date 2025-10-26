@@ -11,17 +11,18 @@ import { DocumentCard } from '@/components/documents/DocumentCard';
 import { SearchResults } from '@/components/search/SearchResults';
 import { motion } from 'framer-motion';
 import { PlusIcon } from '@radix-ui/react-icons';
+import { FileText, FileType, Table, FileCode } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DocumentGridSkeleton } from '@/components/ui/document-skeleton';
 import { Card } from '@/components/ui/card';
 
 // Module-level constants for performance
 const FILE_TYPES = [
-  { icon: "📄", label: "PDF", color: "text-red-600" },
-  { icon: "📝", label: "DOCX", color: "text-blue-600" },
-  { icon: "📋", label: "TXT", color: "text-gray-600" },
-  { icon: "📊", label: "CSV", color: "text-green-600" },
-  { icon: "📑", label: "MD", color: "text-purple-600" }
+  { Icon: FileText, label: "PDF", color: "text-red-600" },
+  { Icon: FileType, label: "DOCX", color: "text-blue-600" },
+  { Icon: FileText, label: "TXT", color: "text-gray-600" },
+  { Icon: Table, label: "CSV", color: "text-green-600" },
+  { Icon: FileCode, label: "MD", color: "text-purple-600" }
 ] as const;
 
 const BENEFITS = [
@@ -71,15 +72,24 @@ export const MainPage: React.FC = () => {
   const showSearch = searchQuery.length > 0;
   const dataToDisplay = showSearch ? searchResults : documents;
 
+  const handleLogoClick = () => {
+    setSearchQuery('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-50 bg-gradient-to-br from-slate-50 to-slate-100 border-b border-border/50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <button
+              onClick={handleLogoClick}
+              className="flex items-center space-x-2 group cursor-pointer transition-all hover:opacity-80"
+              aria-label="Clear search and return to home"
+            >
               <svg
-                className="h-8 w-8 text-primary"
+                className="h-8 w-8 text-primary transition-transform group-hover:scale-110"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -92,15 +102,15 @@ export const MainPage: React.FC = () => {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <span className="text-xl font-bold text-foreground">RAAS</span>
-            </div>
+              <span className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">RAAS</span>
+            </button>
           </div>
         </div>
       </header>
 
       {/* Hero Search */}
       <main className="container mx-auto px-4">
-        <div className="py-12">
+        <div className={showSearch ? "py-8" : "py-16"}>
           <EnhancedSearchBar
             value={searchQuery}
             onChange={setSearchQuery}
@@ -162,9 +172,9 @@ export const MainPage: React.FC = () => {
                   <p className="text-sm text-muted-foreground">
                     {searchResults.data?.total_results || 0} results for "{searchQuery}"
                   </p>
-                  {searchResults.data?.chunks && (
+                  {searchResults.data?.results && (
                     <SearchResults
-                      results={searchResults.data.chunks}
+                      results={searchResults.data.results}
                       query={searchQuery}
                       searchResponse={searchResults.data}
                       onDocumentClick={(docId: string) => setSelectedDocId(docId)}
@@ -232,20 +242,25 @@ export const MainPage: React.FC = () => {
 
                         {/* Supported File Types */}
                         <div className="flex flex-wrap justify-center gap-6">
-                          {FILE_TYPES.map((type, index) => (
-                            <motion.div
-                              key={type.label}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: 0.4 + (index * 0.1) }}
-                              className="flex flex-col items-center gap-2"
-                            >
-                              <div className="text-3xl">{type.icon}</div>
-                              <span className={`text-xs font-medium ${type.color}`}>
-                                {type.label}
-                              </span>
-                            </motion.div>
-                          ))}
+                          {FILE_TYPES.map((type, index) => {
+                            const IconComponent = type.Icon;
+                            return (
+                              <motion.div
+                                key={type.label}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.4 + (index * 0.1) }}
+                                className="flex flex-col items-center gap-2"
+                              >
+                                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${type.color.replace('text-', 'bg-')}/10`}>
+                                  <IconComponent className={`w-6 h-6 ${type.color}`} />
+                                </div>
+                                <span className={`text-xs font-medium ${type.color}`}>
+                                  {type.label}
+                                </span>
+                              </motion.div>
+                            );
+                          })}
                         </div>
 
                         {/* CTA Button */}

@@ -46,10 +46,12 @@ export interface PaginatedDocuments {
 export interface SearchResult {
   chunk_id: string;
   document_id: string;
-  document_title: string;
-  chunk_text: string;
-  chunk_index: number;
+  content: string;  // Changed from chunk_text to match API
   score: number;
+  tokens: number | null;
+  // Optional fields that may be added later
+  document_title?: string;
+  chunk_index?: number;
   section_title?: string;
   page_number?: number;
   chunk_metadata?: Record<string, any>;
@@ -64,9 +66,9 @@ export interface SearchRequest {
 
 export interface SearchResponse {
   query: string;
-  summary: string | null;  // NEW: Generated summary
-  chunks: SearchResult[];
-  model_used: string | null;  // NEW: Model that generated summary
+  summary?: string | null;  // NEW: Generated summary (optional)
+  results: SearchResult[];  // Changed from 'chunks' to match API
+  model_used?: string | null;  // NEW: Model that generated summary (optional)
   total_results: number;
 }
 

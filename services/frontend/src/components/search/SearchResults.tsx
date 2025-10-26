@@ -85,7 +85,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       <div className="space-y-3">
         {results.map((result, index) => (
           <motion.div
-            key={`${result.document_id}-${result.chunk_index}`}
+            key={result.chunk_id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
@@ -96,7 +96,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             >
               <CardHeader>
                 <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-base">{result.document_title}</CardTitle>
+                  <CardTitle className="text-base">
+                    {result.document_title || `Document ${result.document_id.slice(0, 8)}`}
+                  </CardTitle>
                   <Badge variant="secondary">
                     {(result.score * 100).toFixed(0)}% match
                   </Badge>
@@ -105,13 +107,15 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
               <CardContent>
                 <p className="text-sm text-muted-foreground line-clamp-3">
-                  {highlightText(result.chunk_text, query)}
+                  {highlightText(result.content, query)}
                 </p>
                 <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                  <span>Chunk {result.chunk_index + 1}</span>
+                  {result.chunk_index !== undefined && (
+                    <span>Chunk {result.chunk_index + 1}</span>
+                  )}
                   {result.section_title && (
                     <>
-                      <span>•</span>
+                      {result.chunk_index !== undefined && <span>•</span>}
                       <span>{result.section_title}</span>
                     </>
                   )}

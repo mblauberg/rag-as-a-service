@@ -2,6 +2,8 @@
  * Shared formatting utilities for dates, file sizes, and status badges.
  */
 
+import type { FileIconType } from '@/components/ui/file-icon';
+
 /**
  * Format a date string with optional time.
  */
@@ -27,20 +29,20 @@ export function formatBytes(bytes: number): string {
 /**
  * Get file type icon based on file extension.
  */
-export const getFileTypeIcon = (filename: string): string => {
+export const getFileTypeIcon = (filename: string): FileIconType => {
   const ext = filename.split('.').pop()?.toLowerCase();
 
-  const iconMap: Record<string, string> = {
-    pdf: '📄',
-    docx: '📝',
-    doc: '📝',
-    txt: '📋',
-    csv: '📊',
-    md: '📑',
-    markdown: '📑'
+  const iconMap: Record<string, FileIconType> = {
+    pdf: 'pdf',
+    docx: 'docx',
+    doc: 'doc',
+    txt: 'txt',
+    csv: 'csv',
+    md: 'md',
+    markdown: 'markdown'
   };
 
-  return iconMap[ext || ''] || '📄';
+  return iconMap[ext || ''] || 'default';
 };
 
 /**
