@@ -32,7 +32,7 @@ For example, a legal firm searching "contract breach" would miss cases described
 2. **Semantic Search** - Vector similarity search using 384-dimensional embeddings
 3. **AI-Powered Summarisation** - LLM-generated summaries with inline citations
 4. **Document Management** - Full CRUD operations for document lifecycle
-5. **Multi-Provider LLM Support** - Ollama, OpenAI GPT, Anthropic Claude, Google Gemini
+5. **Multi-Provider LLM Support** - OpenAI GPT, Anthropic Claude, Google Gemini for production reliability
 6. **Real-time Status Tracking** - Asynchronous processing with upload/embedding monitoring
 7. **Responsive Web Interface** - Mobile-friendly React/Tailwind CSS UI
 
@@ -78,7 +78,7 @@ Cloud-native architecture solves these through microservices, containerisation, 
 - **PostgreSQL 15** - Relational database for metadata and text chunks
 - **Qdrant** - Vector database with HNSW indexing
 - **sentence-transformers** - Embedding model (`all-MiniLM-L6-v2`) for 384-dim vectors
-- **Ollama** - Local LLM runtime (Llama, Mistral, Gemma)
+- **Cloud LLM Providers** - OpenAI (GPT-5, GPT-5 Mini), Anthropic (Claude), Google (Gemini)
 - **SQLAlchemy + asyncpg** - Async ORM with non-blocking driver
 
 **Cloud Infrastructure:**
@@ -155,22 +155,21 @@ Cloud-native architecture solves these through microservices, containerisation, 
    │  (HPA)   │ └────┬─────┘ └──────────┘
    └────┬─────┘      │
         │            ▼
-        │      ┌──────────┐
-        │      │  Ollama  │
-        └─────▶│ (LLM Host│
-               │  :11434  │
-               │  1 pod   │
-               └──────────┘
+        │      ┌──────────────┐
+        │      │  Cloud LLMs  │
+        └─────▶│ OpenAI/      │
+               │ Anthropic/   │
+               │ Google APIs  │
+               └──────────────┘
 ```
 
 **Service Responsibilities:**
 - **Frontend:** Document upload, search, result visualisation
 - **API Gateway:** Request orchestration, business logic
 - **Embedder:** 384-dim vector generation (sentence-transformers)
-- **Generator:** AI summaries with citations (Ollama/OpenAI/Anthropic)
+- **Generator:** AI summaries with citations via cloud LLM providers (OpenAI/Anthropic/Google)
 - **PostgreSQL:** Document metadata, text chunks, Qdrant IDs (10GB PVC)
 - **Qdrant:** Vector indexing/search with HNSW (20GB PVC)
-- **Ollama:** Local LLM runtime (Llama 3.2, Mistral, Gemma)
 
 ### Document Upload Workflow
 
@@ -208,7 +207,7 @@ User Query → Frontend → API Gateway
                            │
                            ├─► Generator (if model specified, uses top 5 chunks)
                            │      ├─► Format prompt with chunks
-                           │      ├─► Ollama/OpenAI/Anthropic/Google (generate summary)
+                           │      ├─► OpenAI/Anthropic/Google API (generate summary)
                            │      └─► Returns summary with citations [1][2]
                            │
                            └─► Frontend (display results + summary)
@@ -234,10 +233,10 @@ User Query → Frontend → API Gateway
 │  │  │  │ 80%Mem   │  │ 80%Mem   │  │ 80%Mem   │         │ │ │
 │  │  │  └──────────┘  └──────────┘  └──────────┘         │ │ │
 │  │  │                                                     │ │ │
-│  │  │  ┌──────────┐  ┌──────────┐                       │ │ │
-│  │  │  │ Frontend │  │  Ollama  │                       │ │ │
-│  │  │  │  2 pods  │  │  1 pod   │                       │ │ │
-│  │  │  └──────────┘  └──────────┘                       │ │ │
+│  │  │  ┌──────────┐                                       │ │ │
+│  │  │  │ Frontend │                                       │ │ │
+│  │  │  │  2 pods  │                                       │ │ │
+│  │  │  └──────────┘                                       │ │ │
 │  │  └─────────────────────────────────────────────────────┘ │ │
 │  │                                                           │ │
 │  │  ┌─────────────────────────────────────────────────────┐ │ │

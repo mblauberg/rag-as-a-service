@@ -3,10 +3,6 @@ import { abbreviateModelName, groupModelsByProvider } from '../modelUtils';
 import { Model } from '../../types';
 
 describe('abbreviateModelName', () => {
-  it('abbreviates Llama models', () => {
-    expect(abbreviateModelName('Llama 3.3 70B')).toBe('Llama 3.3');
-  });
-
   it('keeps short names as-is', () => {
     expect(abbreviateModelName('GPT-5')).toBe('GPT-5');
     expect(abbreviateModelName('GPT-5 Mini')).toBe('GPT-5 Mini');
@@ -16,29 +12,34 @@ describe('abbreviateModelName', () => {
     expect(abbreviateModelName('Claude Sonnet 4.5')).toBe('Sonnet 4.5');
   });
 
+  it('abbreviates Claude Opus models', () => {
+    expect(abbreviateModelName('Claude Opus 4.1')).toBe('Opus 4.1');
+  });
+
   it('abbreviates Gemini models', () => {
     expect(abbreviateModelName('Gemini 2.5 Pro')).toBe('Gemini 2.5');
+    expect(abbreviateModelName('Gemini 2.5 Flash')).toBe('Gemini 2.5');
   });
 });
 
 describe('groupModelsByProvider', () => {
   const models: Model[] = [
     {
-      name: 'llama3.3:70b',
-      display_name: 'Llama 3.3 70B',
-      provider: 'ollama',
-      size: '70B',
-      description: 'Test',
-      capabilities: [],
-      modified_at: '2025-10-24T10:00:00Z'
-    },
-    {
       name: 'openai:gpt-5',
       display_name: 'GPT-5',
       provider: 'openai',
       size: 'N/A',
-      description: 'Test',
-      capabilities: [],
+      description: 'Most capable model',
+      capabilities: ['reasoning', 'coding'],
+      modified_at: '2025-10-24T10:00:00Z'
+    },
+    {
+      name: 'anthropic:claude-sonnet-4-5',
+      display_name: 'Claude Sonnet 4.5',
+      provider: 'anthropic',
+      size: 'N/A',
+      description: 'Balanced performance',
+      capabilities: ['reasoning', 'coding'],
       modified_at: '2025-10-24T10:00:00Z'
     }
   ];
@@ -46,9 +47,9 @@ describe('groupModelsByProvider', () => {
   it('groups models by provider', () => {
     const grouped = groupModelsByProvider(models);
 
-    expect(grouped.ollama).toHaveLength(1);
     expect(grouped.openai).toHaveLength(1);
-    expect(grouped.ollama[0].name).toBe('llama3.3:70b');
+    expect(grouped.anthropic).toHaveLength(1);
+    expect(grouped.openai[0].name).toBe('openai:gpt-5');
   });
 
   it('handles empty model list', () => {

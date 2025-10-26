@@ -64,15 +64,17 @@ RAAS enables intelligent document search through semantic understanding. Upload 
        │
        ├──────────────────────────────────┐
        │             ┌─────────────┐      │
-       └────────────▶│  Generator  │      │
-                     │  Port 8002  │      │
-                     └──────┬──────┘      │
-                            │             │
-                            ▼             │
-                     ┌─────────────┐      │
-                     │   Ollama    │◀─────┘
-                     │ Port 11434  │
-                     └─────────────┘
+       └────────────▶│  Generator  │──────┘
+                     │  Port 8002  │
+                     └──────┬──────┘
+                            │
+                            ▼
+                     ┌──────────────────┐
+                     │   Cloud LLM APIs │
+                     │ (OpenAI/         │
+                     │  Anthropic/      │
+                     │  Google)         │
+                     └──────────────────┘
 ```
 
 ### Technology Stack
@@ -151,7 +153,6 @@ open http://localhost:3000
 - Embedder: http://localhost:8001/docs
 - Generator: http://localhost:8002/docs
 - Qdrant Dashboard: http://localhost:6333/dashboard
-- Ollama: http://localhost:11434
 
 ### Kubernetes Deployment (Local with Kind)
 
@@ -217,7 +218,11 @@ cd services/generator
 # Install dependencies
 poetry install
 
-# Run locally (requires Ollama running)
+# Set up environment (add API keys to .env)
+cp .env.example .env
+# Edit .env to add OPENAI_API_KEY
+
+# Run locally
 poetry run uvicorn app.main:app --reload --port 8002
 
 # Run tests
@@ -424,26 +429,23 @@ Visit the API docs for interactive testing:
 
 ## Multi-Provider Model Support
 
-The system supports multiple LLM providers for summary generation:
+The system supports multiple cloud LLM providers for production-ready summary generation:
 
-- **OpenAI** (GPT-4o, GPT-4o-mini, default)
-- **Ollama** (local models - llama3.2, mistral, etc.)
-- **Anthropic** (Claude models)
-- **Google** (Gemini models)
+- **OpenAI** (GPT-5, GPT-5 Mini - primary provider)
+- **Anthropic** (Claude Opus 4.1, Claude Sonnet 4.5 - alternative)
+- **Google** (Gemini 2.5 Pro, Gemini 2.5 Flash - alternative)
 
-To enable additional providers, configure environment variables in `services/generator/.env`:
+All providers are cloud-based for reliability, scalability, and consistent performance.
+
+To enable providers, configure environment variables in `services/generator/.env`:
 
 ```bash
-# OpenAI (recommended, enabled by default)
+# OpenAI (primary provider)
 ENABLE_OPENAI=true
 OPENAI_API_KEY=sk-...
-DEFAULT_MODEL=openai:gpt-4o-mini
+DEFAULT_MODEL=openai:gpt-5-mini
 
-# Ollama (optional, for local models)
-ENABLE_OLLAMA=true
-OLLAMA_URL=http://localhost:11434
-
-# Anthropic (optional)
+# Anthropic (optional alternative)
 ENABLE_ANTHROPIC=true
 ANTHROPIC_API_KEY=sk-ant-...
 
@@ -484,14 +486,18 @@ LOG_LEVEL=INFO
 #### Generator Service
 
 ```bash
-# OpenAI Configuration (default)
+# OpenAI Configuration (primary)
 ENABLE_OPENAI=true
 OPENAI_API_KEY=your-openai-api-key-here
-DEFAULT_MODEL=openai:gpt-4o-mini
+DEFAULT_MODEL=openai:gpt-5-mini
 
-# Ollama Configuration (optional)
-OLLAMA_URL=http://localhost:11434
-ENABLE_OLLAMA=false
+# Anthropic Configuration (optional)
+ENABLE_ANTHROPIC=false
+ANTHROPIC_API_KEY=
+
+# Google Configuration (optional)
+ENABLE_GOOGLE=false
+GOOGLE_API_KEY=
 
 # Generation Settings
 MAX_CHUNKS=5
@@ -581,7 +587,6 @@ raas/
 │   ├── kind/                  # Kind cluster config
 │   │   └── kind-config.yaml
 │   └── scripts/               # Infrastructure scripts
-│       ├── init-ollama.sh
 │       ├── setup-kind-full.sh
 │       ├── test-rollout-rollback.sh
 │       ├── test-scalability-reliability.sh

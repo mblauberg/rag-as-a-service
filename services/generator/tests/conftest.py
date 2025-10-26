@@ -19,8 +19,8 @@ def mock_llm_response():
 def test_generation_config():
     """Test configuration for generation service."""
     return {
-        "provider": "ollama",
-        "model": "llama2",
+        "provider": "openai",
+        "model": "openai:gpt-5-mini",
         "temperature": 0.7,
         "max_tokens": 100
     }
@@ -78,8 +78,3 @@ def google_provider():
             return GoogleProvider()
 
 
-@pytest.fixture
-def ollama_provider():
-    """Create OllamaProvider instance for testing."""
-    from app.providers.ollama_provider import OllamaProvider
-    return OllamaProvider(base_url="http://localhost:11434")
