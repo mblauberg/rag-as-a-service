@@ -5,6 +5,7 @@ from typing import Any
 import httpx
 
 from app.core.config import settings
+from app.core.exceptions import GenerationServiceError
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +115,9 @@ class GeneratorClient:
 
         Returns:
             List of model info dictionaries
+
+        Raises:
+            GenerationServiceError: If the generator service is unavailable or returns an error
         """
         url = f"{self.base_url}/api/v1/models"
 
@@ -126,8 +130,23 @@ class GeneratorClient:
                     return data.get("models", [])
                 else:
                     logger.warning(f"Failed to list models: {response.status_code}")
-                    return []
+                    raise GenerationServiceError(
+                        operation="list_models",
+                        original_error=Exception(f"HTTP {response.status_code}")
+                    )
 
-        except Exception as e:
+        except httpx.HTTPError as e:
             logger.error(f"Failed to list models: {e}")
-            return []
+            raise GenerationServiceError(
+                operation="list_models",
+                original_error=e
+            )
+        except GenerationServiceError:
+            # Re-raise our custom exception
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error listing models: {e}")
+            raise GenerationServiceError(
+                operation="list_models",
+                original_error=e
+            )
