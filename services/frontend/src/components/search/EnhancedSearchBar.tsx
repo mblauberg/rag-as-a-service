@@ -124,7 +124,7 @@ export const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None - No AI Summary</SelectItem>
-                  {providerOrder.map((provider, idx) => {
+                  {providerOrder.map((provider) => {
                     const providerModels = groupedModels[provider];
                     if (!providerModels || providerModels.length === 0) return null;
 

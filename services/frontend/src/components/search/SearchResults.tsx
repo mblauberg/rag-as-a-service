@@ -1,25 +1,22 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import type { SearchResult, SearchResponse } from '@/types';
-import { SummaryDisplay } from './SummaryDisplay';
+import type { SearchResult } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 interface SearchResultsProps {
   results: SearchResult[];
   query: string;
-  searchResponse?: SearchResponse;
   onChunkClick: (documentId: string, chunkId: string) => void;
 }
 
 /**
- * SearchResults - Displays search results with optional summary.
+ * SearchResults - Displays search results.
  * Click result to open document detail modal.
  */
 export const SearchResults: React.FC<SearchResultsProps> = ({
   results,
   query,
-  searchResponse,
   onChunkClick,
 }) => {
 
@@ -68,14 +65,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Summary if present */}
-      {searchResponse?.summary && searchResponse?.model_used && (
-        <SummaryDisplay
-          summary={searchResponse.summary}
-          modelUsed={searchResponse.model_used}
-        />
-      )}
-
       {/* Results */}
       <div className="space-y-3">
         {results.map((result, index) => (

@@ -228,7 +228,6 @@ export const MainPage: React.FC = () => {
                       <SearchResults
                         results={searchResults.data.results}
                         query={searchQuery}
-                        searchResponse={searchResults.data}
                         onChunkClick={handleChunkClick}
                       />
                     </>

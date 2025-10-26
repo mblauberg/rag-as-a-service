@@ -37,10 +37,10 @@ export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
   });
 
   useEffect(() => {
-    if (highlightChunkId && open) {
+    if (highlightChunkId && open && document) {
       // Wait for modal to render
       setTimeout(() => {
-        const element = document.getElementById(`chunk-${highlightChunkId}`);
+        const element = window.document.getElementById(`chunk-${highlightChunkId}`);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
           element.classList.add('bg-yellow-100', 'border-l-4', 'border-yellow-500', 'transition-all');
@@ -54,7 +54,7 @@ export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
         }
       }, 100);
     }
-  }, [highlightChunkId, open]);
+  }, [highlightChunkId, open, document]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
