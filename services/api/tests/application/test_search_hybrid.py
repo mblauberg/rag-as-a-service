@@ -1,11 +1,13 @@
 """Tests for hybrid search use case."""
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
-from app.application.use_cases.search_documents import SearchDocumentsUseCase, SearchMode
-from app.domain.value_objects.search_query import SearchQuery
+import pytest
+
+from app.application.use_cases.search_documents import (SearchDocumentsUseCase,
+                                                        SearchMode)
 from app.domain.entities.chunk import Chunk
+from app.domain.value_objects.search_query import SearchQuery
 
 
 @pytest.mark.asyncio
@@ -30,7 +32,7 @@ async def test_hybrid_search_calls_both_stores():
         embedding_service=embedding_service,
         vector_store=vector_store,
         keyword_store=keyword_store,
-        fusion_service=fusion_service
+        fusion_service=fusion_service,
     )
 
     query = SearchQuery(text="test query", top_k=10)
@@ -61,7 +63,7 @@ async def test_hybrid_search_retrieves_2x_before_fusion():
         embedding_service=embedding_service,
         vector_store=vector_store,
         keyword_store=keyword_store,
-        fusion_service=fusion_service
+        fusion_service=fusion_service,
     )
 
     query = SearchQuery(text="test query", top_k=10)

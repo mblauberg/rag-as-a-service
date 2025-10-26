@@ -1,5 +1,6 @@
 """PostgreSQL full-text search implementation using BM25-like ranking."""
 from uuid import UUID
+
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,10 +21,7 @@ class PostgresKeywordStoreImpl(KeywordStore):
         self.db_session = db_session
 
     async def search(
-        self,
-        query_text: str,
-        top_k: int,
-        document_id: UUID | None = None
+        self, query_text: str, top_k: int, document_id: UUID | None = None
     ) -> list[Chunk]:
         """Search using PostgreSQL full-text search.
 
@@ -67,14 +65,11 @@ class PostgresKeywordStoreImpl(KeywordStore):
                     metadata=row.chunk_metadata or {},
                     section_title=row.section_title,
                     section_level=row.section_level,
-                    page_number=row.page_number
+                    page_number=row.page_number,
                 )
                 chunks.append(chunk)
 
             return chunks
 
         except Exception as e:
-            raise SearchError(
-                operation="keyword_search",
-                original_error=e
-            ) from e
+            raise SearchError(operation="keyword_search", original_error=e) from e

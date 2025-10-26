@@ -1,10 +1,12 @@
 """Tests for PostgreSQL keyword store."""
-import pytest
-from uuid import uuid4
 from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
 
-from app.infrastructure.search.postgres_keyword_store import PostgresKeywordStoreImpl
+import pytest
+
 from app.domain.entities.chunk import Chunk
+from app.infrastructure.search.postgres_keyword_store import \
+    PostgresKeywordStoreImpl
 
 
 @pytest.mark.asyncio
@@ -32,10 +34,7 @@ async def test_postgres_keyword_store_searches_with_fts():
 
     # Create store and search
     store = PostgresKeywordStoreImpl(db_session)
-    results = await store.search(
-        query_text="Kubernetes containers",
-        top_k=10
-    )
+    results = await store.search(query_text="Kubernetes containers", top_k=10)
 
     # Verify
     assert len(results) == 1
@@ -55,11 +54,7 @@ async def test_postgres_keyword_store_handles_document_filter():
     store = PostgresKeywordStoreImpl(db_session)
     doc_id = uuid4()
 
-    await store.search(
-        query_text="test",
-        top_k=10,
-        document_id=doc_id
-    )
+    await store.search(query_text="test", top_k=10, document_id=doc_id)
 
     # Verify execute was called with document_id in params
     call_args = db_session.execute.call_args

@@ -14,7 +14,9 @@ class ListDocumentsUseCase:
         """Initialize with document repository."""
         self.document_repo = document_repo
 
-    async def execute(self, page: int = 1, limit: int = 20) -> tuple[list[Document], int]:
+    async def execute(
+        self, page: int = 1, limit: int = 20
+    ) -> tuple[list[Document], int]:
         """List documents with pagination.
 
         Args:

@@ -1,6 +1,7 @@
 """Tests for Reranker port."""
-import pytest
 from uuid import uuid4
+
+import pytest
 
 from app.domain.entities.chunk import Chunk
 from app.ports.services import Reranker
@@ -9,12 +10,7 @@ from app.ports.services import Reranker
 class MockReranker(Reranker):
     """Mock implementation for testing."""
 
-    async def rerank(
-        self,
-        query: str,
-        chunks: list[Chunk],
-        top_k: int
-    ) -> list[Chunk]:
+    async def rerank(self, query: str, chunks: list[Chunk], top_k: int) -> list[Chunk]:
         """Return top_k chunks in reverse order (mock reranking)."""
         # Reverse the list as a simple mock reranking strategy
         reranked = list(reversed(chunks))
@@ -34,16 +30,12 @@ async def test_reranker_port_contract():
             document_id=doc_id,
             content=f"Test content {i}",
             tokens=10,
-            embedding_vector=[0.1 * i] * 384
+            embedding_vector=[0.1 * i] * 384,
         )
         for i in range(5)
     ]
 
-    results = await reranker.rerank(
-        query="test query",
-        chunks=chunks,
-        top_k=3
-    )
+    results = await reranker.rerank(query="test query", chunks=chunks, top_k=3)
 
     assert isinstance(results, list)
     assert all(isinstance(chunk, Chunk) for chunk in results)
@@ -57,12 +49,7 @@ async def test_reranker_respects_top_k():
     # Create test chunks
     doc_id = uuid4()
     chunks = [
-        Chunk(
-            id=uuid4(),
-            document_id=doc_id,
-            content=f"Test content {i}",
-            tokens=10
-        )
+        Chunk(id=uuid4(), document_id=doc_id, content=f"Test content {i}", tokens=10)
         for i in range(10)
     ]
 
@@ -96,13 +83,11 @@ async def test_reranker_preserves_chunk_data():
         metadata={"source": "test.pdf", "page": 1},
         section_title="Introduction",
         section_level=1,
-        page_number=1
+        page_number=1,
     )
 
     results = await reranker.rerank(
-        query="test query",
-        chunks=[original_chunk],
-        top_k=1
+        query="test query", chunks=[original_chunk], top_k=1
     )
 
     # Verify all fields are preserved
@@ -125,11 +110,7 @@ async def test_reranker_handles_empty_chunks():
     """Test that rerank handles empty chunk list."""
     reranker = MockReranker()
 
-    results = await reranker.rerank(
-        query="test query",
-        chunks=[],
-        top_k=5
-    )
+    results = await reranker.rerank(query="test query", chunks=[], top_k=5)
 
     assert isinstance(results, list)
     assert len(results) == 0
@@ -141,18 +122,9 @@ async def test_reranker_handles_single_chunk():
     reranker = MockReranker()
 
     doc_id = uuid4()
-    chunk = Chunk(
-        id=uuid4(),
-        document_id=doc_id,
-        content="Single chunk",
-        tokens=10
-    )
+    chunk = Chunk(id=uuid4(), document_id=doc_id, content="Single chunk", tokens=10)
 
-    results = await reranker.rerank(
-        query="test query",
-        chunks=[chunk],
-        top_k=5
-    )
+    results = await reranker.rerank(query="test query", chunks=[chunk], top_k=5)
 
     assert len(results) == 1
     assert results[0].content == "Single chunk"

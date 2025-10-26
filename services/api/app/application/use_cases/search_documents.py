@@ -4,23 +4,18 @@ from enum import Enum
 
 from app.domain.entities.chunk import Chunk
 from app.domain.value_objects.search_query import SearchQuery
-from app.ports.services import (
-    EmbeddingService,
-    VectorStore,
-    KeywordStore,
-    FusionService,
-    QueryAugmenter,
-    Reranker
-)
+from app.ports.services import (EmbeddingService, FusionService, KeywordStore,
+                                QueryAugmenter, Reranker, VectorStore)
 
 logger = logging.getLogger(__name__)
 
 
 class SearchMode(str, Enum):
     """Search mode selection."""
-    VECTOR = "vector"      # Semantic only
-    KEYWORD = "keyword"    # BM25 only
-    HYBRID = "hybrid"      # RRF fusion (RECOMMENDED)
+
+    VECTOR = "vector"  # Semantic only
+    KEYWORD = "keyword"  # BM25 only
+    HYBRID = "hybrid"  # RRF fusion (RECOMMENDED)
 
 
 class SearchDocumentsUseCase:
@@ -42,7 +37,7 @@ class SearchDocumentsUseCase:
         keyword_store: KeywordStore | None = None,
         fusion_service: FusionService | None = None,
         query_augmenter: QueryAugmenter | None = None,
-        reranker: Reranker | None = None
+        reranker: Reranker | None = None,
     ):
         """Initialize with required dependencies.
 
@@ -68,7 +63,7 @@ class SearchDocumentsUseCase:
         use_expansion: bool = True,
         use_reranking: bool = True,
         rerank_candidates: int = 50,
-        fusion_k: int = 60
+        fusion_k: int = 60,
     ) -> list[Chunk]:
         """Execute document search with specified mode and optional query expansion.
 
@@ -96,13 +91,14 @@ class SearchDocumentsUseCase:
         retrieval_k = query.top_k
         if use_reranking and self.reranker:
             retrieval_k = max(query.top_k, rerank_candidates)
-            logger.info(f"Reranking enabled: retrieving {retrieval_k} candidates for top_{query.top_k}")
+            logger.info(
+                f"Reranking enabled: retrieving {retrieval_k} candidates for top_{query.top_k}"
+            )
 
         # Query expansion if enabled and available
         if use_expansion and self.query_augmenter:
             expanded_queries = await self.query_augmenter.expand(
-                query.text,
-                num_variants=2
+                query.text, num_variants=2
             )
 
             # Search with each query variant (using retrieval_k)
@@ -122,8 +118,7 @@ class SearchDocumentsUseCase:
             # Fuse all expanded query results
             if self.fusion_service and len(all_result_sets) > 1:
                 initial_results = self.fusion_service.fuse(
-                    result_sets=all_result_sets,
-                    k=fusion_k
+                    result_sets=all_result_sets, k=fusion_k
                 )[:retrieval_k]
             else:
                 initial_results = all_result_sets[0][:retrieval_k]
@@ -136,13 +131,11 @@ class SearchDocumentsUseCase:
             # Apply reranking if enabled
             if use_reranking and self.reranker:
                 final_results = await self.reranker.rerank(
-                    query=query.text,
-                    chunks=initial_results,
-                    top_k=query.top_k
+                    query=query.text, chunks=initial_results, top_k=query.top_k
                 )
                 logger.info(f"Reranked to {len(final_results)} final results")
             else:
-                final_results = initial_results[:query.top_k]
+                final_results = initial_results[: query.top_k]
 
             return final_results
 
@@ -161,9 +154,7 @@ class SearchDocumentsUseCase:
         # Apply reranking if enabled
         if use_reranking and self.reranker:
             final_results = await self.reranker.rerank(
-                query=query.text,
-                chunks=initial_results,
-                top_k=query.top_k
+                query=query.text, chunks=initial_results, top_k=query.top_k
             )
             logger.info(
                 f"Reranked {len(initial_results)} candidates to "
@@ -171,7 +162,7 @@ class SearchDocumentsUseCase:
             )
             return final_results
         else:
-            return initial_results[:query.top_k]
+            return initial_results[: query.top_k]
 
     async def _vector_search(self, query: SearchQuery) -> list[Chunk]:
         """Pure semantic search using embeddings."""
@@ -181,8 +172,7 @@ class SearchDocumentsUseCase:
         query_vector = query_embeddings[0]
 
         results = await self.vector_store.search(
-            query_vector=query_vector,
-            top_k=query.top_k
+            query_vector=query_vector, top_k=query.top_k
         )
 
         logger.info(f"Vector search: {len(results)} results")
@@ -194,18 +184,13 @@ class SearchDocumentsUseCase:
             raise ValueError("KeywordStore not configured")
 
         results = await self.keyword_store.search(
-            query_text=query.text,
-            top_k=query.top_k
+            query_text=query.text, top_k=query.top_k
         )
 
         logger.info(f"Keyword search: {len(results)} results")
         return results
 
-    async def _hybrid_search(
-        self,
-        query: SearchQuery,
-        fusion_k: int
-    ) -> list[Chunk]:
+    async def _hybrid_search(self, query: SearchQuery, fusion_k: int) -> list[Chunk]:
         """Hybrid search combining vector and keyword with RRF fusion.
 
         Retrieves 2x results from each method, then fuses to top_k.
@@ -222,8 +207,7 @@ class SearchDocumentsUseCase:
             SearchQuery(text=query.text, top_k=retrieval_k)
         )
         keyword_results = await self.keyword_store.search(
-            query_text=query.text,
-            top_k=retrieval_k
+            query_text=query.text, top_k=retrieval_k
         )
 
         logger.info(
@@ -233,13 +217,11 @@ class SearchDocumentsUseCase:
 
         # Fuse with RRF
         fused_results = self.fusion_service.fuse(
-            result_sets=[vector_results, keyword_results],
-            method="rrf",
-            k=fusion_k
+            result_sets=[vector_results, keyword_results], method="rrf", k=fusion_k
         )
 
         # Return top_k after fusion
-        final_results = fused_results[:query.top_k]
+        final_results = fused_results[: query.top_k]
 
         logger.info(f"Hybrid search: {len(final_results)} final results")
         return final_results

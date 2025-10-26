@@ -10,7 +10,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.api.dependencies import get_search_documents_use_case
 from app.api.mappers import chunk_to_search_result
 from app.api.models import SearchRequest, SearchResponse
-from app.application.use_cases.search_documents import SearchDocumentsUseCase, SearchMode
+from app.application.use_cases.search_documents import (SearchDocumentsUseCase,
+                                                        SearchMode)
 from app.core.exceptions import EmbeddingServiceError, VectorStoreError
 from app.domain.value_objects.search_query import SearchQuery
 
@@ -23,18 +24,18 @@ async def search_documents(
     request: SearchRequest,
     mode: SearchMode = Query(
         default=SearchMode.HYBRID,
-        description="Search mode: 'vector' (semantic only), 'keyword' (BM25 only), or 'hybrid' (RRF fusion - RECOMMENDED, +18-22% accuracy)"
+        description="Search mode: 'vector' (semantic only), 'keyword' (BM25 only), or 'hybrid' (RRF fusion - RECOMMENDED, +18-22% accuracy)",
     ),
     use_expansion: bool = Query(
         default=True,
-        description="Enable multi-query expansion for improved retrieval coverage (default: True, +15-20% recall)"
+        description="Enable multi-query expansion for improved retrieval coverage (default: True, +15-20% recall)",
     ),
     use_reranking: bool = Query(
         default=True,
-        description="Enable cross-encoder reranking for improved precision (default: True, +8-12% precision@10)"
+        description="Enable cross-encoder reranking for improved precision (default: True, +8-12% precision@10)",
     ),
-    use_case: SearchDocumentsUseCase = Depends(get_search_documents_use_case)
-):
+    use_case: SearchDocumentsUseCase = Depends(get_search_documents_use_case),
+) -> SearchResponse:
     """Perform document search with hybrid retrieval (RECOMMENDED).
 
     This endpoint supports three search modes:
@@ -71,21 +72,14 @@ async def search_documents(
     # Validate query
     if not request.query or len(request.query.strip()) == 0:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Query cannot be empty"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Query cannot be empty"
         )
 
     # Create domain value object
     try:
-        search_query = SearchQuery(
-            text=request.query,
-            top_k=request.top_k
-        )
+        search_query = SearchQuery(text=request.query, top_k=request.top_k)
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     # Execute use case
     try:
@@ -93,7 +87,7 @@ async def search_documents(
             search_query,
             mode=mode,
             use_expansion=use_expansion,
-            use_reranking=use_reranking
+            use_reranking=use_reranking,
         )
 
         logger.info(
@@ -105,26 +99,24 @@ async def search_documents(
         results = [chunk_to_search_result(chunk, score=0.0) for chunk in chunks]
 
         return SearchResponse(
-            query=request.query,
-            results=results,
-            total_results=len(results)
+            query=request.query, results=results, total_results=len(results)
         )
 
     except EmbeddingServiceError as e:
         logger.error(f"Embedding generation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Embedding service unavailable: {str(e)}"
+            detail=f"Embedding service unavailable: {str(e)}",
         )
     except VectorStoreError as e:
         logger.error(f"Vector search failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Vector database unavailable: {str(e)}"
+            detail=f"Vector database unavailable: {str(e)}",
         )
     except Exception as e:
         logger.error(f"Search failed: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Search failed: {str(e)}"
+            detail=f"Search failed: {str(e)}",
         )

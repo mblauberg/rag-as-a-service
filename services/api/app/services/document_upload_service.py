@@ -17,17 +17,13 @@ logger = logging.getLogger(__name__)
 class DocumentUploadService:
     """Service handling file I/O operations for document uploads."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize document upload service."""
         self.upload_dir = Path(settings.upload_dir)
         self.upload_dir.mkdir(parents=True, exist_ok=True)
         self.file_detector = FileTypeDetector()
 
-    async def save_file(
-        self,
-        file_content: bytes,
-        filename: str
-    ) -> dict[str, Any]:
+    async def save_file(self, file_content: bytes, filename: str) -> dict[str, Any]:
         """
         Save uploaded file to disk and extract metadata.
 
@@ -61,7 +57,7 @@ class DocumentUploadService:
 
         # Save file to disk
         try:
-            async with aiofiles.open(file_path, 'wb') as f:
+            async with aiofiles.open(file_path, "wb") as f:
                 await f.write(file_content)
             logger.info(f"Saved file to {file_path}")
         except Exception as e:
@@ -77,7 +73,7 @@ class DocumentUploadService:
             "file_path": str(file_path),
             "file_type": file_type,
             "file_size": file_size,
-            "document_type": document_type.value
+            "document_type": document_type.value,
         }
 
     async def delete_file(self, file_path: str) -> None:
@@ -118,18 +114,13 @@ class DocumentUploadService:
         try:
             if not path.exists():
                 raise FileOperationError(
-                    "read",
-                    file_path,
-                    FileNotFoundError(f"File not found: {file_path}")
+                    "read", file_path, FileNotFoundError(f"File not found: {file_path}")
                 )
 
             file_type = file_processor.detect_file_type(str(path))
             file_size = path.stat().st_size
 
-            return {
-                "file_type": file_type,
-                "file_size": file_size
-            }
+            return {"file_type": file_type, "file_size": file_size}
         except FileOperationError:
             raise
         except Exception as e:

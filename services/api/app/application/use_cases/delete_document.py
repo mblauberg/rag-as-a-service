@@ -19,7 +19,7 @@ class DeleteDocumentUseCase:
         self,
         document_repo: DocumentRepository,
         chunk_repo: ChunkRepository,
-        vector_store: VectorStore
+        vector_store: VectorStore,
     ):
         """Initialize with repository and vector store dependencies."""
         self.document_repo = document_repo

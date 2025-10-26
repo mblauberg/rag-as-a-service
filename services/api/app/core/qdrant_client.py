@@ -1,13 +1,8 @@
 """Qdrant client wrapper for vector operations."""
 
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.models import (
-    Distance,
-    FieldCondition,
-    Filter,
-    MatchValue,
-    VectorParams,
-)
+from qdrant_client.models import (Distance, FieldCondition, Filter, MatchValue,
+                                  VectorParams)
 
 from app.core.config import settings
 
@@ -15,7 +10,7 @@ from app.core.config import settings
 class QdrantClientWrapper:
     """Wrapper class for Qdrant async client operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize async Qdrant client."""
         self.client = AsyncQdrantClient(url=settings.qdrant_url)
         self.collection_name = "documents"
@@ -33,9 +28,8 @@ class QdrantClientWrapper:
             await self.client.create_collection(
                 collection_name=self.collection_name,
                 vectors_config=VectorParams(
-                    size=384,  # all-MiniLM-L6-v2 dimension
-                    distance=Distance.COSINE
-                )
+                    size=384, distance=Distance.COSINE  # all-MiniLM-L6-v2 dimension
+                ),
             )
 
         self._initialized = True
@@ -45,7 +39,7 @@ class QdrantClientWrapper:
         query_vector: list[float],
         limit: int = 10,
         score_threshold: float = 0.0,
-        document_ids: list[str] | None = None
+        document_ids: list[str] | None = None,
     ) -> list[dict]:
         """
         Search for similar vectors in Qdrant.
@@ -64,12 +58,7 @@ class QdrantClientWrapper:
         query_filter = None
         if document_ids:
             query_filter = {
-                "must": [
-                    {
-                        "key": "document_id",
-                        "match": {"any": document_ids}
-                    }
-                ]
+                "must": [{"key": "document_id", "match": {"any": document_ids}}]
             }
 
         results = await self.client.search(
@@ -78,15 +67,11 @@ class QdrantClientWrapper:
             limit=limit,
             score_threshold=score_threshold,
             query_filter=query_filter,
-            with_payload=True
+            with_payload=True,
         )
 
         return [
-            {
-                "id": str(result.id),
-                "score": result.score,
-                "payload": result.payload
-            }
+            {"id": str(result.id), "score": result.score, "payload": result.payload}
             for result in results
         ]
 
@@ -104,11 +89,10 @@ class QdrantClientWrapper:
             points_selector=Filter(
                 must=[
                     FieldCondition(
-                        key="document_id",
-                        match=MatchValue(value=document_id)
+                        key="document_id", match=MatchValue(value=document_id)
                     )
                 ]
-            )
+            ),
         )
 
     async def health_check(self) -> bool:

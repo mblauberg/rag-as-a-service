@@ -2,11 +2,9 @@
 import re
 from pathlib import Path
 
-from app.services.processors.base_processor import (
-    BaseDocumentProcessor,
-    DocumentElement,
-    ProcessedDocument,
-)
+from app.services.processors.base_processor import (BaseDocumentProcessor,
+                                                    DocumentElement,
+                                                    ProcessedDocument)
 
 
 class TextProcessor(BaseDocumentProcessor):
@@ -26,37 +24,32 @@ class TextProcessor(BaseDocumentProcessor):
         Returns:
             ProcessedDocument with elements
         """
-        with open(file_path, encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
-        file_type = file_path.suffix.lstrip('.').lower()
-        if file_type == 'markdown':
-            file_type = 'md'
+        file_type = file_path.suffix.lstrip(".").lower()
+        if file_type == "markdown":
+            file_type = "md"
 
         elements: list[DocumentElement] = []
 
-        if file_type == 'md':
+        if file_type == "md":
             # Parse markdown structure
             elements = self._parse_markdown(content)
         else:
             # Plain text - split by paragraphs
             elements = self._parse_plaintext(content)
 
-        metadata = {
-            'char_count': len(content),
-            'line_count': content.count('\n') + 1
-        }
+        metadata = {"char_count": len(content), "line_count": content.count("\n") + 1}
 
         return ProcessedDocument(
-            elements=elements,
-            metadata=metadata,
-            document_type=file_type
+            elements=elements, metadata=metadata, document_type=file_type
         )
 
     def _parse_markdown(self, content: str) -> list[DocumentElement]:
         """Parse markdown with heading structure."""
         elements = []
-        lines = content.split('\n')
+        lines = content.split("\n")
         current_section = []
 
         i = 0
@@ -64,20 +57,20 @@ class TextProcessor(BaseDocumentProcessor):
             line = lines[i]
 
             # Check for ATX-style headings (# Heading)
-            heading_match = re.match(r'^(#{1,6})\s+(.+)$', line)
+            heading_match = re.match(r"^(#{1,6})\s+(.+)$", line)
             if heading_match:
                 level = len(heading_match.group(1))
                 title = heading_match.group(2).strip()
 
                 # Update section hierarchy
-                current_section = current_section[:level-1] + [title]
+                current_section = current_section[: level - 1] + [title]
 
                 element = DocumentElement(
                     content=title,
-                    element_type='heading',
-                    metadata={'heading_level': level},
+                    element_type="heading",
+                    metadata={"heading_level": level},
                     section_level=level,
-                    section_title=' > '.join(current_section)
+                    section_title=" > ".join(current_section),
                 )
                 elements.append(element)
 
@@ -85,16 +78,22 @@ class TextProcessor(BaseDocumentProcessor):
                 # Regular content - collect consecutive non-empty lines
                 para_lines = [line]
                 i += 1
-                while i < len(lines) and lines[i].strip() and not re.match(r'^#{1,6}\s+', lines[i]):
+                while (
+                    i < len(lines)
+                    and lines[i].strip()
+                    and not re.match(r"^#{1,6}\s+", lines[i])
+                ):
                     para_lines.append(lines[i])
                     i += 1
                 i -= 1  # Back up one
 
                 element = DocumentElement(
-                    content='\n'.join(para_lines),
-                    element_type='paragraph',
+                    content="\n".join(para_lines),
+                    element_type="paragraph",
                     metadata={},
-                    section_title=' > '.join(current_section) if current_section else None
+                    section_title=" > ".join(current_section)
+                    if current_section
+                    else None,
                 )
                 elements.append(element)
 
@@ -105,13 +104,11 @@ class TextProcessor(BaseDocumentProcessor):
     def _parse_plaintext(self, content: str) -> list[DocumentElement]:
         """Parse plain text by paragraphs."""
         elements = []
-        paragraphs = [p.strip() for p in content.split('\n\n') if p.strip()]
+        paragraphs = [p.strip() for p in content.split("\n\n") if p.strip()]
 
         for para in paragraphs:
             element = DocumentElement(
-                content=para,
-                element_type='paragraph',
-                metadata={}
+                content=para, element_type="paragraph", metadata={}
             )
             elements.append(element)
 

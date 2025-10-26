@@ -1,11 +1,13 @@
 """Tests for CrossEncoderRerankerImpl."""
-import pytest
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
+
 import numpy as np
+import pytest
 
 from app.domain.entities.chunk import Chunk
-from app.infrastructure.reranking.cross_encoder_reranker import CrossEncoderRerankerImpl
+from app.infrastructure.reranking.cross_encoder_reranker import \
+    CrossEncoderRerankerImpl
 
 
 class TestCrossEncoderRerankerImpl:
@@ -20,7 +22,9 @@ class TestCrossEncoderRerankerImpl:
     @pytest.fixture
     def reranker(self, mock_cross_encoder):
         """Fixture for CrossEncoderRerankerImpl with mocked model."""
-        with patch("app.infrastructure.reranking.cross_encoder_reranker.CrossEncoder") as mock_class:
+        with patch(
+            "app.infrastructure.reranking.cross_encoder_reranker.CrossEncoder"
+        ) as mock_class:
             mock_class.return_value = mock_cross_encoder
             return CrossEncoderRerankerImpl()
 
@@ -34,26 +38,28 @@ class TestCrossEncoderRerankerImpl:
                 document_id=doc_id,
                 content="Python is a programming language",
                 tokens=6,
-                embedding_vector=[0.1, 0.2, 0.3]
+                embedding_vector=[0.1, 0.2, 0.3],
             ),
             Chunk(
                 id=uuid4(),
                 document_id=doc_id,
                 content="The weather is sunny today",
                 tokens=5,
-                embedding_vector=[0.4, 0.5, 0.6]
+                embedding_vector=[0.4, 0.5, 0.6],
             ),
             Chunk(
                 id=uuid4(),
                 document_id=doc_id,
                 content="Python uses indentation for code blocks",
                 tokens=6,
-                embedding_vector=[0.7, 0.8, 0.9]
+                embedding_vector=[0.7, 0.8, 0.9],
             ),
         ]
 
     @pytest.mark.asyncio
-    async def test_rerank_basic_functionality(self, reranker, mock_cross_encoder, sample_chunks):
+    async def test_rerank_basic_functionality(
+        self, reranker, mock_cross_encoder, sample_chunks
+    ):
         """Test basic reranking functionality."""
         query = "Python programming"
 
@@ -93,7 +99,9 @@ class TestCrossEncoderRerankerImpl:
         assert result[1] == sample_chunks[0]  # Score 0.7
 
     @pytest.mark.asyncio
-    async def test_rerank_top_k_larger_than_chunks(self, reranker, mock_cross_encoder, sample_chunks):
+    async def test_rerank_top_k_larger_than_chunks(
+        self, reranker, mock_cross_encoder, sample_chunks
+    ):
         """Test reranking when top_k is larger than available chunks."""
         query = "Python programming"
 
@@ -119,7 +127,9 @@ class TestCrossEncoderRerankerImpl:
         mock_cross_encoder.predict.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_rerank_single_chunk(self, reranker, mock_cross_encoder, sample_chunks):
+    async def test_rerank_single_chunk(
+        self, reranker, mock_cross_encoder, sample_chunks
+    ):
         """Test reranking with single chunk."""
         query = "test query"
         single_chunk = [sample_chunks[0]]
@@ -134,7 +144,9 @@ class TestCrossEncoderRerankerImpl:
         assert result[0] == single_chunk[0]
 
     @pytest.mark.asyncio
-    async def test_rerank_chunks_reordered_by_relevance(self, reranker, mock_cross_encoder, sample_chunks):
+    async def test_rerank_chunks_reordered_by_relevance(
+        self, reranker, mock_cross_encoder, sample_chunks
+    ):
         """Test that chunks are properly reordered by relevance score."""
         query = "weather forecast"
 
@@ -152,7 +164,9 @@ class TestCrossEncoderRerankerImpl:
         assert result[2] == sample_chunks[2]  # Score 0.1
 
     @pytest.mark.asyncio
-    async def test_rerank_with_zero_top_k(self, reranker, mock_cross_encoder, sample_chunks):
+    async def test_rerank_with_zero_top_k(
+        self, reranker, mock_cross_encoder, sample_chunks
+    ):
         """Test reranking with top_k=0."""
         query = "test query"
 
@@ -165,7 +179,9 @@ class TestCrossEncoderRerankerImpl:
         assert result == []
 
     @pytest.mark.asyncio
-    async def test_rerank_preserves_chunk_properties(self, reranker, mock_cross_encoder):
+    async def test_rerank_preserves_chunk_properties(
+        self, reranker, mock_cross_encoder
+    ):
         """Test that reranking preserves all chunk properties."""
         doc_id = uuid4()
         chunk_with_metadata = Chunk(
@@ -177,7 +193,7 @@ class TestCrossEncoderRerankerImpl:
             metadata={"source": "test.pdf", "page": 5},
             section_title="Introduction",
             section_level=1,
-            page_number=5
+            page_number=5,
         )
 
         query = "test"
@@ -199,7 +215,9 @@ class TestCrossEncoderRerankerImpl:
 
     def test_initialization_default_model(self):
         """Test initialization with default model."""
-        with patch("app.infrastructure.reranking.cross_encoder_reranker.CrossEncoder") as mock_class:
+        with patch(
+            "app.infrastructure.reranking.cross_encoder_reranker.CrossEncoder"
+        ) as mock_class:
             reranker = CrossEncoderRerankerImpl()
 
             # Verify default model is used
@@ -207,7 +225,9 @@ class TestCrossEncoderRerankerImpl:
 
     def test_initialization_custom_model(self):
         """Test initialization with custom model."""
-        with patch("app.infrastructure.reranking.cross_encoder_reranker.CrossEncoder") as mock_class:
+        with patch(
+            "app.infrastructure.reranking.cross_encoder_reranker.CrossEncoder"
+        ) as mock_class:
             custom_model = "cross-encoder/ms-marco-TinyBERT-L-2-v2"
             reranker = CrossEncoderRerankerImpl(model_name=custom_model)
 
@@ -215,7 +235,9 @@ class TestCrossEncoderRerankerImpl:
             mock_class.assert_called_once_with(custom_model)
 
     @pytest.mark.asyncio
-    async def test_rerank_handles_identical_scores(self, reranker, mock_cross_encoder, sample_chunks):
+    async def test_rerank_handles_identical_scores(
+        self, reranker, mock_cross_encoder, sample_chunks
+    ):
         """Test reranking when chunks have identical scores."""
         query = "test query"
 

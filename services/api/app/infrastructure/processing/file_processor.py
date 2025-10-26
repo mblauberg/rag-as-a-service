@@ -33,7 +33,7 @@ class FileProcessorImpl(FileProcessor):
         if file_content is None:
             raise FileProcessingError(
                 operation="extract_text",
-                original_error=ValueError("File content is None")
+                original_error=ValueError("File content is None"),
             )
 
         # Normalize file type (remove leading dot, convert to lowercase)
@@ -42,7 +42,7 @@ class FileProcessorImpl(FileProcessor):
         if normalized_type not in self.SUPPORTED_TYPES:
             raise FileProcessingError(
                 operation="extract_text",
-                original_error=ValueError(f"Unsupported file type: {file_type}")
+                original_error=ValueError(f"Unsupported file type: {file_type}"),
             )
 
         try:
@@ -55,8 +55,7 @@ class FileProcessorImpl(FileProcessor):
             raise
         except Exception as e:
             raise FileProcessingError(
-                operation=f"extract_text from {normalized_type}",
-                original_error=e
+                operation=f"extract_text from {normalized_type}", original_error=e
             )
 
     async def _extract_from_pdf(self, file_content: bytes) -> str:
@@ -85,8 +84,7 @@ class FileProcessorImpl(FileProcessor):
 
         except Exception as e:
             raise FileProcessingError(
-                operation="Failed to extract text from pdf",
-                original_error=e
+                operation="Failed to extract text from pdf", original_error=e
             )
 
     async def _extract_from_txt(self, file_content: bytes) -> str:
@@ -105,6 +103,5 @@ class FileProcessorImpl(FileProcessor):
             return file_content.decode("utf-8")
         except UnicodeDecodeError as e:
             raise FileProcessingError(
-                operation="Failed to decode text file",
-                original_error=e
+                operation="Failed to decode text file", original_error=e
             )

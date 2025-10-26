@@ -7,7 +7,7 @@ Tests the complete pipeline with all Phase 2-4 enhancements:
 - Chunking with overlap (Phase 4)
 """
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,10 +30,12 @@ async def setup_test_data(db_session: AsyncSession):
 
     # Insert document (using actual schema)
     await db_session.execute(
-        text("""
+        text(
+            """
             INSERT INTO documents (id, title, file_name, file_type, file_size, upload_status, embedding_status, created_at, updated_at)
             VALUES (:id, :title, :file_name, :file_type, :file_size, :upload_status, :embedding_status, datetime('now'), datetime('now'))
-        """),
+        """
+        ),
         {
             "id": doc_id,
             "title": "Kubernetes Scaling Guide",
@@ -41,8 +43,8 @@ async def setup_test_data(db_session: AsyncSession):
             "file_type": "text/plain",
             "file_size": 100,
             "upload_status": "completed",
-            "embedding_status": "completed"
-        }
+            "embedding_status": "completed",
+        },
     )
 
     # Insert chunks with keywords (using actual schema: chunk_text and token_count)
@@ -53,7 +55,7 @@ async def setup_test_data(db_session: AsyncSession):
             "chunk_index": 0,
             "chunk_text": "Kubernetes scaling involves horizontal pod autoscaling. HPA adjusts replicas based on CPU metrics.",
             "token_count": 15,
-            "chunk_metadata": "{}"
+            "chunk_metadata": "{}",
         },
         {
             "id": "00000000-0000-0000-0001-000000000002",
@@ -61,7 +63,7 @@ async def setup_test_data(db_session: AsyncSession):
             "chunk_index": 1,
             "chunk_text": "Vertical pod autoscaling adjusts resource limits. VPA is useful for right-sizing containers.",
             "token_count": 14,
-            "chunk_metadata": "{}"
+            "chunk_metadata": "{}",
         },
         {
             "id": "00000000-0000-0000-0001-000000000003",
@@ -69,17 +71,19 @@ async def setup_test_data(db_session: AsyncSession):
             "chunk_index": 2,
             "chunk_text": "Cluster autoscaler scales nodes automatically. It works with cloud providers like AWS, GCP, Azure.",
             "token_count": 16,
-            "chunk_metadata": "{}"
-        }
+            "chunk_metadata": "{}",
+        },
     ]
 
     for chunk in chunks:
         await db_session.execute(
-            text("""
+            text(
+                """
                 INSERT INTO document_chunks (id, document_id, chunk_index, chunk_text, token_count, chunk_metadata, created_at)
                 VALUES (:id, :document_id, :chunk_index, :chunk_text, :token_count, :chunk_metadata, datetime('now'))
-            """),
-            chunk
+            """
+            ),
+            chunk,
         )
 
     await db_session.commit()
@@ -87,7 +91,9 @@ async def setup_test_data(db_session: AsyncSession):
     yield
 
     # Cleanup
-    await db_session.execute(text(f"DELETE FROM document_chunks WHERE document_id = '{doc_id}'"))
+    await db_session.execute(
+        text(f"DELETE FROM document_chunks WHERE document_id = '{doc_id}'")
+    )
     await db_session.execute(text(f"DELETE FROM documents WHERE id = '{doc_id}'"))
     await db_session.commit()
 
@@ -97,7 +103,7 @@ async def test_search_with_all_enhancements_enabled(async_client, setup_test_dat
     """Test search with query expansion + reranking + hybrid mode (full pipeline)."""
     response = await async_client.post(
         "/api/v1/search?mode=hybrid&use_expansion=true&use_reranking=true",
-        json={"query": "kubernetes scaling", "top_k": 5}
+        json={"query": "kubernetes scaling", "top_k": 5},
     )
 
     assert response.status_code == 200
@@ -105,7 +111,9 @@ async def test_search_with_all_enhancements_enabled(async_client, setup_test_dat
 
     # Should return results
     assert "results" in data
-    assert len(data["results"]) >= 0  # May be empty if embedder/vector store not available
+    assert (
+        len(data["results"]) >= 0
+    )  # May be empty if embedder/vector store not available
 
     # Check that total_results is present
     assert "total_results" in data
@@ -116,7 +124,7 @@ async def test_search_with_query_expansion_only(async_client, setup_test_data):
     """Test search with query expansion enabled but reranking disabled."""
     response = await async_client.post(
         "/api/v1/search?mode=hybrid&use_expansion=true&use_reranking=false",
-        json={"query": "k8s pod scaling", "top_k": 5}
+        json={"query": "k8s pod scaling", "top_k": 5},
     )
 
     assert response.status_code == 200
@@ -131,7 +139,7 @@ async def test_search_with_reranking_only(async_client, setup_test_data):
     """Test search with reranking enabled but expansion disabled."""
     response = await async_client.post(
         "/api/v1/search?mode=hybrid&use_expansion=false&use_reranking=true",
-        json={"query": "horizontal pod autoscaling", "top_k": 5}
+        json={"query": "horizontal pod autoscaling", "top_k": 5},
     )
 
     assert response.status_code == 200
@@ -146,7 +154,7 @@ async def test_search_with_all_enhancements_disabled(async_client, setup_test_da
     """Test basic search without expansion or reranking (baseline)."""
     response = await async_client.post(
         "/api/v1/search?mode=hybrid&use_expansion=false&use_reranking=false",
-        json={"query": "cluster autoscaler", "top_k": 5}
+        json={"query": "cluster autoscaler", "top_k": 5},
     )
 
     assert response.status_code == 200
@@ -161,7 +169,7 @@ async def test_vector_mode_with_enhancements(async_client, setup_test_data):
     """Test vector-only mode with expansion and reranking."""
     response = await async_client.post(
         "/api/v1/search?mode=vector&use_expansion=true&use_reranking=true",
-        json={"query": "kubernetes autoscaling", "top_k": 5}
+        json={"query": "kubernetes autoscaling", "top_k": 5},
     )
 
     assert response.status_code == 200
@@ -175,7 +183,7 @@ async def test_keyword_mode_with_enhancements(async_client, setup_test_data):
     """Test keyword-only mode with expansion and reranking."""
     response = await async_client.post(
         "/api/v1/search?mode=keyword&use_expansion=true&use_reranking=true",
-        json={"query": "HPA VPA", "top_k": 5}
+        json={"query": "HPA VPA", "top_k": 5},
     )
 
     assert response.status_code == 200
@@ -189,8 +197,7 @@ async def test_default_parameters_use_all_enhancements(async_client, setup_test_
     """Test that default parameters enable expansion and reranking."""
     # No query parameters - should use defaults (hybrid + expansion + reranking)
     response = await async_client.post(
-        "/api/v1/search",
-        json={"query": "scaling containers", "top_k": 5}
+        "/api/v1/search", json={"query": "scaling containers", "top_k": 5}
     )
 
     assert response.status_code == 200
@@ -216,11 +223,13 @@ async def test_search_parameter_combinations(async_client, setup_test_data):
     for mode, expansion, reranking in test_cases:
         response = await async_client.post(
             f"/api/v1/search?mode={mode}&use_expansion={str(expansion).lower()}&use_reranking={str(reranking).lower()}",
-            json={"query": "test query", "top_k": 3}
+            json={"query": "test query", "top_k": 3},
         )
 
         # All combinations should work (may return empty if services unavailable)
-        assert response.status_code == 200, f"Failed for mode={mode}, expansion={expansion}, reranking={reranking}"
+        assert (
+            response.status_code == 200
+        ), f"Failed for mode={mode}, expansion={expansion}, reranking={reranking}"
         data = response.json()
         assert "results" in data
 
@@ -230,7 +239,7 @@ async def test_search_respects_top_k_with_reranking(async_client, setup_test_dat
     """Test that top_k is respected even with reranking enabled."""
     response = await async_client.post(
         "/api/v1/search?mode=hybrid&use_reranking=true",
-        json={"query": "kubernetes", "top_k": 2}
+        json={"query": "kubernetes", "top_k": 2},
     )
 
     assert response.status_code == 200
@@ -246,7 +255,7 @@ async def test_search_empty_query_fails(async_client, setup_test_data):
     """Test that empty query fails validation."""
     response = await async_client.post(
         "/api/v1/search?use_expansion=true&use_reranking=true",
-        json={"query": "", "top_k": 5}
+        json={"query": "", "top_k": 5},
     )
 
     # Should fail validation (400 or 422 are acceptable)

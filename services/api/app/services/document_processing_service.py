@@ -18,7 +18,7 @@ class DocumentProcessingService:
     Coordinates document parsing, chunking, and metadata extraction.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize with all available processors and appropriate chunker based on config."""
         self.processors: dict[DocumentType, BaseDocumentProcessor] = {
             DocumentType.PDF: PDFProcessor(),
@@ -33,7 +33,7 @@ class DocumentProcessingService:
         self.chunker = SemanticChunker(
             min_chunk_size=settings.chunking.min_chunk_size,
             max_chunk_size=settings.chunking.max_chunk_size,
-            breakpoint_percentile=settings.chunking.breakpoint_percentile
+            breakpoint_percentile=settings.chunking.breakpoint_percentile,
         )
 
     def get_processor(self, document_type: DocumentType) -> BaseDocumentProcessor:
@@ -55,9 +55,7 @@ class DocumentProcessingService:
         return self.processors[document_type]
 
     async def process_and_chunk(
-        self,
-        file_path: Path,
-        document_type: DocumentType
+        self, file_path: Path, document_type: DocumentType
     ) -> list[dict]:
         """
         Process document and create chunks with metadata.
@@ -85,24 +83,25 @@ class DocumentProcessingService:
 
         for element in processed_doc.elements:
             # Update section tracking
-            if element.element_type == 'heading':
+            if element.element_type == "heading":
                 # Flush previous section
                 if current_section:
-                    section_text = '\n\n'.join(current_section)
+                    section_text = "\n\n".join(current_section)
                     section_chunks = await self._chunk_text(
-                        section_text,
-                        section_context=current_section_title
+                        section_text, section_context=current_section_title
                     )
 
                     for chunk in section_chunks:
-                        chunks.append({
-                            'content': chunk['content'],
-                            'tokens': chunk['tokens'],
-                            'section_title': current_section_title,
-                            'section_level': current_section_level,
-                            'page_number': current_page,
-                            'metadata': {}
-                        })
+                        chunks.append(
+                            {
+                                "content": chunk["content"],
+                                "tokens": chunk["tokens"],
+                                "section_title": current_section_title,
+                                "section_level": current_section_level,
+                                "page_number": current_page,
+                                "metadata": {},
+                            }
+                        )
 
                     current_section = []
 
@@ -118,28 +117,27 @@ class DocumentProcessingService:
 
         # Flush final section
         if current_section:
-            section_text = '\n\n'.join(current_section)
+            section_text = "\n\n".join(current_section)
             section_chunks = await self._chunk_text(
-                section_text,
-                section_context=current_section_title
+                section_text, section_context=current_section_title
             )
 
             for chunk in section_chunks:
-                chunks.append({
-                    'content': chunk['content'],
-                    'tokens': chunk['tokens'],
-                    'section_title': current_section_title,
-                    'section_level': current_section_level,
-                    'page_number': current_page,
-                    'metadata': {}
-                })
+                chunks.append(
+                    {
+                        "content": chunk["content"],
+                        "tokens": chunk["tokens"],
+                        "section_title": current_section_title,
+                        "section_level": current_section_level,
+                        "page_number": current_page,
+                        "metadata": {},
+                    }
+                )
 
         return chunks
 
     async def _chunk_text(
-        self,
-        text: str,
-        section_context: str = None
+        self, text: str, section_context: str = None
     ) -> list[dict[str, Any]]:
         """
         Chunk text using the configured SemanticChunker.
@@ -157,8 +155,8 @@ class DocumentProcessingService:
         # Convert ChunkResult objects to expected format
         return [
             {
-                'content': chunk.text,
-                'tokens': chunk.token_count or len(chunk.text.split())
+                "content": chunk.text,
+                "tokens": chunk.token_count or len(chunk.text.split()),
             }
             for chunk in chunk_results
         ]

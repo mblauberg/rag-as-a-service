@@ -1,5 +1,7 @@
-import pytest
 from pathlib import Path
+
+import pytest
+
 from app.services.processors.text_processor import TextProcessor
 
 
@@ -50,7 +52,7 @@ More content in section 2."""
     assert result.document_type == "md"
 
     # Check that headings are detected
-    headings = [e for e in result.elements if e.element_type == 'heading']
+    headings = [e for e in result.elements if e.element_type == "heading"]
     assert len(headings) == 4  # Main Title, Section 1, Subsection 1.1, Section 2
 
     # Check heading levels
@@ -66,6 +68,6 @@ More content in section 2."""
     assert headings[3].section_title == "Main Title > Section 2"
 
     # Check paragraphs have section context
-    paragraphs = [e for e in result.elements if e.element_type == 'paragraph']
+    paragraphs = [e for e in result.elements if e.element_type == "paragraph"]
     assert len(paragraphs) > 0
     assert any(p.section_title is not None for p in paragraphs)

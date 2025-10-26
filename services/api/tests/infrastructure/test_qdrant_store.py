@@ -3,16 +3,17 @@
 Uses mocked QdrantClient to test vector store operations without
 requiring an actual Qdrant instance.
 """
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4, UUID
 from typing import List
+from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import UUID, uuid4
 
-from qdrant_client.models import PointStruct, Filter, FieldCondition, MatchValue, ScoredPoint
+import pytest
+from qdrant_client.models import (FieldCondition, Filter, MatchValue,
+                                  PointStruct, ScoredPoint)
 
+from app.core.exceptions import VectorStoreError
 from app.domain.entities.chunk import Chunk
 from app.infrastructure.vector_store.qdrant_store import QdrantVectorStoreImpl
-from app.core.exceptions import VectorStoreError
 
 
 @pytest.fixture
@@ -26,8 +27,7 @@ def mock_qdrant_client():
 def vector_store(mock_qdrant_client):
     """Create QdrantVectorStoreImpl with mocked client."""
     return QdrantVectorStoreImpl(
-        client=mock_qdrant_client,
-        collection_name="test_collection"
+        client=mock_qdrant_client, collection_name="test_collection"
     )
 
 
@@ -42,7 +42,7 @@ def sample_chunks():
             content="First chunk content",
             tokens=10,
             embedding_vector=[0.1, 0.2, 0.3, 0.4, 0.5],
-            metadata={"page": 1}
+            metadata={"page": 1},
         ),
         Chunk(
             id=uuid4(),
@@ -50,7 +50,7 @@ def sample_chunks():
             content="Second chunk content",
             tokens=12,
             embedding_vector=[0.5, 0.4, 0.3, 0.2, 0.1],
-            metadata={"page": 2}
+            metadata={"page": 2},
         ),
         Chunk(
             id=uuid4(),
@@ -60,8 +60,8 @@ def sample_chunks():
             embedding_vector=[0.3, 0.3, 0.3, 0.3, 0.3],
             section_title="Introduction",
             section_level=1,
-            page_number=3
-        )
+            page_number=3,
+        ),
     ]
 
 
@@ -97,7 +97,9 @@ async def test_upsert_success(vector_store, mock_qdrant_client, sample_chunks):
 
 
 @pytest.mark.asyncio
-async def test_upsert_with_optional_fields(vector_store, mock_qdrant_client, sample_chunks):
+async def test_upsert_with_optional_fields(
+    vector_store, mock_qdrant_client, sample_chunks
+):
     """Test upsert correctly handles optional fields."""
     # Arrange
     mock_qdrant_client.upsert = AsyncMock()
@@ -162,7 +164,7 @@ async def test_upsert_without_embeddings_raises_error(vector_store, mock_qdrant_
         document_id=uuid4(),
         content="Test content",
         tokens=5,
-        embedding_vector=None  # No embedding
+        embedding_vector=None,  # No embedding
     )
 
     # Act & Assert
@@ -178,7 +180,9 @@ async def test_upsert_client_error_raises_vector_store_error(
 ):
     """Test that Qdrant client errors are wrapped in VectorStoreError."""
     # Arrange
-    mock_qdrant_client.upsert = AsyncMock(side_effect=Exception("Qdrant connection failed"))
+    mock_qdrant_client.upsert = AsyncMock(
+        side_effect=Exception("Qdrant connection failed")
+    )
 
     # Act & Assert
     with pytest.raises(VectorStoreError) as exc_info:
@@ -208,9 +212,9 @@ async def test_search_success(vector_store, mock_qdrant_client):
                 "metadata": {},
                 "section_title": None,
                 "section_level": None,
-                "page_number": None
+                "page_number": None,
             },
-            vector=None
+            vector=None,
         ),
         ScoredPoint(
             id=str(uuid4()),
@@ -223,18 +227,16 @@ async def test_search_success(vector_store, mock_qdrant_client):
                 "metadata": {"page": 1},
                 "section_title": "Intro",
                 "section_level": 1,
-                "page_number": 1
+                "page_number": 1,
             },
-            vector=None
-        )
+            vector=None,
+        ),
     ]
     mock_qdrant_client.search = AsyncMock(return_value=mock_scored_points)
 
     # Act
     results = await vector_store.search(
-        query_vector=query_vector,
-        top_k=5,
-        document_id=None
+        query_vector=query_vector, top_k=5, document_id=None
     )
 
     # Assert
@@ -264,11 +266,7 @@ async def test_search_with_document_filter(vector_store, mock_qdrant_client):
     mock_qdrant_client.search = AsyncMock(return_value=[])
 
     # Act
-    await vector_store.search(
-        query_vector=query_vector,
-        top_k=10,
-        document_id=doc_id
-    )
+    await vector_store.search(query_vector=query_vector, top_k=10, document_id=doc_id)
 
     # Assert
     call_args = mock_qdrant_client.search.call_args
@@ -304,9 +302,9 @@ async def test_search_uuid_conversion(vector_store, mock_qdrant_client):
             "metadata": {},
             "section_title": None,
             "section_level": None,
-            "page_number": None
+            "page_number": None,
         },
-        vector=None
+        vector=None,
     )
     mock_qdrant_client.search = AsyncMock(return_value=[mock_scored_point])
 
@@ -402,7 +400,7 @@ async def test_metadata_serialization(vector_store, mock_qdrant_client):
         content="Test",
         tokens=5,
         embedding_vector=[0.1, 0.2],
-        metadata={"nested": {"key": "value"}, "list": [1, 2, 3], "string": "test"}
+        metadata={"nested": {"key": "value"}, "list": [1, 2, 3], "string": "test"},
     )
     mock_qdrant_client.upsert = AsyncMock()
 
@@ -413,4 +411,8 @@ async def test_metadata_serialization(vector_store, mock_qdrant_client):
     points = mock_qdrant_client.upsert.call_args.kwargs["points"]
     payload = points[0].payload
 
-    assert payload["metadata"] == {"nested": {"key": "value"}, "list": [1, 2, 3], "string": "test"}
+    assert payload["metadata"] == {
+        "nested": {"key": "value"},
+        "list": [1, 2, 3],
+        "string": "test",
+    }

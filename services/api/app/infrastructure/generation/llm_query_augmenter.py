@@ -1,5 +1,6 @@
 """LLM-based query expansion for improved retrieval."""
 import logging
+
 from app.core.exceptions import GenerationServiceError
 from app.ports.services import GenerationService, QueryAugmenter
 
@@ -20,10 +21,7 @@ class LLMQueryAugmenterImpl(QueryAugmenter):
         self.generation_service = generation_service
 
     async def expand(
-        self,
-        query: str,
-        num_variants: int = 2,
-        method: str = "llm"
+        self, query: str, num_variants: int = 2, method: str = "llm"
     ) -> list[str]:
         """Expand query using LLM to generate variants.
 
@@ -51,10 +49,7 @@ class LLMQueryAugmenterImpl(QueryAugmenter):
             # Generate variants via LLM
             # Note: GenerationService.generate requires context parameter,
             # but we pass empty list since we don't need context for query expansion
-            response = await self.generation_service.generate(
-                prompt=prompt,
-                context=[]
-            )
+            response = await self.generation_service.generate(prompt=prompt, context=[])
 
             # Parse response into list of queries
             variants = self._parse_variants(response)
@@ -62,9 +57,7 @@ class LLMQueryAugmenterImpl(QueryAugmenter):
             # Always include original query first
             expanded = [query] + variants[:num_variants]
 
-            logger.info(
-                f"Expanded query into {len(expanded)} variants: {expanded}"
-            )
+            logger.info(f"Expanded query into {len(expanded)} variants: {expanded}")
 
             return expanded
 
@@ -103,7 +96,7 @@ Alternative phrasings (one per line, no numbering):"""
         Returns:
             List of parsed query variants
         """
-        lines = response.strip().split('\n')
+        lines = response.strip().split("\n")
 
         # Clean up each line
         variants = []
@@ -116,7 +109,7 @@ Alternative phrasings (one per line, no numbering):"""
 
             # Remove numbering if present (1., 2., etc.)
             if line and line[0].isdigit():
-                parts = line.split('.', 1)
+                parts = line.split(".", 1)
                 if len(parts) > 1:
                     line = parts[1].strip()
 
@@ -124,7 +117,7 @@ Alternative phrasings (one per line, no numbering):"""
             line = line.strip('"').strip("'")
 
             # Remove markdown formatting if present (**, *, etc.)
-            line = line.replace('**', '').replace('*', '')
+            line = line.replace("**", "").replace("*", "")
 
             if line:
                 variants.append(line)

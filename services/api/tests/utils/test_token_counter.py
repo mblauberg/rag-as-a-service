@@ -1,4 +1,5 @@
 import pytest
+
 from app.utils.token_counter import TokenCounter
 
 

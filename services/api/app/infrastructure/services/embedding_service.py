@@ -38,7 +38,7 @@ class HTTPEmbeddingService(EmbeddingService):
                 response = await client.post(
                     f"{self.embedder_url}/generate-embeddings",
                     json={"texts": texts},
-                    timeout=30.0
+                    timeout=30.0,
                 )
                 response.raise_for_status()
 
@@ -47,8 +47,7 @@ class HTTPEmbeddingService(EmbeddingService):
                     data = response.json()
                 except ValueError as e:
                     raise EmbeddingServiceError(
-                        "Failed to parse embedding service response",
-                        original_error=e
+                        "Failed to parse embedding service response", original_error=e
                     )
 
                 # Validate response structure
@@ -69,18 +68,16 @@ class HTTPEmbeddingService(EmbeddingService):
 
         except httpx.ConnectError as e:
             raise EmbeddingServiceError(
-                "Failed to connect to embedding service",
-                original_error=e
+                "Failed to connect to embedding service", original_error=e
             )
         except httpx.TimeoutException as e:
             raise EmbeddingServiceError(
-                "Embedding service request timed out",
-                original_error=e
+                "Embedding service request timed out", original_error=e
             )
         except httpx.HTTPStatusError as e:
             raise EmbeddingServiceError(
                 f"Embedding service returned error: {e.response.status_code}",
-                original_error=e
+                original_error=e,
             )
         except EmbeddingServiceError:
             # Re-raise our own exceptions
@@ -89,5 +86,5 @@ class HTTPEmbeddingService(EmbeddingService):
             # Catch any other unexpected errors
             raise EmbeddingServiceError(
                 f"Unexpected error during embedding generation: {type(e).__name__}",
-                original_error=e
+                original_error=e,
             )

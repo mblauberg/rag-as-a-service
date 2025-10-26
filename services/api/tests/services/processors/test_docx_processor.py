@@ -1,7 +1,9 @@
-import pytest
 from pathlib import Path
+
+import pytest
 from docx import Document
 from docx.shared import Pt
+
 from app.services.processors.docx_processor import DOCXProcessor
 
 
@@ -27,7 +29,7 @@ def test_process_simple_docx(tmp_path):
 
     assert result.document_type == "docx"
     assert len(result.elements) >= 2
-    assert all(e.element_type == 'paragraph' for e in result.elements)
+    assert all(e.element_type == "paragraph" for e in result.elements)
 
 
 def test_process_docx_with_headings(tmp_path):
@@ -52,7 +54,7 @@ def test_process_docx_with_headings(tmp_path):
     assert result.document_type == "docx"
 
     # Check that headings are detected
-    headings = [e for e in result.elements if e.element_type == 'heading']
+    headings = [e for e in result.elements if e.element_type == "heading"]
     assert len(headings) == 4  # Main Title, Section 1, Subsection 1.1, Section 2
 
     # Check heading levels
@@ -68,7 +70,7 @@ def test_process_docx_with_headings(tmp_path):
     assert headings[3].section_title == "Main Title > Section 2"
 
     # Check paragraphs have section context
-    paragraphs = [e for e in result.elements if e.element_type == 'paragraph']
+    paragraphs = [e for e in result.elements if e.element_type == "paragraph"]
     assert len(paragraphs) > 0
     assert any(p.section_title is not None for p in paragraphs)
 
@@ -83,7 +85,7 @@ def test_process_docx_with_tables(tmp_path):
 
     # Add a 3x3 table
     table = doc.add_table(rows=3, cols=3)
-    table.style = 'Light Grid Accent 1'
+    table.style = "Light Grid Accent 1"
 
     # Header row
     header_cells = table.rows[0].cells
@@ -108,7 +110,7 @@ def test_process_docx_with_tables(tmp_path):
     result = processor.process(docx_file)
 
     # Check that table is extracted
-    tables = [e for e in result.elements if e.element_type == 'table']
+    tables = [e for e in result.elements if e.element_type == "table"]
     assert len(tables) == 1
 
     # Check table content is converted to markdown
@@ -119,7 +121,7 @@ def test_process_docx_with_tables(tmp_path):
     assert "---" in table_content  # Markdown header separator
 
     # Check metadata
-    assert result.metadata['num_tables'] == 1
+    assert result.metadata["num_tables"] == 1
 
 
 def test_process_docx_metadata(tmp_path):
@@ -142,8 +144,8 @@ def test_process_docx_metadata(tmp_path):
     result = processor.process(docx_file)
 
     # Check metadata
-    assert result.metadata['num_paragraphs'] == 3
-    assert result.metadata['num_tables'] == 1
+    assert result.metadata["num_paragraphs"] == 3
+    assert result.metadata["num_tables"] == 1
 
 
 def test_process_docx_error_handling(tmp_path):
@@ -153,5 +155,7 @@ def test_process_docx_error_handling(tmp_path):
 
     processor = DOCXProcessor()
 
-    with pytest.raises(ValueError, match="DOCX file not found or invalid|Error processing DOCX"):
+    with pytest.raises(
+        ValueError, match="DOCX file not found or invalid|Error processing DOCX"
+    ):
         processor.process(invalid_file)

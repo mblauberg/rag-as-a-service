@@ -8,6 +8,7 @@ from typing import Any
 @dataclass
 class DocumentElement:
     """Represents a structured element from a document."""
+
     content: str
     element_type: str  # paragraph, heading, table, list_item, etc.
     metadata: dict[str, Any]
@@ -19,6 +20,7 @@ class DocumentElement:
 @dataclass
 class ProcessedDocument:
     """Represents a fully processed document."""
+
     elements: list[DocumentElement]
     metadata: dict[str, Any]
     document_type: str

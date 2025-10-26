@@ -1,13 +1,13 @@
 """Test document models use enums"""
+from app.core.enums import EmbeddingStatus, UploadStatus
 from app.models.document import Document, DocumentChunk
-from app.core.enums import UploadStatus, EmbeddingStatus
 
 
 def test_document_column_defaults_use_enums():
     """Test Document model columns have enum defaults"""
     # Check that Column defaults are set to enum values
-    upload_col = Document.__table__.columns['upload_status']
-    embedding_col = Document.__table__.columns['embedding_status']
+    upload_col = Document.__table__.columns["upload_status"]
+    embedding_col = Document.__table__.columns["embedding_status"]
 
     # Column defaults should be enum values
     assert upload_col.default.arg == UploadStatus.PENDING.value
@@ -23,7 +23,7 @@ def test_document_can_set_enum_status():
         file_type="application/pdf",
         file_size=1024,
         upload_status=UploadStatus.PROCESSING.value,
-        embedding_status=EmbeddingStatus.PROCESSING.value
+        embedding_status=EmbeddingStatus.PROCESSING.value,
     )
 
     assert doc.upload_status == UploadStatus.PROCESSING.value
@@ -39,7 +39,7 @@ def test_document_status_is_string_type():
         file_type="application/pdf",
         file_size=1024,
         upload_status=UploadStatus.COMPLETED.value,
-        embedding_status=EmbeddingStatus.COMPLETED.value
+        embedding_status=EmbeddingStatus.COMPLETED.value,
     )
 
     # When explicitly set, should be strings

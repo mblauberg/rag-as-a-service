@@ -1,7 +1,9 @@
 """Integration test for document upload in async context (reproduces event loop bug)."""
-import pytest
 import asyncio
 from pathlib import Path
+
+import pytest
+
 from app.services.document_processing_service import DocumentProcessingService
 from app.utils.file_type_detector import DocumentType
 
@@ -35,14 +37,13 @@ async def test_process_and_chunk_in_async_context():
         # This should NOT raise "event loop already running" error
         # We're already in an async context (pytest-asyncio)
         chunks = await service.process_and_chunk(
-            file_path=test_file,
-            document_type=DocumentType.TXT
+            file_path=test_file, document_type=DocumentType.TXT
         )
 
         # Verify we got chunks
         assert len(chunks) > 0
-        assert all('content' in chunk for chunk in chunks)
-        assert all('tokens' in chunk for chunk in chunks)
+        assert all("content" in chunk for chunk in chunks)
+        assert all("tokens" in chunk for chunk in chunks)
 
     finally:
         # Cleanup
@@ -56,9 +57,7 @@ async def test_semantic_chunker_directly():
     from app.services.chunking.semantic_chunker import SemanticChunker
 
     chunker = SemanticChunker(
-        min_chunk_size=128,
-        max_chunk_size=512,
-        breakpoint_percentile=95.0
+        min_chunk_size=128, max_chunk_size=512, breakpoint_percentile=95.0
     )
 
     test_text = """

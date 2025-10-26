@@ -1,9 +1,10 @@
 """Tests for RRF fusion service."""
-import pytest
 from uuid import uuid4
 
-from app.infrastructure.search.rrf_fusion_service import RRFFusionServiceImpl
+import pytest
+
 from app.domain.entities.chunk import Chunk
+from app.infrastructure.search.rrf_fusion_service import RRFFusionServiceImpl
 
 
 def test_rrf_fusion_combines_two_lists():

@@ -3,11 +3,9 @@ from pathlib import Path
 
 import pypdf
 
-from app.services.processors.base_processor import (
-    BaseDocumentProcessor,
-    DocumentElement,
-    ProcessedDocument,
-)
+from app.services.processors.base_processor import (BaseDocumentProcessor,
+                                                    DocumentElement,
+                                                    ProcessedDocument)
 
 
 class PDFProcessor(BaseDocumentProcessor):
@@ -33,13 +31,15 @@ class PDFProcessor(BaseDocumentProcessor):
         elements: list[DocumentElement] = []
 
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 pdf_reader = pypdf.PdfReader(f)
 
                 metadata = {
-                    'num_pages': len(pdf_reader.pages),
-                    'title': pdf_reader.metadata.title if pdf_reader.metadata else None,
-                    'author': pdf_reader.metadata.author if pdf_reader.metadata else None,
+                    "num_pages": len(pdf_reader.pages),
+                    "title": pdf_reader.metadata.title if pdf_reader.metadata else None,
+                    "author": pdf_reader.metadata.author
+                    if pdf_reader.metadata
+                    else None,
                 }
 
                 for page_num, page in enumerate(pdf_reader.pages, start=1):
@@ -47,13 +47,15 @@ class PDFProcessor(BaseDocumentProcessor):
 
                     if text.strip():
                         # Split into paragraphs
-                        paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
+                        paragraphs = [
+                            p.strip() for p in text.split("\n\n") if p.strip()
+                        ]
 
                         for para in paragraphs:
                             element = DocumentElement(
                                 content=para,
-                                element_type='paragraph',
-                                metadata={'source': 'pdf'},
+                                element_type="paragraph",
+                                metadata={"source": "pdf"},
                                 page_number=page_num,
                             )
                             elements.append(element)
@@ -66,7 +68,5 @@ class PDFProcessor(BaseDocumentProcessor):
             raise ValueError(f"Error processing PDF: {e}")
 
         return ProcessedDocument(
-            elements=elements,
-            metadata=metadata,
-            document_type='pdf'
+            elements=elements, metadata=metadata, document_type="pdf"
         )

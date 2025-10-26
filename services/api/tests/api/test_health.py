@@ -1,6 +1,7 @@
 """Tests for health check endpoints."""
-import pytest
 from unittest.mock import AsyncMock, Mock
+
+import pytest
 from sqlalchemy import text
 
 
@@ -39,7 +40,9 @@ async def test_root_endpoint(async_client):
 
 
 @pytest.mark.asyncio
-async def test_readiness_check_all_services_healthy(async_client, mock_qdrant_client, mock_embedder_client):
+async def test_readiness_check_all_services_healthy(
+    async_client, mock_qdrant_client, mock_embedder_client
+):
     """
     Test readiness check when all services are healthy.
 
@@ -71,17 +74,14 @@ async def test_readiness_check_all_services_healthy(async_client, mock_qdrant_cl
 
 @pytest.mark.asyncio
 async def test_readiness_check_database_unavailable(
-    async_client,
-    db_session,
-    mock_qdrant_client,
-    mock_embedder_client,
-    monkeypatch
+    async_client, db_session, mock_qdrant_client, mock_embedder_client, monkeypatch
 ):
     """
     Test readiness check when database is unavailable.
 
     Should report not_ready status with database failure details.
     """
+
     # Mock database to fail
     async def mock_db_execute(*args, **kwargs):
         raise Exception("Database connection failed")
@@ -103,10 +103,7 @@ async def test_readiness_check_database_unavailable(
 
 @pytest.mark.asyncio
 async def test_readiness_check_qdrant_unavailable(
-    async_client,
-    mock_qdrant_client,
-    mock_embedder_client,
-    monkeypatch
+    async_client, mock_qdrant_client, mock_embedder_client, monkeypatch
 ):
     """
     Test readiness check when Qdrant is unavailable.
@@ -115,6 +112,7 @@ async def test_readiness_check_qdrant_unavailable(
     """
     # Mock the global qdrant_client's health_check method
     from app.core.qdrant_client import qdrant_client
+
     monkeypatch.setattr(qdrant_client, "health_check", AsyncMock(return_value=False))
 
     response = await async_client.get("/api/v1/ready")
@@ -132,10 +130,7 @@ async def test_readiness_check_qdrant_unavailable(
 
 @pytest.mark.asyncio
 async def test_readiness_check_qdrant_exception(
-    async_client,
-    mock_qdrant_client,
-    mock_embedder_client,
-    monkeypatch
+    async_client, mock_qdrant_client, mock_embedder_client, monkeypatch
 ):
     """
     Test readiness check when Qdrant raises exception.
@@ -144,7 +139,12 @@ async def test_readiness_check_qdrant_exception(
     """
     # Mock the global qdrant_client's health_check method to raise exception
     from app.core.qdrant_client import qdrant_client
-    monkeypatch.setattr(qdrant_client, "health_check", AsyncMock(side_effect=Exception("Connection timeout")))
+
+    monkeypatch.setattr(
+        qdrant_client,
+        "health_check",
+        AsyncMock(side_effect=Exception("Connection timeout")),
+    )
 
     response = await async_client.get("/api/v1/ready")
 
@@ -161,10 +161,7 @@ async def test_readiness_check_qdrant_exception(
 
 @pytest.mark.asyncio
 async def test_readiness_check_embedder_unavailable(
-    async_client,
-    mock_qdrant_client,
-    mock_embedder_client,
-    monkeypatch
+    async_client, mock_qdrant_client, mock_embedder_client, monkeypatch
 ):
     """
     Test readiness check when embedder service is unavailable.
@@ -186,6 +183,7 @@ async def test_readiness_check_embedder_unavailable(
 
     # Patch httpx.AsyncClient to return our mock
     import httpx
+
     monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: mock_http_client)
 
     response = await async_client.get("/api/v1/ready")
@@ -196,17 +194,16 @@ async def test_readiness_check_embedder_unavailable(
     assert data["status"] == "not_ready"
 
     # Find embedder service status
-    embedder_service = next(svc for svc in data["services"] if svc["name"] == "embedder")
+    embedder_service = next(
+        svc for svc in data["services"] if svc["name"] == "embedder"
+    )
     assert embedder_service["status"] == "not_ready"
     assert "not responding" in embedder_service["details"].lower()
 
 
 @pytest.mark.asyncio
 async def test_readiness_check_embedder_exception(
-    async_client,
-    mock_qdrant_client,
-    mock_embedder_client,
-    monkeypatch
+    async_client, mock_qdrant_client, mock_embedder_client, monkeypatch
 ):
     """
     Test readiness check when embedder service raises exception.
@@ -221,6 +218,7 @@ async def test_readiness_check_embedder_exception(
 
     # Patch httpx.AsyncClient to return our mock
     import httpx
+
     monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: mock_http_client)
 
     response = await async_client.get("/api/v1/ready")
@@ -231,24 +229,23 @@ async def test_readiness_check_embedder_exception(
     assert data["status"] == "not_ready"
 
     # Find embedder service status
-    embedder_service = next(svc for svc in data["services"] if svc["name"] == "embedder")
+    embedder_service = next(
+        svc for svc in data["services"] if svc["name"] == "embedder"
+    )
     assert embedder_service["status"] == "not_ready"
     assert "refused" in embedder_service["details"].lower()
 
 
 @pytest.mark.asyncio
 async def test_readiness_check_multiple_services_down(
-    async_client,
-    mock_qdrant_client,
-    mock_embedder_client,
-    db_session,
-    monkeypatch
+    async_client, mock_qdrant_client, mock_embedder_client, db_session, monkeypatch
 ):
     """
     Test readiness check when multiple services are down.
 
     Should report not_ready with details for each failed service.
     """
+
     # Mock database to fail
     async def mock_db_execute(*args, **kwargs):
         raise Exception("Database unavailable")
@@ -257,6 +254,7 @@ async def test_readiness_check_multiple_services_down(
 
     # Mock the global qdrant_client's health_check method to fail
     from app.core.qdrant_client import qdrant_client
+
     monkeypatch.setattr(qdrant_client, "health_check", AsyncMock(return_value=False))
 
     # Create mock HTTP client that raises exception
@@ -267,6 +265,7 @@ async def test_readiness_check_multiple_services_down(
 
     # Patch httpx.AsyncClient to return our mock
     import httpx
+
     monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: mock_http_client)
 
     response = await async_client.get("/api/v1/ready")

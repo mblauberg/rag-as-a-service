@@ -123,5 +123,5 @@ class ChunkRepositoryImpl(ChunkRepository):
             section_title=model.section_title,
             section_level=model.section_level,
             page_number=model.page_number,
-            embedding_vector=None  # Not retrieved from DB
+            embedding_vector=None,  # Not retrieved from DB
         )

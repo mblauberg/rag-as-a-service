@@ -1,18 +1,18 @@
 """Tests for UploadDocumentUseCase."""
-import pytest
-from unittest.mock import Mock, AsyncMock
-from uuid import uuid4
 from datetime import datetime
+from unittest.mock import AsyncMock, Mock
+from uuid import uuid4
 
-from app.application.use_cases.upload_document import (
-    UploadDocumentUseCase,
-    UploadDocumentCommand
-)
-from app.domain.entities.document import Document
-from app.domain.entities.chunk import Chunk
+import pytest
+
+from app.application.use_cases.upload_document import (UploadDocumentCommand,
+                                                       UploadDocumentUseCase)
 from app.core.enums import UploadStatus
-from app.ports.repositories import DocumentRepository, ChunkRepository
-from app.ports.services import EmbeddingService, VectorStore, FileProcessor, TextChunker
+from app.domain.entities.chunk import Chunk
+from app.domain.entities.document import Document
+from app.ports.repositories import ChunkRepository, DocumentRepository
+from app.ports.services import (EmbeddingService, FileProcessor, TextChunker,
+                                VectorStore)
 
 
 @pytest.mark.asyncio
@@ -29,7 +29,9 @@ async def test_upload_document_success():
     # Configure mock behavior
     mock_doc_repo.save = AsyncMock(side_effect=lambda doc: doc)
     mock_chunk_repo.save_batch = AsyncMock(side_effect=lambda chunks: chunks)
-    mock_file_processor.extract_text = AsyncMock(return_value="Sample document text content")
+    mock_file_processor.extract_text = AsyncMock(
+        return_value="Sample document text content"
+    )
     mock_chunker.chunk = AsyncMock(return_value=["chunk 1 content", "chunk 2 content"])
     mock_embedding_service.generate_embeddings = AsyncMock(
         return_value=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
@@ -43,7 +45,7 @@ async def test_upload_document_success():
         embedding_service=mock_embedding_service,
         vector_store=mock_vector_store,
         file_processor=mock_file_processor,
-        chunker=mock_chunker
+        chunker=mock_chunker,
     )
 
     # Act: Execute use case
@@ -51,7 +53,7 @@ async def test_upload_document_success():
         title="Test Document",
         file_name="test.pdf",
         file_content=b"PDF content bytes",
-        description="Test description"
+        description="Test description",
     )
     document, chunk_count = await use_case.execute(command)
 
@@ -80,7 +82,9 @@ async def test_upload_document_failure_marks_failed():
     mock_file_processor = Mock(spec=FileProcessor)
 
     mock_doc_repo.save = AsyncMock(side_effect=lambda doc: doc)
-    mock_file_processor.extract_text = AsyncMock(side_effect=Exception("Processing failed"))
+    mock_file_processor.extract_text = AsyncMock(
+        side_effect=Exception("Processing failed")
+    )
 
     use_case = UploadDocumentUseCase(
         document_repo=mock_doc_repo,
@@ -88,14 +92,12 @@ async def test_upload_document_failure_marks_failed():
         embedding_service=Mock(spec=EmbeddingService),
         vector_store=Mock(spec=VectorStore),
         file_processor=mock_file_processor,
-        chunker=Mock(spec=TextChunker)
+        chunker=Mock(spec=TextChunker),
     )
 
     # Act & Assert
     command = UploadDocumentCommand(
-        title="Test",
-        file_name="test.pdf",
-        file_content=b"content"
+        title="Test", file_name="test.pdf", file_content=b"content"
     )
 
     with pytest.raises(Exception, match="Processing failed"):

@@ -1,7 +1,9 @@
 """Test configuration consolidation"""
 import pytest
 from pydantic import ValidationError
-from app.core.config import Settings, ChunkingConfig, SearchConfig, EmbedderConfig, GeneratorConfig
+
+from app.core.config import (ChunkingConfig, EmbedderConfig, GeneratorConfig,
+                             SearchConfig, Settings)
 
 
 def test_chunking_config_defaults():

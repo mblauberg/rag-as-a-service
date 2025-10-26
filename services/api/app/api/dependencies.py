@@ -13,36 +13,37 @@ from app.application.use_cases.delete_document import DeleteDocumentUseCase
 from app.application.use_cases.get_document import GetDocumentUseCase
 from app.application.use_cases.list_documents import ListDocumentsUseCase
 from app.application.use_cases.search_documents import SearchDocumentsUseCase
-
 # Domain & Use Cases
 from app.application.use_cases.upload_document import UploadDocumentUseCase
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.qdrant_client import qdrant_client
-from app.infrastructure.db.repositories.chunk_repository_impl import ChunkRepositoryImpl
-
+from app.infrastructure.db.repositories.chunk_repository_impl import \
+    ChunkRepositoryImpl
 # Infrastructure - Repositories
-from app.infrastructure.db.repositories.document_repository_impl import DocumentRepositoryImpl
+from app.infrastructure.db.repositories.document_repository_impl import \
+    DocumentRepositoryImpl
+# Infrastructure - Query Augmentation
+from app.infrastructure.generation.llm_query_augmenter import \
+    LLMQueryAugmenterImpl
 from app.infrastructure.processing.file_processor import FileProcessorImpl
 from app.infrastructure.processing.semantic_chunker import SemanticChunkerImpl
-
+# Infrastructure - Reranking
+from app.infrastructure.reranking.cross_encoder_reranker import \
+    CrossEncoderRerankerImpl
+# Infrastructure - Search
+from app.infrastructure.search.postgres_keyword_store import \
+    PostgresKeywordStoreImpl
+from app.infrastructure.search.rrf_fusion_service import RRFFusionServiceImpl
 # Infrastructure - Services
 from app.infrastructure.services.embedding_service import HTTPEmbeddingService
-from app.infrastructure.services.generation_service import HTTPGenerationService
+from app.infrastructure.services.generation_service import \
+    HTTPGenerationService
 from app.infrastructure.vector_store.qdrant_store import QdrantVectorStoreImpl
-
-# Infrastructure - Search
-from app.infrastructure.search.postgres_keyword_store import PostgresKeywordStoreImpl
-from app.infrastructure.search.rrf_fusion_service import RRFFusionServiceImpl
-
-# Infrastructure - Query Augmentation
-from app.infrastructure.generation.llm_query_augmenter import LLMQueryAugmenterImpl
-
-# Infrastructure - Reranking
-from app.infrastructure.reranking.cross_encoder_reranker import CrossEncoderRerankerImpl
-
 # Ports
-from app.ports.services import KeywordStore, FusionService, EmbeddingService, VectorStore, GenerationService, QueryAugmenter, Reranker
+from app.ports.services import (EmbeddingService, FusionService,
+                                GenerationService, KeywordStore,
+                                QueryAugmenter, Reranker, VectorStore)
 
 
 # Qdrant Client Dependency
@@ -58,7 +59,7 @@ async def get_qdrant_client() -> AsyncQdrantClient:
 
 # Upload Document Use Case
 def get_upload_document_use_case(
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> UploadDocumentUseCase:
     """Factory for UploadDocumentUseCase with all dependencies wired.
 
@@ -82,14 +83,13 @@ def get_upload_document_use_case(
     # Services
     embedding_service = HTTPEmbeddingService(settings.embedder.url)
     vector_store = QdrantVectorStoreImpl(
-        client=qdrant_client.client,
-        collection_name="documents"
+        client=qdrant_client.client, collection_name="documents"
     )
     file_processor = FileProcessorImpl()
     chunker = SemanticChunkerImpl(
         min_chunk_size=settings.chunking.min_chunk_size,
         max_chunk_size=settings.chunking.max_chunk_size,
-        breakpoint_percentile=settings.chunking.breakpoint_percentile
+        breakpoint_percentile=settings.chunking.breakpoint_percentile,
     )
 
     return UploadDocumentUseCase(
@@ -98,13 +98,13 @@ def get_upload_document_use_case(
         embedding_service=embedding_service,
         vector_store=vector_store,
         file_processor=file_processor,
-        chunker=chunker
+        chunker=chunker,
     )
 
 
 # List Documents Use Case
 def get_list_documents_use_case(
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> ListDocumentsUseCase:
     """Factory for ListDocumentsUseCase.
 
@@ -120,7 +120,7 @@ def get_list_documents_use_case(
 
 # Delete Document Use Case
 def get_delete_document_use_case(
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> DeleteDocumentUseCase:
     """Factory for DeleteDocumentUseCase.
 
@@ -133,21 +133,16 @@ def get_delete_document_use_case(
     document_repo = DocumentRepositoryImpl(db)
     chunk_repo = ChunkRepositoryImpl(db)
     vector_store = QdrantVectorStoreImpl(
-        client=qdrant_client.client,
-        collection_name="documents"
+        client=qdrant_client.client, collection_name="documents"
     )
 
     return DeleteDocumentUseCase(
-        document_repo=document_repo,
-        chunk_repo=chunk_repo,
-        vector_store=vector_store
+        document_repo=document_repo, chunk_repo=chunk_repo, vector_store=vector_store
     )
 
 
 # Get Document Use Case
-def get_get_document_use_case(
-    db: AsyncSession = Depends(get_db)
-) -> GetDocumentUseCase:
+def get_get_document_use_case(db: AsyncSession = Depends(get_db)) -> GetDocumentUseCase:
     """Factory for GetDocumentUseCase.
 
     Args:
@@ -159,16 +154,11 @@ def get_get_document_use_case(
     document_repo = DocumentRepositoryImpl(db)
     chunk_repo = ChunkRepositoryImpl(db)
 
-    return GetDocumentUseCase(
-        document_repo=document_repo,
-        chunk_repo=chunk_repo
-    )
+    return GetDocumentUseCase(document_repo=document_repo, chunk_repo=chunk_repo)
 
 
 # Keyword Store
-def get_keyword_store(
-    db: AsyncSession = Depends(get_db)
-) -> KeywordStore:
+def get_keyword_store(db: AsyncSession = Depends(get_db)) -> KeywordStore:
     """Create PostgreSQL keyword store instance."""
     return PostgresKeywordStoreImpl(db)
 
@@ -187,7 +177,7 @@ def get_generation_service() -> GenerationService:
 
 # Query Augmenter
 def get_query_augmenter(
-    generation_service: GenerationService = Depends(get_generation_service)
+    generation_service: GenerationService = Depends(get_generation_service),
 ) -> QueryAugmenter:
     """Create LLM query augmenter instance."""
     return LLMQueryAugmenterImpl(generation_service)
@@ -201,15 +191,18 @@ def get_reranker() -> Reranker:
 
 # Search Documents Use Case
 def get_search_documents_use_case(
-    embedding_service: EmbeddingService = Depends(lambda: HTTPEmbeddingService(settings.embedder.url)),
-    vector_store: VectorStore = Depends(lambda: QdrantVectorStoreImpl(
-        client=qdrant_client.client,
-        collection_name="documents"
-    )),
+    embedding_service: EmbeddingService = Depends(
+        lambda: HTTPEmbeddingService(settings.embedder.url)
+    ),
+    vector_store: VectorStore = Depends(
+        lambda: QdrantVectorStoreImpl(
+            client=qdrant_client.client, collection_name="documents"
+        )
+    ),
     keyword_store: KeywordStore = Depends(get_keyword_store),
     fusion_service: FusionService = Depends(get_fusion_service),
     query_augmenter: QueryAugmenter = Depends(get_query_augmenter),
-    reranker: Reranker = Depends(get_reranker)
+    reranker: Reranker = Depends(get_reranker),
 ) -> SearchDocumentsUseCase:
     """Factory for SearchDocumentsUseCase with hybrid capabilities and query expansion.
 
@@ -230,5 +223,5 @@ def get_search_documents_use_case(
         keyword_store=keyword_store,
         fusion_service=fusion_service,
         query_augmenter=query_augmenter,
-        reranker=reranker
+        reranker=reranker,
     )

@@ -2,11 +2,9 @@
 import csv
 from pathlib import Path
 
-from app.services.processors.base_processor import (
-    BaseDocumentProcessor,
-    DocumentElement,
-    ProcessedDocument,
-)
+from app.services.processors.base_processor import (BaseDocumentProcessor,
+                                                    DocumentElement,
+                                                    ProcessedDocument)
 
 
 class CSVProcessor(BaseDocumentProcessor):
@@ -29,7 +27,7 @@ class CSVProcessor(BaseDocumentProcessor):
         """
         elements: list[DocumentElement] = []
 
-        with open(file_path, encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             headers = reader.fieldnames
 
@@ -41,22 +39,20 @@ class CSVProcessor(BaseDocumentProcessor):
 
                 element = DocumentElement(
                     content=row_text,
-                    element_type='csv_row',
+                    element_type="csv_row",
                     metadata={
-                        'row_index': row_idx,
-                        'headers': list(headers) if headers else [],
-                        'values': dict(row)
-                    }
+                        "row_index": row_idx,
+                        "headers": list(headers) if headers else [],
+                        "values": dict(row),
+                    },
                 )
                 elements.append(element)
 
         metadata = {
-            'num_rows': len(elements),
-            'headers': list(headers) if headers else []
+            "num_rows": len(elements),
+            "headers": list(headers) if headers else [],
         }
 
         return ProcessedDocument(
-            elements=elements,
-            metadata=metadata,
-            document_type='csv'
+            elements=elements, metadata=metadata, document_type="csv"
         )

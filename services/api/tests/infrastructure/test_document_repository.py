@@ -3,25 +3,25 @@
 Uses in-memory SQLite database with SQLAlchemy async API.
 Tests the full mapping between domain entities and ORM models.
 """
-import pytest
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from uuid import uuid4
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
-from app.domain.entities.document import Document
+import pytest
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
+
 from app.core.enums import UploadStatus
+from app.domain.entities.document import Document
 from app.infrastructure.db.base import Base
-from app.infrastructure.db.repositories.document_repository_impl import DocumentRepositoryImpl
+from app.infrastructure.db.repositories.document_repository_impl import \
+    DocumentRepositoryImpl
 
 
 @pytest.fixture
 async def async_session():
     """Create an in-memory SQLite database for testing."""
     # Use aiosqlite for async SQLite
-    engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:",
-        echo=False
-    )
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
 
     # Create all tables
     async with engine.begin() as conn:
@@ -57,7 +57,7 @@ async def test_save_document(document_repository):
         file_type="pdf",
         created_at=datetime.now(UTC),
         upload_status=UploadStatus.PROCESSING,
-        description="Test description"
+        description="Test description",
     )
 
     # Act
@@ -79,7 +79,7 @@ async def test_find_by_id(document_repository):
         file_name="findme.pdf",
         file_type="pdf",
         created_at=datetime.now(UTC),
-        upload_status=UploadStatus.COMPLETED
+        upload_status=UploadStatus.COMPLETED,
     )
     await document_repository.save(document)
 
@@ -113,7 +113,7 @@ async def test_update_document(document_repository):
         file_name="test.pdf",
         file_type="pdf",
         created_at=datetime.now(UTC),
-        upload_status=UploadStatus.PROCESSING
+        upload_status=UploadStatus.PROCESSING,
     )
     await document_repository.save(document)
 
@@ -140,7 +140,7 @@ async def test_find_all_pagination(document_repository):
             file_name=f"doc{i}.pdf",
             file_type="pdf",
             created_at=datetime.now(UTC),
-            upload_status=UploadStatus.COMPLETED
+            upload_status=UploadStatus.COMPLETED,
         )
         await document_repository.save(document)
 
@@ -163,7 +163,7 @@ async def test_find_all_second_page(document_repository):
             file_name=f"doc{i}.pdf",
             file_type="pdf",
             created_at=datetime.now(UTC),
-            upload_status=UploadStatus.COMPLETED
+            upload_status=UploadStatus.COMPLETED,
         )
         await document_repository.save(document)
 
@@ -185,7 +185,7 @@ async def test_delete_document(document_repository):
         file_name="delete.pdf",
         file_type="pdf",
         created_at=datetime.now(UTC),
-        upload_status=UploadStatus.COMPLETED
+        upload_status=UploadStatus.COMPLETED,
     )
     await document_repository.save(document)
 
@@ -201,15 +201,19 @@ async def test_delete_document(document_repository):
 async def test_enum_mapping(document_repository):
     """Test that UploadStatus enum is properly mapped to/from database."""
     # Test all enum values
-    for status in [UploadStatus.PENDING, UploadStatus.PROCESSING,
-                   UploadStatus.COMPLETED, UploadStatus.FAILED]:
+    for status in [
+        UploadStatus.PENDING,
+        UploadStatus.PROCESSING,
+        UploadStatus.COMPLETED,
+        UploadStatus.FAILED,
+    ]:
         document = Document(
             id=uuid4(),
             title=f"Test {status.value}",
             file_name="test.pdf",
             file_type="pdf",
             created_at=datetime.now(UTC),
-            upload_status=status
+            upload_status=status,
         )
 
         # Save and retrieve
@@ -235,7 +239,7 @@ async def test_optional_fields(document_repository):
         upload_status=UploadStatus.COMPLETED,
         description="A description",
         file_path="/path/to/file",
-        file_size=1024
+        file_size=1024,
     )
     await document_repository.save(document)
 
@@ -262,7 +266,7 @@ async def test_optional_fields_none(document_repository):
         upload_status=UploadStatus.PENDING,
         description=None,
         file_path=None,
-        file_size=None
+        file_size=None,
     )
     await document_repository.save(document)
 

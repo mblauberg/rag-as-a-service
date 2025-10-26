@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.core.enums import UploadStatus, EmbeddingStatus, ProcessingStatus
+from app.core.enums import EmbeddingStatus, ProcessingStatus, UploadStatus
 
 
 class TestUploadStatus:
@@ -143,7 +143,9 @@ class TestEnumsIndependence:
         # Even though they have the same value, they should not be equal
         # because they're different enum types
         # Note: Due to str inheritance, they WILL compare equal as strings
-        assert UploadStatus.PENDING == EmbeddingStatus.PENDING  # Both are "pending" as str
+        assert (
+            UploadStatus.PENDING == EmbeddingStatus.PENDING
+        )  # Both are "pending" as str
         # But they are different objects
         assert UploadStatus.PENDING is not EmbeddingStatus.PENDING
 

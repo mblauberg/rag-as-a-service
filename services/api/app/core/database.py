@@ -1,7 +1,8 @@
 """Async database connection and session management."""
 from collections.abc import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
 from sqlalchemy.orm import declarative_base
 
 from app.core.config import settings
@@ -15,11 +16,13 @@ engine_kwargs = {
 
 # Only add pool settings for non-SQLite databases
 if "sqlite" not in settings.database_url:
-    engine_kwargs.update({
-        "pool_pre_ping": True,
-        "pool_size": 10,
-        "max_overflow": 20,
-    })
+    engine_kwargs.update(
+        {
+            "pool_pre_ping": True,
+            "pool_size": 10,
+            "max_overflow": 20,
+        }
+    )
 
 engine = create_async_engine(settings.database_url, **engine_kwargs)
 

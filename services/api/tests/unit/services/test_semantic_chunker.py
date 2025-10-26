@@ -1,4 +1,5 @@
 import pytest
+
 from app.services.chunking.semantic_chunker import SemanticChunker
 
 
@@ -6,9 +7,7 @@ from app.services.chunking.semantic_chunker import SemanticChunker
 async def test_semantic_chunker_creates_coherent_chunks():
     """Test that semantic chunker splits on semantic boundaries"""
     chunker = SemanticChunker(
-        min_chunk_size=50,
-        max_chunk_size=200,
-        breakpoint_percentile=95.0
+        min_chunk_size=50, max_chunk_size=200, breakpoint_percentile=95.0
     )
 
     # Text with clear semantic shift
@@ -26,7 +25,9 @@ async def test_semantic_chunker_creates_coherent_chunks():
     assert len(chunks) >= 2
 
     # First chunk should be about Kubernetes
-    assert "kubernetes" in chunks[0].text.lower() or "container" in chunks[0].text.lower()
+    assert (
+        "kubernetes" in chunks[0].text.lower() or "container" in chunks[0].text.lower()
+    )
 
     # Later chunk should be about Python
     assert any("python" in chunk.text.lower() for chunk in chunks[1:])
@@ -35,10 +36,7 @@ async def test_semantic_chunker_creates_coherent_chunks():
 @pytest.mark.asyncio
 async def test_semantic_chunker_respects_size_limits():
     """Test that chunks respect min/max size constraints"""
-    chunker = SemanticChunker(
-        min_chunk_size=100,
-        max_chunk_size=500
-    )
+    chunker = SemanticChunker(min_chunk_size=100, max_chunk_size=500)
 
     text = "Short sentence. " * 100  # Repeated text
 

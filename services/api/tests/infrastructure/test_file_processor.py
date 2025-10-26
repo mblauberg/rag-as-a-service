@@ -1,10 +1,11 @@
 """Tests for FileProcessor infrastructure adapter."""
-import pytest
 from io import BytesIO
+
+import pytest
 from pypdf import PdfWriter
 
-from app.infrastructure.processing.file_processor import FileProcessorImpl
 from app.core.exceptions import FileProcessingError
+from app.infrastructure.processing.file_processor import FileProcessorImpl
 
 
 @pytest.fixture
@@ -21,6 +22,7 @@ def sample_pdf_bytes():
 
     # Add some text to the page
     from pypdf.generic import NameObject, TextStringObject
+
     page = pdf_writer.pages[0]
     # Note: This is a simplified PDF. For real text, we'd need more complex structure
     # For testing, we'll use a different approach - create from scratch
@@ -36,8 +38,8 @@ def sample_pdf_with_text():
     """Create a PDF with actual extractable text."""
     # Create a simple PDF with text using reportlab
     try:
-        from reportlab.pdfgen import canvas
         from reportlab.lib.pagesizes import letter
+        from reportlab.pdfgen import canvas
 
         buffer = BytesIO()
         c = canvas.Canvas(buffer, pagesize=letter)
@@ -97,11 +99,16 @@ class TestFileProcessorImpl:
         """Test extracting text from a plain text file."""
         result = await file_processor.extract_text(sample_text_bytes, "txt")
 
-        assert result == "This is a sample text file.\nIt has multiple lines.\nFor testing purposes."
+        assert (
+            result
+            == "This is a sample text file.\nIt has multiple lines.\nFor testing purposes."
+        )
         assert isinstance(result, str)
 
     @pytest.mark.asyncio
-    async def test_extract_text_from_pdf_file(self, file_processor, sample_pdf_with_text):
+    async def test_extract_text_from_pdf_file(
+        self, file_processor, sample_pdf_with_text
+    ):
         """Test extracting text from a PDF file."""
         result = await file_processor.extract_text(sample_pdf_with_text, "pdf")
 
@@ -150,7 +157,9 @@ class TestFileProcessorImpl:
         assert "Failed to extract text from pdf" in str(exc_info.value)
 
     @pytest.mark.asyncio
-    async def test_extract_text_from_pdf_with_no_text(self, file_processor, sample_pdf_bytes):
+    async def test_extract_text_from_pdf_with_no_text(
+        self, file_processor, sample_pdf_bytes
+    ):
         """Test extracting from PDF with no text content (blank page)."""
         # This should succeed but return empty or minimal text
         result = await file_processor.extract_text(sample_pdf_bytes, "pdf")
@@ -170,7 +179,9 @@ class TestFileProcessorImpl:
         assert "Failed to decode text file" in str(exc_info.value)
 
     @pytest.mark.asyncio
-    async def test_extract_text_case_insensitive_file_type(self, file_processor, sample_text_bytes):
+    async def test_extract_text_case_insensitive_file_type(
+        self, file_processor, sample_text_bytes
+    ):
         """Test that file types are handled case-insensitively."""
         result_lower = await file_processor.extract_text(sample_text_bytes, "txt")
         result_upper = await file_processor.extract_text(sample_text_bytes, "TXT")
@@ -178,7 +189,9 @@ class TestFileProcessorImpl:
         assert result_lower == result_upper
 
     @pytest.mark.asyncio
-    async def test_extract_text_with_file_type_extension(self, file_processor, sample_text_bytes):
+    async def test_extract_text_with_file_type_extension(
+        self, file_processor, sample_text_bytes
+    ):
         """Test that file type with dot prefix works."""
         result_no_dot = await file_processor.extract_text(sample_text_bytes, "txt")
         result_with_dot = await file_processor.extract_text(sample_text_bytes, ".txt")

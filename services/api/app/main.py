@@ -1,5 +1,6 @@
 """FastAPI application entrypoint."""
 import logging
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -13,13 +14,13 @@ from app.core.database import init_db
 logging.basicConfig(
     level=settings.log_level,
     format='{"time": "%(asctime)s", "level": "%(levelname)s", "message": "%(message)s"}',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """
     Application lifespan manager for startup and shutdown events.
 
@@ -28,7 +29,9 @@ async def lifespan(app: FastAPI):
     """
     # Startup
     logger.info("Starting RAAS API service")
-    logger.info(f"Database URL: {settings.database_url.split('@')[1] if '@' in settings.database_url else 'configured'}")
+    logger.info(
+        f"Database URL: {settings.database_url.split('@')[1] if '@' in settings.database_url else 'configured'}"
+    )
     logger.info(f"Qdrant URL: {settings.qdrant_url}")
     logger.info(f"Embedder URL: {settings.embedder.url}")
     logger.info(f"Generator URL: {settings.generator.url}")
@@ -51,7 +54,7 @@ app = FastAPI(
     title="RAAS API",
     description="Retrieval-Augmented Generation as a Service - API Gateway",
     version="0.1.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Configure CORS
@@ -64,36 +67,16 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(
-    health.router,
-    prefix="/api/v1",
-    tags=["health"]
-)
+app.include_router(health.router, prefix="/api/v1", tags=["health"])
 
-app.include_router(
-    documents.router,
-    prefix="/api/v1/documents",
-    tags=["documents"]
-)
+app.include_router(documents.router, prefix="/api/v1/documents", tags=["documents"])
 
-app.include_router(
-    search.router,
-    prefix="/api/v1/search",
-    tags=["search"]
-)
+app.include_router(search.router, prefix="/api/v1/search", tags=["search"])
 
-app.include_router(
-    models.router,
-    prefix="/api/v1",
-    tags=["models"]
-)
+app.include_router(models.router, prefix="/api/v1", tags=["models"])
 
 
 @app.get("/")
-async def root():
+async def root() -> dict[str, str]:
     """Root endpoint."""
-    return {
-        "message": "RAAS API Gateway",
-        "version": "0.1.0",
-        "docs": "/docs"
-    }
+    return {"message": "RAAS API Gateway", "version": "0.1.0", "docs": "/docs"}

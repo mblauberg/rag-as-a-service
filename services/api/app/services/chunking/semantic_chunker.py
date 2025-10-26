@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 class ChunkResult(BaseModel):
     """Result of chunking operation"""
+
     text: str
     start_index: int
     end_index: int
@@ -33,7 +34,7 @@ class SemanticChunker:
         max_chunk_size: int = 512,
         breakpoint_percentile: float = 95.0,
         embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2",
-        overlap_ratio: float = 0.1
+        overlap_ratio: float = 0.1,
     ):
         """
         Initialize semantic chunker.
@@ -60,7 +61,7 @@ class SemanticChunker:
             embedding_model=self.embeddings,
             chunk_size=max_chunk_size,
             min_chunk_size=min_chunk_size,
-            threshold=breakpoint_percentile / 100.0  # Convert percentile to 0-1 range
+            threshold=breakpoint_percentile / 100.0,  # Convert percentile to 0-1 range
         )
 
     async def chunk_text(self, text: str) -> list[ChunkResult]:
@@ -83,21 +84,29 @@ class SemanticChunker:
 
         for chunk in chunks:
             chunk_text = chunk.text.strip()
-            token_count = chunk.token_count if hasattr(chunk, 'token_count') else len(chunk_text.split())
+            token_count = (
+                chunk.token_count
+                if hasattr(chunk, "token_count")
+                else len(chunk_text.split())
+            )
 
             # Accumulate all chunks first
-            accumulated_chunks.append({
-                "text": chunk_text,
-                "tokens": token_count,
-                "start": current_index,
-                "end": current_index + len(chunk_text)
-            })
+            accumulated_chunks.append(
+                {
+                    "text": chunk_text,
+                    "tokens": token_count,
+                    "start": current_index,
+                    "end": current_index + len(chunk_text),
+                }
+            )
             current_index += len(chunk_text)
 
         # Now process accumulated chunks with size constraints
         # Strategy: Merge VERY small fragments (< 10% of min), preserve semantic boundaries otherwise
         merged_chunks = []
-        very_small_threshold = max(5, self.min_chunk_size * 0.1)  # Chunks smaller than this are fragments
+        very_small_threshold = max(
+            5, self.min_chunk_size * 0.1
+        )  # Chunks smaller than this are fragments
 
         buffer_chunks = []
         buffer_tokens = 0
@@ -112,24 +121,28 @@ class SemanticChunker:
                 # Save accumulated buffer first
                 if buffer_chunks:
                     merged_text = " ".join(c["text"] for c in buffer_chunks)
-                    merged_chunks.append({
-                        "text": merged_text,
-                        "tokens": buffer_tokens,
-                        "start": buffer_chunks[0]["start"],
-                        "end": buffer_chunks[-1]["end"]
-                    })
+                    merged_chunks.append(
+                        {
+                            "text": merged_text,
+                            "tokens": buffer_tokens,
+                            "start": buffer_chunks[0]["start"],
+                            "end": buffer_chunks[-1]["end"],
+                        }
+                    )
                     buffer_chunks = []
                     buffer_tokens = 0
 
                 # Truncate large chunk
                 words = chunk["text"].split()
-                split_text = " ".join(words[:self.max_chunk_size])
-                merged_chunks.append({
-                    "text": split_text,
-                    "tokens": self.max_chunk_size,
-                    "start": chunk["start"],
-                    "end": chunk["start"] + len(split_text)
-                })
+                split_text = " ".join(words[: self.max_chunk_size])
+                merged_chunks.append(
+                    {
+                        "text": split_text,
+                        "tokens": self.max_chunk_size,
+                        "start": chunk["start"],
+                        "end": chunk["start"] + len(split_text),
+                    }
+                )
 
             # Chunk is a tiny fragment - always merge with neighbors
             elif chunk["tokens"] < very_small_threshold:
@@ -137,14 +150,19 @@ class SemanticChunker:
                 buffer_tokens += chunk["tokens"]
 
                 # Save buffer if it's large enough or this is the last chunk
-                if buffer_tokens >= self.min_chunk_size or i == len(accumulated_chunks) - 1:
+                if (
+                    buffer_tokens >= self.min_chunk_size
+                    or i == len(accumulated_chunks) - 1
+                ):
                     merged_text = " ".join(c["text"] for c in buffer_chunks)
-                    merged_chunks.append({
-                        "text": merged_text,
-                        "tokens": buffer_tokens,
-                        "start": buffer_chunks[0]["start"],
-                        "end": buffer_chunks[-1]["end"]
-                    })
+                    merged_chunks.append(
+                        {
+                            "text": merged_text,
+                            "tokens": buffer_tokens,
+                            "start": buffer_chunks[0]["start"],
+                            "end": buffer_chunks[-1]["end"],
+                        }
+                    )
                     buffer_chunks = []
                     buffer_tokens = 0
 
@@ -157,23 +175,27 @@ class SemanticChunker:
                         buffer_chunks.append(chunk)
                         buffer_tokens += chunk["tokens"]
                         merged_text = " ".join(c["text"] for c in buffer_chunks)
-                        merged_chunks.append({
-                            "text": merged_text,
-                            "tokens": buffer_tokens,
-                            "start": buffer_chunks[0]["start"],
-                            "end": buffer_chunks[-1]["end"]
-                        })
+                        merged_chunks.append(
+                            {
+                                "text": merged_text,
+                                "tokens": buffer_tokens,
+                                "start": buffer_chunks[0]["start"],
+                                "end": buffer_chunks[-1]["end"],
+                            }
+                        )
                         buffer_chunks = []
                         buffer_tokens = 0
                     else:
                         # Can't merge, save buffer and this chunk separately
                         merged_text = " ".join(c["text"] for c in buffer_chunks)
-                        merged_chunks.append({
-                            "text": merged_text,
-                            "tokens": buffer_tokens,
-                            "start": buffer_chunks[0]["start"],
-                            "end": buffer_chunks[-1]["end"]
-                        })
+                        merged_chunks.append(
+                            {
+                                "text": merged_text,
+                                "tokens": buffer_tokens,
+                                "start": buffer_chunks[0]["start"],
+                                "end": buffer_chunks[-1]["end"],
+                            }
+                        )
                         buffer_chunks = []
                         buffer_tokens = 0
                         merged_chunks.append(chunk)
@@ -189,31 +211,39 @@ class SemanticChunker:
                 last_chunk = merged_chunks[-1]
                 if (last_chunk["tokens"] + buffer_tokens) <= self.max_chunk_size:
                     # Merge buffer into last chunk
-                    merged_text = last_chunk["text"] + " " + " ".join(c["text"] for c in buffer_chunks)
+                    merged_text = (
+                        last_chunk["text"]
+                        + " "
+                        + " ".join(c["text"] for c in buffer_chunks)
+                    )
                     merged_chunks[-1] = {
                         "text": merged_text,
                         "tokens": last_chunk["tokens"] + buffer_tokens,
                         "start": last_chunk["start"],
-                        "end": buffer_chunks[-1]["end"]
+                        "end": buffer_chunks[-1]["end"],
                     }
                 else:
                     # Can't merge, save buffer as-is
                     merged_text = " ".join(c["text"] for c in buffer_chunks)
-                    merged_chunks.append({
-                        "text": merged_text,
-                        "tokens": buffer_tokens,
-                        "start": buffer_chunks[0]["start"],
-                        "end": buffer_chunks[-1]["end"]
-                    })
+                    merged_chunks.append(
+                        {
+                            "text": merged_text,
+                            "tokens": buffer_tokens,
+                            "start": buffer_chunks[0]["start"],
+                            "end": buffer_chunks[-1]["end"],
+                        }
+                    )
             else:
                 # Buffer is big enough, save as-is
                 merged_text = " ".join(c["text"] for c in buffer_chunks)
-                merged_chunks.append({
-                    "text": merged_text,
-                    "tokens": buffer_tokens,
-                    "start": buffer_chunks[0]["start"],
-                    "end": buffer_chunks[-1]["end"]
-                })
+                merged_chunks.append(
+                    {
+                        "text": merged_text,
+                        "tokens": buffer_tokens,
+                        "start": buffer_chunks[0]["start"],
+                        "end": buffer_chunks[-1]["end"],
+                    }
+                )
 
         # Apply overlap if enabled
         if self.overlap_ratio > 0.0 and len(merged_chunks) > 1:
@@ -221,12 +251,14 @@ class SemanticChunker:
 
         # Convert to ChunkResult objects
         for chunk in merged_chunks:
-            results.append(ChunkResult(
-                text=chunk["text"],
-                start_index=chunk["start"],
-                end_index=chunk["end"],
-                token_count=chunk["tokens"]
-            ))
+            results.append(
+                ChunkResult(
+                    text=chunk["text"],
+                    start_index=chunk["start"],
+                    end_index=chunk["end"],
+                    token_count=chunk["tokens"],
+                )
+            )
 
         return results
 
@@ -262,8 +294,16 @@ class SemanticChunker:
                 # where N is half of overlap_tokens (so total is ~overlap_tokens)
                 half_overlap = overlap_tokens // 2
 
-                overlap_from_curr = curr_words[-half_overlap:] if len(curr_words) > half_overlap else curr_words
-                overlap_from_next = next_words[:half_overlap] if len(next_words) > half_overlap else next_words
+                overlap_from_curr = (
+                    curr_words[-half_overlap:]
+                    if len(curr_words) > half_overlap
+                    else curr_words
+                )
+                overlap_from_next = (
+                    next_words[:half_overlap]
+                    if len(next_words) > half_overlap
+                    else next_words
+                )
 
                 # Combine to create overlap text
                 overlap_text = " ".join(overlap_from_curr + overlap_from_next)
@@ -278,7 +318,7 @@ class SemanticChunker:
                     "text": overlap_text,
                     "tokens": overlap_token_count,
                     "start": overlap_start,
-                    "end": overlap_end
+                    "end": overlap_end,
                 }
 
                 overlapping_chunks.append(overlap_chunk)
@@ -286,9 +326,7 @@ class SemanticChunker:
         return overlapping_chunks
 
     async def chunk_document(
-        self,
-        text: str,
-        metadata: dict | None = None
+        self, text: str, metadata: dict | None = None
     ) -> list[dict]:
         """
         Chunk document and return with metadata (API-compatible format).

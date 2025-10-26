@@ -2,7 +2,8 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import (JSON, Column, DateTime, ForeignKey, Integer, String,
+                        Text)
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
@@ -10,7 +11,7 @@ from app.core.database import Base
 from app.core.enums import EmbeddingStatus, UploadStatus
 
 
-def utcnow():
+def utcnow() -> datetime:
     """Get current UTC time - wrapper for SQLAlchemy default."""
     return datetime.now(UTC)
 
@@ -31,14 +32,12 @@ class Document(Base):
 
     # Status fields using enums
     upload_status = Column(
-        String(50),
-        default=UploadStatus.PENDING.value,  # Use enum value
-        nullable=False
+        String(50), default=UploadStatus.PENDING.value, nullable=False  # Use enum value
     )
     embedding_status = Column(
         String(50),
         default=EmbeddingStatus.PENDING.value,  # Use enum value
-        nullable=False
+        nullable=False,
     )
 
     created_at = Column(DateTime, default=utcnow, nullable=False)
@@ -46,9 +45,7 @@ class Document(Base):
 
     # Relationship to chunks
     chunks = relationship(
-        "DocumentChunk",
-        back_populates="document",
-        cascade="all, delete-orphan"
+        "DocumentChunk", back_populates="document", cascade="all, delete-orphan"
     )
 
 
@@ -58,7 +55,11 @@ class DocumentChunk(Base):
     __tablename__ = "document_chunks"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    document_id = Column(UUID(as_uuid=True), ForeignKey("documents.id", ondelete="CASCADE"), nullable=False)
+    document_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("documents.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     chunk_index = Column(Integer, nullable=False)
     chunk_text = Column(Text, nullable=False)
     qdrant_point_id = Column(UUID(as_uuid=True), nullable=True)
@@ -69,8 +70,12 @@ class DocumentChunk(Base):
     section_level = Column(Integer, default=0)
     page_number = Column(Integer, nullable=True)
     chunk_tokens = Column(Integer, nullable=True)
-    parent_chunk_id = Column(UUID(as_uuid=True), ForeignKey("document_chunks.id", ondelete="CASCADE"), nullable=True)
-    chunk_metadata = Column(JSONB().with_variant(JSON(), 'sqlite'), default={})
+    parent_chunk_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("document_chunks.id", ondelete="CASCADE"),
+        nullable=True,
+    )
+    chunk_metadata = Column(JSONB().with_variant(JSON(), "sqlite"), default={})
 
     created_at = Column(DateTime, default=utcnow, nullable=False)
 

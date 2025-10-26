@@ -1,14 +1,15 @@
 """Tests for DeleteDocumentUseCase."""
-import pytest
-from unittest.mock import Mock, AsyncMock
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
-from datetime import datetime, UTC
+
+import pytest
 
 from app.application.use_cases.delete_document import DeleteDocumentUseCase
-from app.domain.entities.document import Document
 from app.core.enums import UploadStatus
 from app.core.exceptions import DocumentNotFoundError
-from app.ports.repositories import DocumentRepository, ChunkRepository
+from app.domain.entities.document import Document
+from app.ports.repositories import ChunkRepository, DocumentRepository
 from app.ports.services import VectorStore
 
 
@@ -21,14 +22,16 @@ async def test_delete_document_success():
     mock_vector_store = Mock(spec=VectorStore)
 
     # Mock document exists
-    mock_doc_repo.find_by_id = AsyncMock(return_value=Document(
-        id=doc_id,
-        title="Test",
-        file_name="test.pdf",
-        file_type="pdf",
-        created_at=datetime.now(UTC),
-        upload_status=UploadStatus.COMPLETED
-    ))
+    mock_doc_repo.find_by_id = AsyncMock(
+        return_value=Document(
+            id=doc_id,
+            title="Test",
+            file_name="test.pdf",
+            file_type="pdf",
+            created_at=datetime.now(UTC),
+            upload_status=UploadStatus.COMPLETED,
+        )
+    )
     mock_doc_repo.delete = AsyncMock()
     mock_chunk_repo.delete_by_document_id = AsyncMock()
     mock_vector_store.delete_by_document = AsyncMock()
@@ -36,7 +39,7 @@ async def test_delete_document_success():
     use_case = DeleteDocumentUseCase(
         document_repo=mock_doc_repo,
         chunk_repo=mock_chunk_repo,
-        vector_store=mock_vector_store
+        vector_store=mock_vector_store,
     )
 
     await use_case.execute(doc_id)
@@ -57,7 +60,7 @@ async def test_delete_document_not_found():
     use_case = DeleteDocumentUseCase(
         document_repo=mock_doc_repo,
         chunk_repo=Mock(spec=ChunkRepository),
-        vector_store=Mock(spec=VectorStore)
+        vector_store=Mock(spec=VectorStore),
     )
 
     with pytest.raises(DocumentNotFoundError):

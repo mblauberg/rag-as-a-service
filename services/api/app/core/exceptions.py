@@ -20,10 +20,7 @@ class DocumentNotFoundError(HTTPException):
         """
         if detail is None:
             detail = f"Document {document_id} not found"
-        super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=detail
-        )
+        super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
 
 
 class QdrantConnectionError(Exception):
@@ -82,7 +79,9 @@ class FileOperationError(Exception):
     writing, or deleting fail.
     """
 
-    def __init__(self, operation: str, file_path: str, original_error: Exception = None):
+    def __init__(
+        self, operation: str, file_path: str, original_error: Exception = None
+    ):
         """
         Initialize FileOperationError.
 
@@ -108,7 +107,9 @@ class TextExtractionError(Exception):
     text from a document file.
     """
 
-    def __init__(self, file_path: str, file_type: str, original_error: Exception = None):
+    def __init__(
+        self, file_path: str, file_type: str, original_error: Exception = None
+    ):
         """
         Initialize TextExtractionError.
 
@@ -186,7 +187,9 @@ class FileProcessingError(Exception):
     text extraction or validation fail.
     """
 
-    def __init__(self, operation: str, file_path: str = None, original_error: Exception = None):
+    def __init__(
+        self, operation: str, file_path: str = None, original_error: Exception = None
+    ):
         """
         Initialize FileProcessingError.
 

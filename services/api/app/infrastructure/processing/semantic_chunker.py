@@ -17,7 +17,7 @@ class SemanticChunkerImpl(TextChunker):
         min_chunk_size: int = 128,
         max_chunk_size: int = 512,
         breakpoint_percentile: float = 95.0,
-        embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+        embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2",
     ):
         """Initialize the semantic chunker.
 
@@ -31,7 +31,7 @@ class SemanticChunkerImpl(TextChunker):
             min_chunk_size=min_chunk_size,
             max_chunk_size=max_chunk_size,
             breakpoint_percentile=breakpoint_percentile,
-            embedding_model=embedding_model
+            embedding_model=embedding_model,
         )
 
     async def chunk(self, text: str) -> list[str]:
@@ -56,7 +56,4 @@ class SemanticChunkerImpl(TextChunker):
             return chunks
 
         except Exception as e:
-            raise ChunkingError(
-                operation="chunk_text",
-                original_error=e
-            )
+            raise ChunkingError(operation="chunk_text", original_error=e)

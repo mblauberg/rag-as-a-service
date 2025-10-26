@@ -1,9 +1,10 @@
 """Tests for SemanticChunker infrastructure adapter."""
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from app.infrastructure.processing.semantic_chunker import SemanticChunkerImpl
+import pytest
+
 from app.core.exceptions import ChunkingError
+from app.infrastructure.processing.semantic_chunker import SemanticChunkerImpl
 from app.services.chunking.semantic_chunker import ChunkResult
 
 
@@ -34,21 +35,21 @@ def sample_chunk_results():
             start_index=0,
             end_index=56,
             token_count=10,
-            coherence_score=0.95
+            coherence_score=0.95,
         ),
         ChunkResult(
             text="It focuses on the development of algorithms that can learn from data.",
             start_index=57,
             end_index=126,
             token_count=12,
-            coherence_score=0.92
+            coherence_score=0.92,
         ),
         ChunkResult(
             text="Deep learning is a specialized form of machine learning. It uses neural networks with multiple layers.",
             start_index=127,
             end_index=230,
             token_count=18,
-            coherence_score=0.88
+            coherence_score=0.88,
         ),
     ]
 
@@ -57,31 +58,37 @@ class TestSemanticChunkerImpl:
     """Test suite for SemanticChunkerImpl."""
 
     @pytest.mark.asyncio
-    async def test_chunk_text_success(self, semantic_chunker, sample_text, sample_chunk_results):
+    async def test_chunk_text_success(
+        self, semantic_chunker, sample_text, sample_chunk_results
+    ):
         """Test successful text chunking."""
         # Mock the underlying chunker
         with patch.object(
-            semantic_chunker.chunker,
-            'chunk_text',
-            new_callable=AsyncMock
+            semantic_chunker.chunker, "chunk_text", new_callable=AsyncMock
         ) as mock_chunk:
             mock_chunk.return_value = sample_chunk_results
 
             result = await semantic_chunker.chunk(sample_text)
 
             assert len(result) == 3
-            assert result[0] == "Machine learning is a subset of artificial intelligence."
-            assert result[1] == "It focuses on the development of algorithms that can learn from data."
-            assert result[2] == "Deep learning is a specialized form of machine learning. It uses neural networks with multiple layers."
+            assert (
+                result[0] == "Machine learning is a subset of artificial intelligence."
+            )
+            assert (
+                result[1]
+                == "It focuses on the development of algorithms that can learn from data."
+            )
+            assert (
+                result[2]
+                == "Deep learning is a specialized form of machine learning. It uses neural networks with multiple layers."
+            )
             mock_chunk.assert_called_once_with(sample_text)
 
     @pytest.mark.asyncio
     async def test_chunk_empty_text(self, semantic_chunker):
         """Test chunking empty text."""
         with patch.object(
-            semantic_chunker.chunker,
-            'chunk_text',
-            new_callable=AsyncMock
+            semantic_chunker.chunker, "chunk_text", new_callable=AsyncMock
         ) as mock_chunk:
             mock_chunk.return_value = []
 
@@ -99,13 +106,11 @@ class TestSemanticChunkerImpl:
             start_index=0,
             end_index=len(text),
             token_count=5,
-            coherence_score=1.0
+            coherence_score=1.0,
         )
 
         with patch.object(
-            semantic_chunker.chunker,
-            'chunk_text',
-            new_callable=AsyncMock
+            semantic_chunker.chunker, "chunk_text", new_callable=AsyncMock
         ) as mock_chunk:
             mock_chunk.return_value = [chunk_result]
 
@@ -123,13 +128,11 @@ class TestSemanticChunkerImpl:
             start_index=0,
             end_index=len(text),
             token_count=12,
-            coherence_score=0.9
+            coherence_score=0.9,
         )
 
         with patch.object(
-            semantic_chunker.chunker,
-            'chunk_text',
-            new_callable=AsyncMock
+            semantic_chunker.chunker, "chunk_text", new_callable=AsyncMock
         ) as mock_chunk:
             mock_chunk.return_value = [chunk_result]
 
@@ -148,21 +151,19 @@ class TestSemanticChunkerImpl:
                 start_index=0,
                 end_index=200,
                 token_count=40,
-                coherence_score=0.85
+                coherence_score=0.85,
             ),
             ChunkResult(
                 text=text[200:400],
                 start_index=200,
                 end_index=400,
                 token_count=40,
-                coherence_score=0.83
+                coherence_score=0.83,
             ),
         ]
 
         with patch.object(
-            semantic_chunker.chunker,
-            'chunk_text',
-            new_callable=AsyncMock
+            semantic_chunker.chunker, "chunk_text", new_callable=AsyncMock
         ) as mock_chunk:
             mock_chunk.return_value = chunks
 
@@ -176,9 +177,7 @@ class TestSemanticChunkerImpl:
     async def test_chunk_error_handling(self, semantic_chunker, sample_text):
         """Test that chunking errors are properly wrapped in ChunkingError."""
         with patch.object(
-            semantic_chunker.chunker,
-            'chunk_text',
-            new_callable=AsyncMock
+            semantic_chunker.chunker, "chunk_text", new_callable=AsyncMock
         ) as mock_chunk:
             mock_chunk.side_effect = Exception("Underlying chunker failed")
 
@@ -194,9 +193,7 @@ class TestSemanticChunkerImpl:
         text = "   \n\t\n   "
 
         with patch.object(
-            semantic_chunker.chunker,
-            'chunk_text',
-            new_callable=AsyncMock
+            semantic_chunker.chunker, "chunk_text", new_callable=AsyncMock
         ) as mock_chunk:
             mock_chunk.return_value = []
 
@@ -209,15 +206,19 @@ class TestSemanticChunkerImpl:
         """Test that chunks are returned in correct order."""
         text = "First sentence. Second sentence. Third sentence."
         chunks = [
-            ChunkResult(text="First sentence.", start_index=0, end_index=15, token_count=2),
-            ChunkResult(text="Second sentence.", start_index=16, end_index=32, token_count=2),
-            ChunkResult(text="Third sentence.", start_index=33, end_index=48, token_count=2),
+            ChunkResult(
+                text="First sentence.", start_index=0, end_index=15, token_count=2
+            ),
+            ChunkResult(
+                text="Second sentence.", start_index=16, end_index=32, token_count=2
+            ),
+            ChunkResult(
+                text="Third sentence.", start_index=33, end_index=48, token_count=2
+            ),
         ]
 
         with patch.object(
-            semantic_chunker.chunker,
-            'chunk_text',
-            new_callable=AsyncMock
+            semantic_chunker.chunker, "chunk_text", new_callable=AsyncMock
         ) as mock_chunk:
             mock_chunk.return_value = chunks
 
@@ -230,15 +231,25 @@ class TestSemanticChunkerImpl:
         """Test chunking text with newlines."""
         text = "First paragraph.\n\nSecond paragraph with more text.\n\nThird paragraph here."
         chunks = [
-            ChunkResult(text="First paragraph.", start_index=0, end_index=16, token_count=2),
-            ChunkResult(text="Second paragraph with more text.", start_index=18, end_index=50, token_count=5),
-            ChunkResult(text="Third paragraph here.", start_index=52, end_index=73, token_count=3),
+            ChunkResult(
+                text="First paragraph.", start_index=0, end_index=16, token_count=2
+            ),
+            ChunkResult(
+                text="Second paragraph with more text.",
+                start_index=18,
+                end_index=50,
+                token_count=5,
+            ),
+            ChunkResult(
+                text="Third paragraph here.",
+                start_index=52,
+                end_index=73,
+                token_count=3,
+            ),
         ]
 
         with patch.object(
-            semantic_chunker.chunker,
-            'chunk_text',
-            new_callable=AsyncMock
+            semantic_chunker.chunker, "chunk_text", new_callable=AsyncMock
         ) as mock_chunk:
             mock_chunk.return_value = chunks
 
@@ -251,7 +262,7 @@ class TestSemanticChunkerImpl:
     async def test_chunker_initialization(self, semantic_chunker):
         """Test that the chunker is properly initialized."""
         assert semantic_chunker.chunker is not None
-        assert hasattr(semantic_chunker.chunker, 'chunk_text')
+        assert hasattr(semantic_chunker.chunker, "chunk_text")
 
     @pytest.mark.asyncio
     async def test_chunk_extracts_text_from_chunk_results(self, semantic_chunker):
@@ -262,13 +273,11 @@ class TestSemanticChunkerImpl:
             start_index=0,
             end_index=14,
             token_count=2,
-            coherence_score=0.95
+            coherence_score=0.95,
         )
 
         with patch.object(
-            semantic_chunker.chunker,
-            'chunk_text',
-            new_callable=AsyncMock
+            semantic_chunker.chunker, "chunk_text", new_callable=AsyncMock
         ) as mock_chunk:
             mock_chunk.return_value = [chunk_result]
 

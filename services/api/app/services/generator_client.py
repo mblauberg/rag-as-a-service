@@ -5,6 +5,7 @@ from typing import Any
 import httpx
 
 from app.core.config import settings
+from app.core.exceptions import GenerationServiceError
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +19,7 @@ class GeneratorClient:
         self.timeout = 30.0  # 30 second timeout for generation
 
     async def generate_summary(
-        self,
-        query: str,
-        chunks: list[dict[str, Any]],
-        model: str
+        self, query: str, chunks: list[dict[str, Any]], model: str
     ) -> dict[str, Any] | None:
         """
         Generate summary from chunks.
@@ -41,19 +39,17 @@ class GeneratorClient:
             {
                 "text": chunk["text"],
                 "document_id": chunk["document_id"],
-                "chunk_index": chunk.get("chunk_index", 0)
+                "chunk_index": chunk.get("chunk_index", 0),
             }
             for chunk in chunks
         ]
 
-        payload = {
-            "query": query,
-            "chunks": chunk_inputs,
-            "model": model
-        }
+        payload = {"query": query, "chunks": chunk_inputs, "model": model}
 
         try:
-            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
+            async with httpx.AsyncClient(
+                timeout=self.timeout, follow_redirects=True
+            ) as client:
                 response = await client.post(url, json=payload)
 
                 if response.status_code == 200:
@@ -68,10 +64,7 @@ class GeneratorClient:
             return None
 
     async def generate(
-        self,
-        prompt: str,
-        max_tokens: int = 150,
-        temperature: float = 0.3
+        self, prompt: str, max_tokens: int = 150, temperature: float = 0.3
     ) -> Any | None:
         """
         Generate text from a prompt using the generator service.
@@ -89,17 +82,21 @@ class GeneratorClient:
         payload = {
             "prompt": prompt,
             "max_tokens": max_tokens,
-            "temperature": temperature
+            "temperature": temperature,
         }
 
         try:
-            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
+            async with httpx.AsyncClient(
+                timeout=self.timeout, follow_redirects=True
+            ) as client:
                 response = await client.post(url, json=payload)
 
                 if response.status_code == 200:
                     result = response.json()
                     # Return object with 'text' attribute for compatibility
-                    return type('GenerateResponse', (), {'text': result.get('text', '')})()
+                    return type(
+                        "GenerateResponse", (), {"text": result.get("text", "")}
+                    )()
                 else:
                     logger.warning(f"Generator returned {response.status_code}")
                     return None
@@ -114,6 +111,9 @@ class GeneratorClient:
 
         Returns:
             List of model info dictionaries
+
+        Raises:
+            GenerationServiceError: If the generator service is unavailable or returns an error
         """
         url = f"{self.base_url}/api/v1/models"
 
@@ -126,8 +126,23 @@ class GeneratorClient:
                     return data.get("models", [])
                 else:
                     logger.warning(f"Failed to list models: {response.status_code}")
-                    return []
+                    raise GenerationServiceError(
+                        operation="list_models",
+                        original_error=Exception(f"HTTP {response.status_code}")
+                    )
 
-        except Exception as e:
+        except httpx.HTTPError as e:
             logger.error(f"Failed to list models: {e}")
-            return []
+            raise GenerationServiceError(
+                operation="list_models",
+                original_error=e
+            )
+        except GenerationServiceError:
+            # Re-raise our custom exception
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error listing models: {e}")
+            raise GenerationServiceError(
+                operation="list_models",
+                original_error=e
+            )

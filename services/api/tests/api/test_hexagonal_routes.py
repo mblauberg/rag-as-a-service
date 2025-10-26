@@ -3,27 +3,25 @@
 These tests verify that the FastAPI HTTP layer correctly integrates
 with the hexagonal architecture use cases via dependency injection.
 """
-import pytest
-from unittest.mock import AsyncMock, patch, Mock
-from uuid import uuid4
+from datetime import UTC, datetime
 from io import BytesIO
-from datetime import datetime, UTC
+from unittest.mock import AsyncMock, Mock, patch
+from uuid import uuid4
 
+import pytest
 from fastapi import UploadFile
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
-from app.main import app
-from app.api.dependencies import (
-    get_upload_document_use_case,
-    get_list_documents_use_case,
-    get_delete_document_use_case,
-    get_search_documents_use_case,
-    get_get_document_use_case
-)
-from app.domain.entities.document import Document
-from app.domain.entities.chunk import Chunk
+from app.api.dependencies import (get_delete_document_use_case,
+                                  get_get_document_use_case,
+                                  get_list_documents_use_case,
+                                  get_search_documents_use_case,
+                                  get_upload_document_use_case)
 from app.core.enums import UploadStatus
 from app.core.exceptions import DocumentNotFoundError
+from app.domain.entities.chunk import Chunk
+from app.domain.entities.document import Document
+from app.main import app
 
 
 @pytest.mark.asyncio
@@ -43,7 +41,7 @@ async def test_upload_document_success():
         upload_status=UploadStatus.COMPLETED,
         description="Test description",
         file_path="/path/to/test.pdf",
-        file_size=1024
+        file_size=1024,
     )
 
     mock_use_case.execute.return_value = (mock_document, 5)
@@ -52,15 +50,15 @@ async def test_upload_document_success():
     app.dependency_overrides[get_upload_document_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
             # Create file upload
             files = {"file": ("test.pdf", b"test content", "application/pdf")}
             data = {"title": "Test Doc", "description": "Test description"}
 
             response = await client.post(
-                "/api/v1/documents/upload",
-                files=files,
-                data=data
+                "/api/v1/documents/upload", files=files, data=data
             )
 
         assert response.status_code == 201
@@ -83,14 +81,14 @@ async def test_upload_document_empty_file():
     app.dependency_overrides[get_upload_document_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
             files = {"file": ("test.pdf", b"", "application/pdf")}
             data = {"title": "Test Doc"}
 
             response = await client.post(
-                "/api/v1/documents/upload",
-                files=files,
-                data=data
+                "/api/v1/documents/upload", files=files, data=data
             )
 
         assert response.status_code == 400
@@ -113,7 +111,7 @@ async def test_list_documents_success():
         file_type="pdf",
         created_at=datetime.now(UTC),
         upload_status=UploadStatus.COMPLETED,
-        file_size=1024
+        file_size=1024,
     )
     doc2 = Document(
         id=uuid4(),
@@ -122,7 +120,7 @@ async def test_list_documents_success():
         file_type="pdf",
         created_at=datetime.now(UTC),
         upload_status=UploadStatus.COMPLETED,
-        file_size=2048
+        file_size=2048,
     )
 
     mock_use_case.execute.return_value = ([doc1, doc2], 2)
@@ -130,7 +128,9 @@ async def test_list_documents_success():
     app.dependency_overrides[get_list_documents_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
             response = await client.get("/api/v1/documents?page=1&limit=20")
 
         assert response.status_code == 200
@@ -156,7 +156,9 @@ async def test_list_documents_invalid_pagination():
     app.dependency_overrides[get_list_documents_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
             response = await client.get("/api/v1/documents?page=0&limit=20")
 
         assert response.status_code == 400
@@ -177,7 +179,9 @@ async def test_delete_document_success():
     document_id = uuid4()
 
     try:
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
             response = await client.delete(f"/api/v1/documents/{document_id}")
 
         assert response.status_code == 204
@@ -197,7 +201,9 @@ async def test_delete_document_not_found():
     app.dependency_overrides[get_delete_document_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
             response = await client.delete(f"/api/v1/documents/{document_id}")
 
         assert response.status_code == 404
@@ -213,28 +219,19 @@ async def test_search_documents_success():
     mock_use_case = AsyncMock()
 
     # Create mock chunks
-    chunk1 = Chunk(
-        id=uuid4(),
-        document_id=uuid4(),
-        content="Test content 1",
-        tokens=10
-    )
-    chunk2 = Chunk(
-        id=uuid4(),
-        document_id=uuid4(),
-        content="Test content 2",
-        tokens=12
-    )
+    chunk1 = Chunk(id=uuid4(), document_id=uuid4(), content="Test content 1", tokens=10)
+    chunk2 = Chunk(id=uuid4(), document_id=uuid4(), content="Test content 2", tokens=12)
 
     mock_use_case.execute.return_value = [chunk1, chunk2]
 
     app.dependency_overrides[get_search_documents_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
             response = await client.post(
-                "/api/v1/search",
-                json={"query": "test query", "top_k": 10}
+                "/api/v1/search", json={"query": "test query", "top_k": 10}
             )
 
         assert response.status_code == 200
@@ -257,10 +254,11 @@ async def test_search_documents_empty_query():
     app.dependency_overrides[get_search_documents_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
             response = await client.post(
-                "/api/v1/search",
-                json={"query": "", "top_k": 10}
+                "/api/v1/search", json={"query": "", "top_k": 10}
             )
 
         # Pydantic validation returns 422 for empty string with min_length constraint
@@ -289,7 +287,7 @@ async def test_get_document_by_id_success():
         upload_status=UploadStatus.COMPLETED,
         description="Test description",
         file_path="/path/to/test.pdf",
-        file_size=2048
+        file_size=2048,
     )
 
     mock_chunks = [
@@ -297,14 +295,14 @@ async def test_get_document_by_id_success():
             id=chunk_id1,
             document_id=document_id,
             content="First chunk content",
-            tokens=50
+            tokens=50,
         ),
         Chunk(
             id=chunk_id2,
             document_id=document_id,
             content="Second chunk content",
-            tokens=60
-        )
+            tokens=60,
+        ),
     ]
 
     mock_use_case.execute.return_value = (mock_document, mock_chunks)
@@ -312,7 +310,9 @@ async def test_get_document_by_id_success():
     app.dependency_overrides[get_get_document_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
             response = await client.get(f"/api/v1/documents/{document_id}")
 
         assert response.status_code == 200
@@ -340,7 +340,9 @@ async def test_get_document_by_id_not_found():
     app.dependency_overrides[get_get_document_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
             response = await client.get(f"/api/v1/documents/{document_id}")
 
         assert response.status_code == 404

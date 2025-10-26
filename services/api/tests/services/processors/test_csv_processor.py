@@ -1,5 +1,7 @@
-import pytest
 from pathlib import Path
+
+import pytest
+
 from app.services.processors.csv_processor import CSVProcessor
 
 

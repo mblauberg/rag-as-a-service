@@ -3,27 +3,28 @@
 Uses in-memory SQLite database with SQLAlchemy async API.
 Tests the full mapping between domain entities and ORM models.
 """
-import pytest
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from uuid import uuid4
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
-from app.domain.entities.document import Document
-from app.domain.entities.chunk import Chunk
+import pytest
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
+
 from app.core.enums import UploadStatus
+from app.domain.entities.chunk import Chunk
+from app.domain.entities.document import Document
 from app.infrastructure.db.base import Base
-from app.infrastructure.db.repositories.document_repository_impl import DocumentRepositoryImpl
-from app.infrastructure.db.repositories.chunk_repository_impl import ChunkRepositoryImpl
+from app.infrastructure.db.repositories.chunk_repository_impl import \
+    ChunkRepositoryImpl
+from app.infrastructure.db.repositories.document_repository_impl import \
+    DocumentRepositoryImpl
 
 
 @pytest.fixture
 async def async_session():
     """Create an in-memory SQLite database for testing."""
     # Use aiosqlite for async SQLite
-    engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:",
-        echo=False
-    )
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
 
     # Create all tables
     async with engine.begin() as conn:
@@ -63,7 +64,7 @@ async def sample_document(document_repository):
         file_name="test.pdf",
         file_type="pdf",
         created_at=datetime.now(UTC),
-        upload_status=UploadStatus.PROCESSING
+        upload_status=UploadStatus.PROCESSING,
     )
     return await document_repository.save(document)
 
@@ -77,7 +78,7 @@ async def test_save_batch_chunks(chunk_repository, sample_document):
             id=uuid4(),
             document_id=sample_document.id,
             content=f"Chunk {i} content",
-            tokens=10
+            tokens=10,
         )
         for i in range(3)
     ]
@@ -101,7 +102,7 @@ async def test_save_batch_with_metadata(chunk_repository, sample_document):
         document_id=sample_document.id,
         content="Test content",
         tokens=5,
-        metadata={"section": "Introduction", "page": 1}
+        metadata={"section": "Introduction", "page": 1},
     )
 
     # Act
@@ -123,7 +124,7 @@ async def test_save_batch_with_optional_fields(chunk_repository, sample_document
         tokens=5,
         section_title="Chapter 1",
         section_level=1,
-        page_number=10
+        page_number=10,
     )
 
     # Act
@@ -145,7 +146,7 @@ async def test_save_batch_with_embedding(chunk_repository, sample_document):
         document_id=sample_document.id,
         content="Test content",
         tokens=5,
-        embedding_vector=[0.1, 0.2, 0.3, 0.4, 0.5]
+        embedding_vector=[0.1, 0.2, 0.3, 0.4, 0.5],
     )
 
     # Act
@@ -163,10 +164,7 @@ async def test_find_by_document_id(chunk_repository, sample_document):
     # Arrange - create chunks for this document
     chunks = [
         Chunk(
-            id=uuid4(),
-            document_id=sample_document.id,
-            content=f"Chunk {i}",
-            tokens=5
+            id=uuid4(), document_id=sample_document.id, content=f"Chunk {i}", tokens=5
         )
         for i in range(3)
     ]
@@ -204,13 +202,18 @@ async def test_find_by_document_id_multiple_documents(
         file_name="doc2.pdf",
         file_type="pdf",
         created_at=datetime.now(UTC),
-        upload_status=UploadStatus.PROCESSING
+        upload_status=UploadStatus.PROCESSING,
     )
     doc2 = await document_repository.save(doc2)
 
     # Create chunks for both documents
     chunks_doc1 = [
-        Chunk(id=uuid4(), document_id=sample_document.id, content=f"Doc1 Chunk {i}", tokens=5)
+        Chunk(
+            id=uuid4(),
+            document_id=sample_document.id,
+            content=f"Doc1 Chunk {i}",
+            tokens=5,
+        )
         for i in range(2)
     ]
     chunks_doc2 = [
@@ -233,7 +236,9 @@ async def test_delete_by_document_id(chunk_repository, sample_document):
     """Test deleting all chunks for a document."""
     # Arrange - create chunks
     chunks = [
-        Chunk(id=uuid4(), document_id=sample_document.id, content=f"Chunk {i}", tokens=5)
+        Chunk(
+            id=uuid4(), document_id=sample_document.id, content=f"Chunk {i}", tokens=5
+        )
         for i in range(3)
     ]
     await chunk_repository.save_batch(chunks)
@@ -262,12 +267,17 @@ async def test_delete_by_document_id_leaves_other_documents(
         file_name="doc2.pdf",
         file_type="pdf",
         created_at=datetime.now(UTC),
-        upload_status=UploadStatus.PROCESSING
+        upload_status=UploadStatus.PROCESSING,
     )
     doc2 = await document_repository.save(doc2)
 
     chunks_doc1 = [
-        Chunk(id=uuid4(), document_id=sample_document.id, content=f"Doc1 Chunk {i}", tokens=5)
+        Chunk(
+            id=uuid4(),
+            document_id=sample_document.id,
+            content=f"Doc1 Chunk {i}",
+            tokens=5,
+        )
         for i in range(2)
     ]
     chunks_doc2 = [
@@ -316,7 +326,9 @@ async def test_cascade_delete_on_document_deletion(
     """Test that chunks are deleted when parent document is deleted (cascade)."""
     # Arrange - create chunks
     chunks = [
-        Chunk(id=uuid4(), document_id=sample_document.id, content=f"Chunk {i}", tokens=5)
+        Chunk(
+            id=uuid4(), document_id=sample_document.id, content=f"Chunk {i}", tokens=5
+        )
         for i in range(3)
     ]
     await chunk_repository.save_batch(chunks)

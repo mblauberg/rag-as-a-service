@@ -8,22 +8,23 @@ os.environ.setdefault("EMBEDDER_URL", "http://localhost:8001")
 os.environ.setdefault("GENERATOR_URL", "http://localhost:8002")
 os.environ.setdefault("UPLOAD_DIR", "/tmp/raas-test-uploads")
 
-import pytest
-import pytest_asyncio
 from typing import AsyncGenerator
 from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
-from httpx import AsyncClient, ASGITransport
+
+import pytest
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
 from sqlalchemy.pool import StaticPool
 
-from app.main import app
 from app.api.dependencies import get_qdrant_client
 from app.core.database import Base, get_db
 from app.core.qdrant_client import QdrantClientWrapper
+from app.main import app
 from app.models.document import Document, DocumentChunk
-
 
 # Test database URL - use PostgreSQL if DATABASE_URL env var is set, otherwise SQLite
 TEST_DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
@@ -55,16 +56,24 @@ async def db_engine():
 
         # For PostgreSQL, apply additional FTS migration for text_search_vector column
         if is_postgres:
-            await conn.execute(text("""
+            await conn.execute(
+                text(
+                    """
                 ALTER TABLE document_chunks
                 ADD COLUMN IF NOT EXISTS text_search_vector tsvector
                 GENERATED ALWAYS AS (to_tsvector('english', chunk_text)) STORED;
-            """))
-            await conn.execute(text("""
+            """
+                )
+            )
+            await conn.execute(
+                text(
+                    """
                 CREATE INDEX IF NOT EXISTS idx_text_search
                 ON document_chunks
                 USING GIN (text_search_vector);
-            """))
+            """
+                )
+            )
 
     yield engine
 
@@ -146,16 +155,16 @@ def mock_embedder_client():
 
     # Configure mock to return appropriate responses based on URL
     async def mock_post(*args, **kwargs):
-        url = args[0] if args else kwargs.get('url', '')
-        if 'embed' in url and 'query' not in url:
+        url = args[0] if args else kwargs.get("url", "")
+        if "embed" in url and "query" not in url:
             return embed_response
-        elif 'query' in url:
+        elif "query" in url:
             return embed_query_response
         return Mock(status_code=404)
 
     async def mock_get(*args, **kwargs):
-        url = args[0] if args else kwargs.get('url', '')
-        if 'health' in url:
+        url = args[0] if args else kwargs.get("url", "")
+        if "health" in url:
             return health_response
         return Mock(status_code=404)
 
@@ -172,6 +181,7 @@ async def async_client(db_session, mock_qdrant_client, mock_embedder_client):
 
     Overrides database and Qdrant dependencies with mocks.
     """
+
     # Override dependencies
     async def override_get_db():
         yield db_session
@@ -182,7 +192,9 @@ async def async_client(db_session, mock_qdrant_client, mock_embedder_client):
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_qdrant_client] = override_get_qdrant_client
 
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         yield client
 
     # Clear overrides
@@ -205,7 +217,7 @@ async def sample_document(db_session) -> Document:
         file_size=1024,
         file_path="/test/path/test.pdf",
         upload_status="completed",
-        embedding_status="completed"
+        embedding_status="completed",
     )
 
     db_session.add(document)
@@ -231,7 +243,7 @@ async def sample_document_with_chunks(db_session) -> Document:
         file_size=1024,
         file_path="/test/path/test.pdf",
         upload_status="completed",
-        embedding_status="completed"
+        embedding_status="completed",
     )
 
     db_session.add(document)
@@ -245,7 +257,7 @@ async def sample_document_with_chunks(db_session) -> Document:
             chunk_index=i,
             chunk_text=f"This is chunk {i} text content for testing.",
             qdrant_point_id=uuid4(),
-            token_count=10
+            token_count=10,
         )
         db_session.add(chunk)
 
@@ -258,12 +270,6 @@ async def sample_document_with_chunks(db_session) -> Document:
 # Pytest configuration
 def pytest_configure(config):
     """Configure pytest markers."""
-    config.addinivalue_line(
-        "markers", "asyncio: mark test as async"
-    )
-    config.addinivalue_line(
-        "markers", "integration: mark test as integration test"
-    )
-    config.addinivalue_line(
-        "markers", "unit: mark test as unit test"
-    )
+    config.addinivalue_line("markers", "asyncio: mark test as async")
+    config.addinivalue_line("markers", "integration: mark test as integration test")
+    config.addinivalue_line("markers", "unit: mark test as unit test")

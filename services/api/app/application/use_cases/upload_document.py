@@ -8,7 +8,8 @@ from app.core.enums import UploadStatus
 from app.domain.entities.chunk import Chunk
 from app.domain.entities.document import Document
 from app.ports.repositories import ChunkRepository, DocumentRepository
-from app.ports.services import EmbeddingService, FileProcessor, TextChunker, VectorStore
+from app.ports.services import (EmbeddingService, FileProcessor, TextChunker,
+                                VectorStore)
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ class UploadDocumentUseCase:
         embedding_service: EmbeddingService,
         vector_store: VectorStore,
         file_processor: FileProcessor,
-        chunker: TextChunker
+        chunker: TextChunker,
     ):
         """Initialize use case with injected dependencies (ports)."""
         self.document_repo = document_repo
@@ -69,7 +70,7 @@ class UploadDocumentUseCase:
             file_size=command.file_size,
             created_at=datetime.now(timezone.utc).replace(tzinfo=None),
             upload_status=UploadStatus.PROCESSING,
-            description=command.description
+            description=command.description,
         )
 
         # 2. Persist document (initial state)
@@ -79,8 +80,7 @@ class UploadDocumentUseCase:
         try:
             # 3. Extract text from file
             text = await self.file_processor.extract_text(
-                command.file_content,
-                document.file_type
+                command.file_content, document.file_type
             )
             logger.debug(f"Extracted {len(text)} characters from {document.file_name}")
 
@@ -94,7 +94,7 @@ class UploadDocumentUseCase:
                     id=uuid4(),
                     document_id=document.id,
                     content=chunk_text,
-                    tokens=self._count_tokens(chunk_text)
+                    tokens=self._count_tokens(chunk_text),
                 )
                 for chunk_text in chunk_texts
             ]
@@ -137,7 +137,7 @@ class UploadDocumentUseCase:
 
     def _detect_file_type(self, filename: str) -> str:
         """Detect file type from extension."""
-        return filename.rsplit('.', 1)[-1].lower() if '.' in filename else "unknown"
+        return filename.rsplit(".", 1)[-1].lower() if "." in filename else "unknown"
 
     def _count_tokens(self, text: str) -> int:
         """Estimate token count (simple word-based approximation)."""

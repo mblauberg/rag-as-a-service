@@ -1,12 +1,13 @@
 """Tests for ListDocumentsUseCase."""
-import pytest
-from unittest.mock import Mock, AsyncMock
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
-from datetime import datetime, UTC
+
+import pytest
 
 from app.application.use_cases.list_documents import ListDocumentsUseCase
-from app.domain.entities.document import Document
 from app.core.enums import UploadStatus
+from app.domain.entities.document import Document
 from app.ports.repositories import DocumentRepository
 
 
@@ -22,7 +23,7 @@ async def test_list_documents_success():
         file_name="doc1.pdf",
         file_type="pdf",
         created_at=datetime.now(UTC),
-        upload_status=UploadStatus.COMPLETED
+        upload_status=UploadStatus.COMPLETED,
     )
     doc2 = Document(
         id=uuid4(),
@@ -30,7 +31,7 @@ async def test_list_documents_success():
         file_name="doc2.pdf",
         file_type="pdf",
         created_at=datetime.now(UTC),
-        upload_status=UploadStatus.COMPLETED
+        upload_status=UploadStatus.COMPLETED,
     )
 
     mock_doc_repo.find_all = AsyncMock(return_value=([doc1, doc2], 50))

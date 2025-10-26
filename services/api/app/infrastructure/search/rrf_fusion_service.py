@@ -17,10 +17,7 @@ class RRFFusionServiceImpl(FusionService):
     """
 
     def fuse(
-        self,
-        result_sets: list[list[Chunk]],
-        method: str = "rrf",
-        k: int = 60
+        self, result_sets: list[list[Chunk]], method: str = "rrf", k: int = 60
     ) -> list[Chunk]:
         """Fuse multiple ranked lists using RRF.
 

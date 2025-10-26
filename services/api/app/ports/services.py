@@ -45,10 +45,7 @@ class VectorStore(ABC):
 
     @abstractmethod
     async def search(
-        self,
-        query_vector: list[float],
-        top_k: int,
-        document_id: UUID | None = None
+        self, query_vector: list[float], top_k: int, document_id: UUID | None = None
     ) -> list[Chunk]:
         """Search for similar vectors.
 
@@ -80,10 +77,7 @@ class GenerationService(ABC):
 
     @abstractmethod
     async def generate(
-        self,
-        prompt: str,
-        context: list[str],
-        model: str | None = None
+        self, prompt: str, context: list[str], model: str | None = None
     ) -> str:
         """Generate text response using LLM.
 
@@ -149,10 +143,7 @@ class KeywordStore(ABC):
 
     @abstractmethod
     async def search(
-        self,
-        query_text: str,
-        top_k: int,
-        document_id: UUID | None = None
+        self, query_text: str, top_k: int, document_id: UUID | None = None
     ) -> list[Chunk]:
         """Search using keyword matching.
 
@@ -176,10 +167,7 @@ class FusionService(ABC):
 
     @abstractmethod
     def fuse(
-        self,
-        result_sets: list[list[Chunk]],
-        method: str = "rrf",
-        k: int = 60
+        self, result_sets: list[list[Chunk]], method: str = "rrf", k: int = 60
     ) -> list[Chunk]:
         """Fuse multiple ranked lists into one.
 
@@ -203,10 +191,7 @@ class QueryAugmenter(ABC):
 
     @abstractmethod
     async def expand(
-        self,
-        query: str,
-        num_variants: int = 2,
-        method: str = "llm"
+        self, query: str, num_variants: int = 2, method: str = "llm"
     ) -> list[str]:
         """Expand query into multiple variants.
 
@@ -229,12 +214,7 @@ class Reranker(ABC):
     """
 
     @abstractmethod
-    async def rerank(
-        self,
-        query: str,
-        chunks: list[Chunk],
-        top_k: int
-    ) -> list[Chunk]:
+    async def rerank(self, query: str, chunks: list[Chunk], top_k: int) -> list[Chunk]:
         """Rerank chunks using query-document relevance.
 
         Args:

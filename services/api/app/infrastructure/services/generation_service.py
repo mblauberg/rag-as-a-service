@@ -22,10 +22,7 @@ class HTTPGenerationService(GenerationService):
         self.client = GeneratorClient(base_url=generator_url)
 
     async def generate(
-        self,
-        prompt: str,
-        context: list[str],
-        model: str | None = None
+        self, prompt: str, context: list[str], model: str | None = None
     ) -> str:
         """Generate text response using LLM via HTTP.
 
@@ -44,21 +41,17 @@ class HTTPGenerationService(GenerationService):
             # For query expansion, we don't need context chunks
             # Use the simpler generate method with just the prompt
             result = await self.client.generate(
-                prompt=prompt,
-                max_tokens=150,
-                temperature=0.7
+                prompt=prompt, max_tokens=150, temperature=0.7
             )
 
             if result is None:
-                raise GenerationServiceError(
-                    "Generation service returned None"
-                )
+                raise GenerationServiceError("Generation service returned None")
 
             # Extract text from response
-            if hasattr(result, 'text'):
+            if hasattr(result, "text"):
                 return result.text
-            elif isinstance(result, dict) and 'text' in result:
-                return result['text']
+            elif isinstance(result, dict) and "text" in result:
+                return result["text"]
             elif isinstance(result, str):
                 return result
             else:
@@ -73,5 +66,5 @@ class HTTPGenerationService(GenerationService):
             # Wrap any other exceptions
             raise GenerationServiceError(
                 f"Unexpected error during generation: {type(e).__name__}",
-                original_error=e
+                original_error=e,
             )

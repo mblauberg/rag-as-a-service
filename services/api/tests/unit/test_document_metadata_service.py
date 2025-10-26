@@ -1,13 +1,14 @@
 """Unit tests for DocumentMetadataService."""
-import pytest
-from uuid import uuid4
 from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import uuid4
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.document_metadata_service import DocumentMetadataService
-from app.models.document import Document, DocumentChunk
-from app.api.models import DocumentListResponse, DocumentDetailResponse
+from app.api.models import DocumentDetailResponse, DocumentListResponse
 from app.core.exceptions import DocumentNotFoundError
+from app.models.document import Document, DocumentChunk
+from app.services.document_metadata_service import DocumentMetadataService
 
 
 @pytest.fixture
@@ -26,7 +27,8 @@ def mock_db():
 @pytest.fixture
 def sample_document():
     """Create sample document for testing."""
-    from datetime import datetime, UTC
+    from datetime import UTC, datetime
+
     doc_id = uuid4()
     now = datetime.now(UTC)
     return Document(
@@ -41,7 +43,7 @@ def sample_document():
         upload_status="completed",
         embedding_status="pending",
         created_at=now,
-        updated_at=now
+        updated_at=now,
     )
 
 
@@ -55,7 +57,7 @@ def sample_chunks_data():
             "section_level": 1,
             "page_number": 1,
             "tokens": 10,
-            "metadata": {"source": "test"}
+            "metadata": {"source": "test"},
         },
         {
             "content": "This is chunk 2",
@@ -63,8 +65,8 @@ def sample_chunks_data():
             "section_level": 1,
             "page_number": 2,
             "tokens": 12,
-            "metadata": {"source": "test"}
-        }
+            "metadata": {"source": "test"},
+        },
     ]
 
 
@@ -101,7 +103,7 @@ class TestDocumentMetadataService:
             file_type=file_type,
             file_size=file_size,
             file_path=file_path,
-            document_type=document_type
+            document_type=document_type,
         )
 
         assert document.title == title
@@ -116,7 +118,9 @@ class TestDocumentMetadataService:
         mock_db.add.assert_called_once()
         mock_db.flush.assert_called_once()
 
-    async def test_get_documents_success(self, metadata_service, mock_db, sample_document):
+    async def test_get_documents_success(
+        self, metadata_service, mock_db, sample_document
+    ):
         """Test successful document list retrieval."""
         # Mock count query
         count_result = MagicMock()
@@ -172,7 +176,9 @@ class TestDocumentMetadataService:
         assert result.limit == 10
         assert result.total == 50
 
-    async def test_get_document_by_id_success(self, metadata_service, mock_db, sample_document):
+    async def test_get_document_by_id_success(
+        self, metadata_service, mock_db, sample_document
+    ):
         """Test successful document retrieval by ID."""
         document_id = sample_document.id
 
@@ -200,7 +206,9 @@ class TestDocumentMetadataService:
 
         assert result is None
 
-    async def test_delete_document_success(self, metadata_service, mock_db, sample_document):
+    async def test_delete_document_success(
+        self, metadata_service, mock_db, sample_document
+    ):
         """Test successful document deletion."""
         document_id = sample_document.id
 
@@ -229,7 +237,9 @@ class TestDocumentMetadataService:
 
         mock_db.delete.assert_not_called()
 
-    async def test_update_embedding_status_success(self, metadata_service, mock_db, sample_document):
+    async def test_update_embedding_status_success(
+        self, metadata_service, mock_db, sample_document
+    ):
         """Test successful embedding status update."""
         document_id = sample_document.id
         new_status = "completed"
@@ -254,11 +264,15 @@ class TestDocumentMetadataService:
         mock_db.execute.return_value = query_result
 
         # Should not raise error, just log warning
-        await metadata_service.update_embedding_status(mock_db, document_id, "completed")
+        await metadata_service.update_embedding_status(
+            mock_db, document_id, "completed"
+        )
 
         mock_db.commit.assert_not_called()
 
-    async def test_update_upload_status_success(self, metadata_service, mock_db, sample_document):
+    async def test_update_upload_status_success(
+        self, metadata_service, mock_db, sample_document
+    ):
         """Test successful upload status update."""
         document_id = sample_document.id
         new_status = "completed"
@@ -273,7 +287,9 @@ class TestDocumentMetadataService:
         assert sample_document.upload_status == new_status
         mock_db.commit.assert_called_once()
 
-    async def test_create_chunk_records_success(self, metadata_service, mock_db, sample_chunks_data):
+    async def test_create_chunk_records_success(
+        self, metadata_service, mock_db, sample_chunks_data
+    ):
         """Test successful chunk records creation."""
         document_id = uuid4()
 
@@ -288,9 +304,7 @@ class TestDocumentMetadataService:
         mock_db.flush.side_effect = mock_flush
 
         chunks = await metadata_service.create_chunk_records(
-            db=mock_db,
-            document_id=document_id,
-            chunks_data=sample_chunks_data
+            db=mock_db, document_id=document_id, chunks_data=sample_chunks_data
         )
 
         assert len(chunks) == 2
@@ -310,9 +324,7 @@ class TestDocumentMetadataService:
         document_id = uuid4()
 
         chunks = await metadata_service.create_chunk_records(
-            db=mock_db,
-            document_id=document_id,
-            chunks_data=[]
+            db=mock_db, document_id=document_id, chunks_data=[]
         )
 
         assert len(chunks) == 0

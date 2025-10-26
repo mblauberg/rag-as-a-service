@@ -1,10 +1,11 @@
 """Tests for HTTP embedding service adapter."""
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-import httpx
 
-from app.infrastructure.services.embedding_service import HTTPEmbeddingService
+import httpx
+import pytest
+
 from app.core.exceptions import EmbeddingServiceError
+from app.infrastructure.services.embedding_service import HTTPEmbeddingService
 
 
 class TestHTTPEmbeddingService:
@@ -25,16 +26,13 @@ class TestHTTPEmbeddingService:
         """Fixture for mocked HTTP response."""
         response = MagicMock()
         response.status_code = 200
-        response.json.return_value = {
-            "embeddings": [
-                [0.1, 0.2, 0.3],
-                [0.4, 0.5, 0.6]
-            ]
-        }
+        response.json.return_value = {"embeddings": [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]}
         return response
 
     @pytest.mark.asyncio
-    async def test_generate_embeddings_success(self, service, embedder_url, mock_response):
+    async def test_generate_embeddings_success(
+        self, service, embedder_url, mock_response
+    ):
         """Test successful embedding generation."""
         texts = ["hello world", "test document"]
 
@@ -51,14 +49,16 @@ class TestHTTPEmbeddingService:
             mock_client.post.assert_called_once_with(
                 f"{embedder_url}/generate-embeddings",
                 json={"texts": texts},
-                timeout=30.0
+                timeout=30.0,
             )
 
             # Verify result
             assert result == [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
             assert len(result) == 2
             assert all(isinstance(embedding, list) for embedding in result)
-            assert all(isinstance(val, float) for embedding in result for val in embedding)
+            assert all(
+                isinstance(val, float) for embedding in result for val in embedding
+            )
 
     @pytest.mark.asyncio
     async def test_generate_embeddings_network_error(self, service):
@@ -69,7 +69,9 @@ class TestHTTPEmbeddingService:
             mock_client = AsyncMock()
             mock_client.__aenter__.return_value = mock_client
             mock_client.__aexit__.return_value = None
-            mock_client.post = AsyncMock(side_effect=httpx.ConnectError("Connection refused"))
+            mock_client.post = AsyncMock(
+                side_effect=httpx.ConnectError("Connection refused")
+            )
             mock_client_class.return_value = mock_client
 
             with pytest.raises(EmbeddingServiceError) as exc_info:
@@ -87,7 +89,9 @@ class TestHTTPEmbeddingService:
             mock_client = AsyncMock()
             mock_client.__aenter__.return_value = mock_client
             mock_client.__aexit__.return_value = None
-            mock_client.post = AsyncMock(side_effect=httpx.TimeoutException("Request timeout"))
+            mock_client.post = AsyncMock(
+                side_effect=httpx.TimeoutException("Request timeout")
+            )
             mock_client_class.return_value = mock_client
 
             with pytest.raises(EmbeddingServiceError) as exc_info:
@@ -109,9 +113,11 @@ class TestHTTPEmbeddingService:
             # Create a proper HTTPStatusError
             request = httpx.Request("POST", "http://localhost:8001/embed")
             response = httpx.Response(500, request=request)
-            mock_client.post = AsyncMock(side_effect=httpx.HTTPStatusError(
-                "Server error", request=request, response=response
-            ))
+            mock_client.post = AsyncMock(
+                side_effect=httpx.HTTPStatusError(
+                    "Server error", request=request, response=response
+                )
+            )
             mock_client_class.return_value = mock_client
 
             with pytest.raises(EmbeddingServiceError) as exc_info:
@@ -155,9 +161,7 @@ class TestHTTPEmbeddingService:
             # Response with only one embedding for two texts
             mock_response = MagicMock()
             mock_response.status_code = 200
-            mock_response.json.return_value = {
-                "embeddings": [[0.1, 0.2, 0.3]]
-            }
+            mock_response.json.return_value = {"embeddings": [[0.1, 0.2, 0.3]]}
             mock_client.post = AsyncMock(return_value=mock_response)
             mock_client_class.return_value = mock_client
 

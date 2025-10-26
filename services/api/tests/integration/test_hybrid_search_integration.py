@@ -1,16 +1,19 @@
 """Integration tests for hybrid search end-to-end."""
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from app.main import app
+import pytest
+
 from app.api.dependencies import get_search_documents_use_case
 from app.application.use_cases.search_documents import SearchDocumentsUseCase
 from app.domain.entities.chunk import Chunk
+from app.main import app
 
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_hybrid_search_endpoint_returns_results(async_client, sample_document_with_chunks):
+async def test_hybrid_search_endpoint_returns_results(
+    async_client, sample_document_with_chunks
+):
     """Test hybrid search endpoint returns results.
 
     This test verifies that the hybrid search endpoint:
@@ -23,7 +26,7 @@ async def test_hybrid_search_endpoint_returns_results(async_client, sample_docum
         id=sample_document_with_chunks.id,
         document_id=sample_document_with_chunks.id,
         content="test content chunk",
-        tokens=10
+        tokens=10,
     )
 
     mock_use_case = MagicMock(spec=SearchDocumentsUseCase)
@@ -34,11 +37,8 @@ async def test_hybrid_search_endpoint_returns_results(async_client, sample_docum
     try:
         response = await async_client.post(
             "/api/v1/search",
-            json={
-                "query": "test content",
-                "top_k": 10
-            },
-            params={"mode": "hybrid"}
+            json={"query": "test content", "top_k": 10},
+            params={"mode": "hybrid"},
         )
 
         assert response.status_code == 200
@@ -59,7 +59,9 @@ async def test_hybrid_search_endpoint_returns_results(async_client, sample_docum
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_hybrid_vs_vector_search_return_different_results(async_client, sample_document_with_chunks):
+async def test_hybrid_vs_vector_search_return_different_results(
+    async_client, sample_document_with_chunks
+):
     """Test hybrid search returns different results than vector-only.
 
     This test demonstrates that BM25 keyword search contributes to hybrid results,
@@ -75,14 +77,14 @@ async def test_hybrid_vs_vector_search_return_different_results(async_client, sa
         id=uuid4(),
         document_id=sample_document_with_chunks.id,
         content="vector search result",
-        tokens=10
+        tokens=10,
     )
 
     hybrid_chunk = Chunk(
         id=uuid4(),
         document_id=sample_document_with_chunks.id,
         content="hybrid search result",
-        tokens=15
+        tokens=15,
     )
 
     # Mock use case that returns different results based on mode
@@ -93,21 +95,25 @@ async def test_hybrid_vs_vector_search_return_different_results(async_client, sa
 
     try:
         # Vector-only search
-        app.dependency_overrides[get_search_documents_use_case] = lambda: create_mock_use_case([vector_chunk])
+        app.dependency_overrides[
+            get_search_documents_use_case
+        ] = lambda: create_mock_use_case([vector_chunk])
 
         vector_response = await async_client.post(
             "/api/v1/search",
             json={"query": query, "top_k": 5},
-            params={"mode": "vector"}
+            params={"mode": "vector"},
         )
 
         # Hybrid search
-        app.dependency_overrides[get_search_documents_use_case] = lambda: create_mock_use_case([hybrid_chunk, vector_chunk])
+        app.dependency_overrides[
+            get_search_documents_use_case
+        ] = lambda: create_mock_use_case([hybrid_chunk, vector_chunk])
 
         hybrid_response = await async_client.post(
             "/api/v1/search",
             json={"query": query, "top_k": 5},
-            params={"mode": "hybrid"}
+            params={"mode": "hybrid"},
         )
 
         # Both should succeed
@@ -145,7 +151,7 @@ async def test_keyword_search_mode_works(async_client, sample_document_with_chun
         id=uuid4(),
         document_id=sample_document_with_chunks.id,
         content="keyword search result",
-        tokens=8
+        tokens=8,
     )
 
     mock_use_case = MagicMock(spec=SearchDocumentsUseCase)
@@ -157,7 +163,7 @@ async def test_keyword_search_mode_works(async_client, sample_document_with_chun
         response = await async_client.post(
             "/api/v1/search",
             json={"query": "test", "top_k": 5},
-            params={"mode": "keyword"}
+            params={"mode": "keyword"},
         )
 
         assert response.status_code == 200
@@ -175,9 +181,7 @@ async def test_keyword_search_mode_works(async_client, sample_document_with_chun
 async def test_hybrid_search_with_empty_query_fails(async_client):
     """Test that hybrid search rejects empty queries."""
     response = await async_client.post(
-        "/api/v1/search",
-        json={"query": "", "top_k": 10},
-        params={"mode": "hybrid"}
+        "/api/v1/search", json={"query": "", "top_k": 10}, params={"mode": "hybrid"}
     )
 
     # FastAPI validation returns 422 for invalid input
@@ -202,7 +206,7 @@ async def test_hybrid_search_default_mode(async_client, sample_document_with_chu
         id=uuid4(),
         document_id=sample_document_with_chunks.id,
         content="default mode result",
-        tokens=12
+        tokens=12,
     )
 
     mock_use_case = MagicMock(spec=SearchDocumentsUseCase)
@@ -213,8 +217,7 @@ async def test_hybrid_search_default_mode(async_client, sample_document_with_chu
     try:
         # Search without specifying mode parameter
         response = await async_client.post(
-            "/api/v1/search",
-            json={"query": "test content", "top_k": 5}
+            "/api/v1/search", json={"query": "test content", "top_k": 5}
         )
 
         assert response.status_code == 200

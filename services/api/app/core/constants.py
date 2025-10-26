@@ -23,7 +23,9 @@ MAX_UPLOAD_SIZE_MB = 100  # Maximum file upload size in megabytes
 
 # Timeout Configuration
 EMBEDDER_TIMEOUT_SECONDS = 30.0  # HTTP timeout for embedder service calls
-GENERATOR_TIMEOUT_SECONDS = 60.0  # HTTP timeout for generator service calls (LLMs are slower)
+GENERATOR_TIMEOUT_SECONDS = (
+    60.0  # HTTP timeout for generator service calls (LLMs are slower)
+)
 HEALTH_CHECK_TIMEOUT_SECONDS = 5.0  # HTTP timeout for health check calls
 
 # Vector Store Configuration

@@ -108,7 +108,12 @@ class DocumentRepositoryImpl(DocumentRepository):
 
         # Get paginated documents
         offset = (page - 1) * limit
-        stmt = select(DocumentModel).offset(offset).limit(limit).order_by(DocumentModel.created_at.desc())
+        stmt = (
+            select(DocumentModel)
+            .offset(offset)
+            .limit(limit)
+            .order_by(DocumentModel.created_at.desc())
+        )
         result = await self.session.execute(stmt)
         db_documents = result.scalars().all()
 
@@ -148,7 +153,7 @@ class DocumentRepositoryImpl(DocumentRepository):
             file_size=entity.file_size,
             description=entity.description,
             upload_status=entity.upload_status.value,  # Enum to string
-            created_at=entity.created_at
+            created_at=entity.created_at,
         )
 
     def _to_entity(self, model: DocumentModel) -> Document:
@@ -169,5 +174,5 @@ class DocumentRepositoryImpl(DocumentRepository):
             file_size=model.file_size,
             description=model.description,
             upload_status=UploadStatus(model.upload_status),  # String to enum
-            created_at=model.created_at
+            created_at=model.created_at,
         )

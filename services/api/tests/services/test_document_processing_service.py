@@ -1,5 +1,7 @@
-import pytest
 from pathlib import Path
+
+import pytest
+
 from app.services.document_processing_service import DocumentProcessingService
 from app.utils.file_type_detector import DocumentType
 

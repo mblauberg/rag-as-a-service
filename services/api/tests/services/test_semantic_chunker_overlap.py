@@ -5,17 +5,14 @@ Tests that overlap chunks are created between base chunks to preserve
 context across chunk boundaries.
 """
 import pytest
+
 from app.services.chunking.semantic_chunker import SemanticChunker
 
 
 @pytest.mark.asyncio
 async def test_chunking_with_overlap_creates_overlap_chunks():
     """Test that overlap creates additional chunks between base chunks."""
-    chunker = SemanticChunker(
-        min_chunk_size=50,
-        max_chunk_size=100,
-        overlap_ratio=0.1
-    )
+    chunker = SemanticChunker(min_chunk_size=50, max_chunk_size=100, overlap_ratio=0.1)
 
     # Create text that will definitely produce multiple chunks
     text = (
@@ -32,17 +29,15 @@ async def test_chunking_with_overlap_creates_overlap_chunks():
     # With overlap enabled and multiple semantic chunks, we should have more chunks
     # Each pair of base chunks should have an overlap chunk between them
     # So if we have N base chunks, we should have roughly 2N-1 total chunks
-    assert len(chunks) >= 3, f"Expected at least 3 chunks with overlap, got {len(chunks)}"
+    assert (
+        len(chunks) >= 3
+    ), f"Expected at least 3 chunks with overlap, got {len(chunks)}"
 
 
 @pytest.mark.asyncio
 async def test_overlap_chunks_preserve_context():
     """Test that overlap chunks contain text from both adjacent chunks."""
-    chunker = SemanticChunker(
-        min_chunk_size=50,
-        max_chunk_size=100,
-        overlap_ratio=0.1
-    )
+    chunker = SemanticChunker(min_chunk_size=50, max_chunk_size=100, overlap_ratio=0.1)
 
     text = (
         "First section discusses Kubernetes and container orchestration systems. "
@@ -67,7 +62,7 @@ async def test_overlap_chunks_preserve_context():
 
         # Get words from end of current and start of next
         curr_words = set(curr_chunk.text.split()[-10:])  # Last 10 words
-        next_words = set(next_chunk.text.split()[:10])    # First 10 words
+        next_words = set(next_chunk.text.split()[:10])  # First 10 words
 
         # There should be some overlap in vocabulary between adjacent chunks
         # This ensures context preservation
@@ -83,15 +78,11 @@ async def test_overlap_chunks_preserve_context():
 async def test_overlap_ratio_zero_disables_overlap():
     """Test that overlap_ratio=0.0 produces no overlap chunks."""
     chunker_no_overlap = SemanticChunker(
-        min_chunk_size=50,
-        max_chunk_size=100,
-        overlap_ratio=0.0
+        min_chunk_size=50, max_chunk_size=100, overlap_ratio=0.0
     )
 
     chunker_with_overlap = SemanticChunker(
-        min_chunk_size=50,
-        max_chunk_size=100,
-        overlap_ratio=0.1
+        min_chunk_size=50, max_chunk_size=100, overlap_ratio=0.1
     )
 
     text = (
@@ -108,8 +99,9 @@ async def test_overlap_ratio_zero_disables_overlap():
 
     # With overlap enabled, should have more chunks
     # (overlap chunks are inserted between base chunks)
-    assert len(chunks_with_overlap) >= len(chunks_no_overlap), \
-        f"Overlap should create more chunks: {len(chunks_with_overlap)} vs {len(chunks_no_overlap)}"
+    assert len(chunks_with_overlap) >= len(
+        chunks_no_overlap
+    ), f"Overlap should create more chunks: {len(chunks_with_overlap)} vs {len(chunks_no_overlap)}"
 
 
 @pytest.mark.asyncio
@@ -118,7 +110,7 @@ async def test_single_chunk_no_overlap():
     chunker = SemanticChunker(
         min_chunk_size=50,
         max_chunk_size=500,  # Large enough to fit all text in one chunk
-        overlap_ratio=0.1
+        overlap_ratio=0.1,
     )
 
     text = "This is a short text that fits in one chunk."
@@ -132,11 +124,7 @@ async def test_single_chunk_no_overlap():
 @pytest.mark.asyncio
 async def test_overlap_chunk_size():
     """Test that overlap chunks are approximately the right size."""
-    chunker = SemanticChunker(
-        min_chunk_size=50,
-        max_chunk_size=100,
-        overlap_ratio=0.1
-    )
+    chunker = SemanticChunker(min_chunk_size=50, max_chunk_size=100, overlap_ratio=0.1)
 
     text = (
         "Kubernetes is a container orchestration platform that automates deployment. "
@@ -168,11 +156,7 @@ async def test_overlap_chunk_size():
 @pytest.mark.asyncio
 async def test_overlap_maintains_text_order():
     """Test that overlap doesn't break the sequential order of chunks."""
-    chunker = SemanticChunker(
-        min_chunk_size=50,
-        max_chunk_size=100,
-        overlap_ratio=0.1
-    )
+    chunker = SemanticChunker(min_chunk_size=50, max_chunk_size=100, overlap_ratio=0.1)
 
     text = (
         "First sentence about Kubernetes. "
@@ -192,9 +176,10 @@ async def test_overlap_maintains_text_order():
 
         # Start indices should be generally increasing (with some overlap)
         # The next chunk should start at or after the current chunk starts
-        assert next_chunk.start_index >= curr_chunk.start_index - 100, \
-            f"Chunk order broken: chunk {i} ends at {curr_chunk.start_index}, " \
+        assert next_chunk.start_index >= curr_chunk.start_index - 100, (
+            f"Chunk order broken: chunk {i} ends at {curr_chunk.start_index}, "
             f"chunk {i+1} starts at {next_chunk.start_index}"
+        )
 
 
 @pytest.mark.asyncio
@@ -210,9 +195,15 @@ async def test_overlap_with_different_ratios():
     )
 
     # Test with 0%, 10%, and 20% overlap
-    chunker_0 = SemanticChunker(min_chunk_size=50, max_chunk_size=100, overlap_ratio=0.0)
-    chunker_10 = SemanticChunker(min_chunk_size=50, max_chunk_size=100, overlap_ratio=0.1)
-    chunker_20 = SemanticChunker(min_chunk_size=50, max_chunk_size=100, overlap_ratio=0.2)
+    chunker_0 = SemanticChunker(
+        min_chunk_size=50, max_chunk_size=100, overlap_ratio=0.0
+    )
+    chunker_10 = SemanticChunker(
+        min_chunk_size=50, max_chunk_size=100, overlap_ratio=0.1
+    )
+    chunker_20 = SemanticChunker(
+        min_chunk_size=50, max_chunk_size=100, overlap_ratio=0.2
+    )
 
     chunks_0 = await chunker_0.chunk_text(text)
     chunks_10 = await chunker_10.chunk_text(text)
@@ -227,5 +218,6 @@ async def test_overlap_with_different_ratios():
     # But the relationship isn't strictly linear, so just verify they're different
     # when there are multiple chunks
     if len(chunks_0) > 1:
-        assert len(chunks_10) != len(chunks_0) or len(chunks_20) != len(chunks_0), \
-            "Different overlap ratios should produce different chunk patterns"
+        assert len(chunks_10) != len(chunks_0) or len(chunks_20) != len(
+            chunks_0
+        ), "Different overlap ratios should produce different chunk patterns"

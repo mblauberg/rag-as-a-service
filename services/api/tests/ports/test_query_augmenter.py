@@ -8,10 +8,7 @@ class MockQueryAugmenter(QueryAugmenter):
     """Mock implementation for testing."""
 
     async def expand(
-        self,
-        query: str,
-        num_variants: int = 2,
-        method: str = "llm"
+        self, query: str, num_variants: int = 2, method: str = "llm"
     ) -> list[str]:
         """Return original query plus mock variants."""
         return [query] + [f"variant_{i}" for i in range(num_variants)]
@@ -22,11 +19,7 @@ async def test_query_augmenter_port_contract():
     """Test that QueryAugmenter port has correct interface."""
     augmenter = MockQueryAugmenter()
 
-    results = await augmenter.expand(
-        query="test query",
-        num_variants=2,
-        method="llm"
-    )
+    results = await augmenter.expand(query="test query", num_variants=2, method="llm")
 
     assert isinstance(results, list)
     assert len(results) == 3

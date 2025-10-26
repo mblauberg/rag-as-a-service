@@ -1,6 +1,6 @@
 import pytest
-from app.utils.file_type_detector import FileTypeDetector
-from app.utils.file_type_detector import DocumentType
+
+from app.utils.file_type_detector import DocumentType, FileTypeDetector
 
 
 def test_detect_pdf():

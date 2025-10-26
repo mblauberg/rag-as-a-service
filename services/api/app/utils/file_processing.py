@@ -1,6 +1,7 @@
 """File type detection and text extraction utilities."""
 try:
     import magic
+
     MAGIC_AVAILABLE = True
 except ImportError:
     MAGIC_AVAILABLE = False
@@ -27,10 +28,10 @@ class FileProcessor:
         # Fallback to extension-based detection
         suffix = Path(file_path).suffix.lower()
         mime_map = {
-            '.txt': 'text/plain',
-            '.pdf': 'application/pdf',
-            '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            '.doc': 'application/msword',
+            ".txt": "text/plain",
+            ".pdf": "application/pdf",
+            ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ".doc": "application/msword",
         }
 
         if MAGIC_AVAILABLE:
@@ -39,9 +40,9 @@ class FileProcessor:
                 return mime.from_file(file_path)
             except Exception as e:
                 logger.warning(f"Could not detect file type with magic: {e}")
-                return mime_map.get(suffix, 'application/octet-stream')
+                return mime_map.get(suffix, "application/octet-stream")
         else:
-            return mime_map.get(suffix, 'application/octet-stream')
+            return mime_map.get(suffix, "application/octet-stream")
 
     @staticmethod
     def extract_text(file_path: str, file_type: str) -> str:
@@ -58,11 +59,11 @@ class FileProcessor:
         Raises:
             ValueError: If file type is not supported
         """
-        if file_type == 'text/plain' or file_type.startswith('text/'):
+        if file_type == "text/plain" or file_type.startswith("text/"):
             return FileProcessor._extract_text_plain(file_path)
-        elif file_type == 'application/pdf':
+        elif file_type == "application/pdf":
             return FileProcessor._extract_text_pdf(file_path)
-        elif 'wordprocessingml' in file_type or file_type == 'application/msword':
+        elif "wordprocessingml" in file_type or file_type == "application/msword":
             return FileProcessor._extract_text_docx(file_path)
         else:
             raise ValueError(f"Unsupported file type: {file_type}")
@@ -70,7 +71,7 @@ class FileProcessor:
     @staticmethod
     def _extract_text_plain(file_path: str) -> str:
         """Extract text from plain text file."""
-        with open(file_path, encoding='utf-8', errors='ignore') as f:
+        with open(file_path, encoding="utf-8", errors="ignore") as f:
             return f.read()
 
     @staticmethod
@@ -78,13 +79,14 @@ class FileProcessor:
         """Extract text from PDF file."""
         try:
             from PyPDF2 import PdfReader
+
             reader = PdfReader(file_path)
             text = []
             for page in reader.pages:
                 page_text = page.extract_text()
                 if page_text:
                     text.append(page_text)
-            return '\n\n'.join(text)
+            return "\n\n".join(text)
         except Exception as e:
             logger.error(f"Error extracting PDF text: {e}")
             raise ValueError(f"Could not extract text from PDF: {str(e)}")
@@ -94,12 +96,13 @@ class FileProcessor:
         """Extract text from DOCX file."""
         try:
             from docx import Document
+
             doc = Document(file_path)
             text = []
             for paragraph in doc.paragraphs:
                 if paragraph.text.strip():
                     text.append(paragraph.text)
-            return '\n\n'.join(text)
+            return "\n\n".join(text)
         except Exception as e:
             logger.error(f"Error extracting DOCX text: {e}")
             raise ValueError(f"Could not extract text from DOCX: {str(e)}")

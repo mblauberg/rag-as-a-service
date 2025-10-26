@@ -1,12 +1,13 @@
 """Unit tests for DocumentUploadService."""
-import pytest
 from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
-from unittest.mock import patch, MagicMock, AsyncMock
-import aiofiles
 
-from app.services.document_upload_service import DocumentUploadService
+import aiofiles
+import pytest
+
 from app.core.exceptions import FileOperationError
+from app.services.document_upload_service import DocumentUploadService
 from app.utils.file_type_detector import DocumentType
 
 
@@ -62,7 +63,9 @@ class TestDocumentUploadService:
         assert result["document_type"] == "docx"
         assert result["file_path"].endswith(".docx")
 
-    async def test_save_file_unsupported_type(self, upload_service, sample_file_content):
+    async def test_save_file_unsupported_type(
+        self, upload_service, sample_file_content
+    ):
         """Test file save with unsupported file type."""
         filename = "test_document.xyz"
 
@@ -76,7 +79,10 @@ class TestDocumentUploadService:
         filename = "test_document.pdf"
 
         # Mock aiofiles.open to raise an exception
-        with patch("app.services.document_upload_service.aiofiles.open", side_effect=IOError("Write failed")):
+        with patch(
+            "app.services.document_upload_service.aiofiles.open",
+            side_effect=IOError("Write failed"),
+        ):
             with pytest.raises(FileOperationError) as exc_info:
                 await upload_service.save_file(sample_file_content, filename)
 
@@ -120,7 +126,9 @@ class TestDocumentUploadService:
         file_path = result["file_path"]
 
         # Mock unlink to raise permission error
-        with patch.object(Path, "unlink", side_effect=PermissionError("Permission denied")):
+        with patch.object(
+            Path, "unlink", side_effect=PermissionError("Permission denied")
+        ):
             with pytest.raises(FileOperationError) as exc_info:
                 await upload_service.delete_file(file_path)
 
@@ -147,7 +155,9 @@ class TestDocumentUploadService:
 
         assert "read" in str(exc_info.value)
 
-    async def test_save_file_preserves_extension(self, upload_service, sample_file_content):
+    async def test_save_file_preserves_extension(
+        self, upload_service, sample_file_content
+    ):
         """Test that original file extension is preserved."""
         filename = "test_document.md"
 
@@ -165,7 +175,9 @@ class TestDocumentUploadService:
         assert result1["file_id"] != result2["file_id"]
         assert result1["file_path"] != result2["file_path"]
 
-    async def test_save_file_all_supported_types(self, upload_service, sample_file_content):
+    async def test_save_file_all_supported_types(
+        self, upload_service, sample_file_content
+    ):
         """Test saving files of all supported document types."""
         supported_extensions = ["pdf", "docx", "txt", "md", "csv"]
 

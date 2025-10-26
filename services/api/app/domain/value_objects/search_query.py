@@ -1,7 +1,7 @@
 """Search query value object."""
 from dataclasses import dataclass
 
-from app.core.constants import MIN_SEARCH_TOP_K, MAX_SEARCH_TOP_K
+from app.core.constants import MAX_SEARCH_TOP_K, MIN_SEARCH_TOP_K
 
 
 @dataclass(frozen=True)

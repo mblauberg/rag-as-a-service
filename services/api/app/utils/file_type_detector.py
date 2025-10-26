@@ -5,6 +5,7 @@ from pathlib import Path
 
 class DocumentType(str, Enum):
     """Supported document types."""
+
     PDF = "pdf"
     DOCX = "docx"
     TXT = "txt"
@@ -19,18 +20,18 @@ class FileTypeDetector:
     """Detect document type from filename or content."""
 
     EXTENSION_MAP = {
-        '.pdf': DocumentType.PDF,
-        '.docx': DocumentType.DOCX,
-        '.txt': DocumentType.TXT,
-        '.md': DocumentType.MD,
-        '.markdown': DocumentType.MD,
-        '.csv': DocumentType.CSV,
-        '.xlsx': DocumentType.XLSX,
-        '.xls': DocumentType.XLSX,
-        '.pptx': DocumentType.PPTX,
-        '.ppt': DocumentType.PPTX,
-        '.html': DocumentType.HTML,
-        '.htm': DocumentType.HTML,
+        ".pdf": DocumentType.PDF,
+        ".docx": DocumentType.DOCX,
+        ".txt": DocumentType.TXT,
+        ".md": DocumentType.MD,
+        ".markdown": DocumentType.MD,
+        ".csv": DocumentType.CSV,
+        ".xlsx": DocumentType.XLSX,
+        ".xls": DocumentType.XLSX,
+        ".pptx": DocumentType.PPTX,
+        ".ppt": DocumentType.PPTX,
+        ".html": DocumentType.HTML,
+        ".htm": DocumentType.HTML,
     }
 
     def detect_from_filename(self, filename: str) -> DocumentType:

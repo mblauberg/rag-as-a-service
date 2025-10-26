@@ -13,11 +13,7 @@ logger = logging.getLogger(__name__)
 class GetDocumentUseCase:
     """Use case for retrieving a single document with its chunks."""
 
-    def __init__(
-        self,
-        document_repo: DocumentRepository,
-        chunk_repo: ChunkRepository
-    ):
+    def __init__(self, document_repo: DocumentRepository, chunk_repo: ChunkRepository):
         """Initialize with repository dependencies."""
         self.document_repo = document_repo
         self.chunk_repo = chunk_repo

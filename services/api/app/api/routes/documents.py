@@ -7,43 +7,40 @@ principles with dependency injection and proper error handling.
 import logging
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import (APIRouter, Depends, File, Form, HTTPException, UploadFile,
+                     status)
 
-from app.api.dependencies import (
-    get_delete_document_use_case,
-    get_get_document_use_case,
-    get_list_documents_use_case,
-    get_upload_document_use_case,
-)
+from app.api.dependencies import (get_delete_document_use_case,
+                                  get_get_document_use_case,
+                                  get_list_documents_use_case,
+                                  get_upload_document_use_case)
 from app.api.mappers import chunk_to_response, document_to_response
-from app.api.models import (
-    DocumentDetailResponse,
-    ListDocumentsResponse,
-    UploadDocumentResponse,
-)
+from app.api.models import (DocumentDetailResponse, ListDocumentsResponse,
+                            UploadDocumentResponse)
 from app.application.use_cases.delete_document import DeleteDocumentUseCase
 from app.application.use_cases.get_document import GetDocumentUseCase
 from app.application.use_cases.list_documents import ListDocumentsUseCase
-from app.application.use_cases.upload_document import UploadDocumentCommand, UploadDocumentUseCase
-from app.core.exceptions import (
-    ChunkingError,
-    DocumentNotFoundError,
-    EmbeddingServiceError,
-    FileProcessingError,
-    VectorStoreError,
-)
+from app.application.use_cases.upload_document import (UploadDocumentCommand,
+                                                       UploadDocumentUseCase)
+from app.core.exceptions import (ChunkingError, DocumentNotFoundError,
+                                 EmbeddingServiceError, FileProcessingError,
+                                 VectorStoreError)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/upload", response_model=UploadDocumentResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/upload",
+    response_model=UploadDocumentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def upload_document(
     file: UploadFile = File(..., description="File to upload"),
     title: str = Form(..., description="Document title"),
     description: str | None = Form(None, description="Optional document description"),
-    use_case: UploadDocumentUseCase = Depends(get_upload_document_use_case)
-):
+    use_case: UploadDocumentUseCase = Depends(get_upload_document_use_case),
+) -> UploadDocumentResponse:
     """Upload a document file with hexagonal architecture.
 
     This endpoint orchestrates the complete document upload workflow:
@@ -69,8 +66,7 @@ async def upload_document(
     # Validate file
     if not file.filename:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No file provided"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No file provided"
         )
 
     # Read file content
@@ -80,14 +76,13 @@ async def upload_document(
         logger.error(f"Failed to read file: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Could not read file: {str(e)}"
+            detail=f"Could not read file: {str(e)}",
         )
 
     # Validate file size
     if len(content) == 0:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="File is empty"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="File is empty"
         )
 
     # Create command
@@ -96,57 +91,56 @@ async def upload_document(
         file_name=file.filename,
         file_content=content,
         file_size=len(content),
-        description=description
+        description=description,
     )
 
     # Execute use case
     try:
         document, chunk_count = await use_case.execute(command)
 
-        logger.info(f"Document {document.id} uploaded successfully with {chunk_count} chunks")
+        logger.info(
+            f"Document {document.id} uploaded successfully with {chunk_count} chunks"
+        )
 
         # Convert domain entity to response DTO
         return UploadDocumentResponse(
             document=document_to_response(document),
             chunk_count=chunk_count,
-            message="Document uploaded and processed successfully"
+            message="Document uploaded and processed successfully",
         )
 
     except FileProcessingError as e:
         logger.error(f"File processing failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to process file: {str(e)}"
+            detail=f"Failed to process file: {str(e)}",
         )
     except ChunkingError as e:
         logger.error(f"Chunking failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to chunk document: {str(e)}"
+            detail=f"Failed to chunk document: {str(e)}",
         )
     except EmbeddingServiceError as e:
         logger.error(f"Embedding generation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Embedding service unavailable: {str(e)}"
+            detail=f"Embedding service unavailable: {str(e)}",
         )
     except VectorStoreError as e:
         logger.error(f"Vector store operation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Vector database unavailable: {str(e)}"
+            detail=f"Vector database unavailable: {str(e)}",
         )
     except ValueError as e:
         logger.error(f"Validation error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         logger.error(f"Unexpected error during upload: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to process document: {str(e)}"
+            detail=f"Failed to process document: {str(e)}",
         )
 
 
@@ -154,8 +148,8 @@ async def upload_document(
 async def list_documents(
     page: int = 1,
     limit: int = 20,
-    use_case: ListDocumentsUseCase = Depends(get_list_documents_use_case)
-):
+    use_case: ListDocumentsUseCase = Depends(get_list_documents_use_case),
+) -> ListDocumentsResponse:
     """Get paginated list of documents.
 
     Args:
@@ -177,30 +171,23 @@ async def list_documents(
         document_responses = [document_to_response(doc) for doc in documents]
 
         return ListDocumentsResponse(
-            documents=document_responses,
-            total=total,
-            page=page,
-            limit=limit
+            documents=document_responses, total=total, page=page, limit=limit
         )
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to list documents: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve documents: {str(e)}"
+            detail=f"Failed to retrieve documents: {str(e)}",
         )
 
 
 @router.get("/{document_id}", response_model=DocumentDetailResponse)
 async def get_document(
-    document_id: UUID,
-    use_case: GetDocumentUseCase = Depends(get_get_document_use_case)
-):
+    document_id: UUID, use_case: GetDocumentUseCase = Depends(get_get_document_use_case)
+) -> DocumentDetailResponse:
     """Get a single document with all its chunks.
 
     Args:
@@ -228,14 +215,16 @@ async def get_document(
             title=document.title,
             file_name=document.file_name,
             file_type=document.file_type,
-            file_size=document.file_size,
+            file_size=document.file_size or 0,  # Default to 0 if None
             file_path=document.file_path,
             upload_status=document.upload_status.value,
-            embedding_status=document.embedding_status.value if hasattr(document, 'embedding_status') else "completed",
+            embedding_status=document.embedding_status.value
+            if hasattr(document, "embedding_status")
+            else "completed",
             created_at=document.created_at,
             updated_at=document.created_at,  # Use created_at as documents don't track updates
             description=document.description,
-            chunks=chunk_responses
+            chunks=chunk_responses,
         )
 
     except DocumentNotFoundError as e:
@@ -245,15 +234,15 @@ async def get_document(
         logger.error(f"Failed to get document: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve document: {str(e)}"
+            detail=f"Failed to retrieve document: {str(e)}",
         )
 
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_document(
     document_id: UUID,
-    use_case: DeleteDocumentUseCase = Depends(get_delete_document_use_case)
-):
+    use_case: DeleteDocumentUseCase = Depends(get_delete_document_use_case),
+) -> None:
     """Delete a document and all associated data.
 
     Removes:
@@ -279,11 +268,11 @@ async def delete_document(
         logger.error(f"Vector store deletion failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Failed to delete vectors: {str(e)}"
+            detail=f"Failed to delete vectors: {str(e)}",
         )
     except Exception as e:
         logger.error(f"Failed to delete document: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete document: {str(e)}"
+            detail=f"Failed to delete document: {str(e)}",
         )
