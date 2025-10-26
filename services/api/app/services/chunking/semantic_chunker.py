@@ -32,7 +32,8 @@ class SemanticChunker:
         min_chunk_size: int = 128,
         max_chunk_size: int = 512,
         breakpoint_percentile: float = 95.0,
-        embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+        embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2",
+        overlap_ratio: float = 0.1
     ):
         """
         Initialize semantic chunker.
@@ -42,17 +43,17 @@ class SemanticChunker:
             max_chunk_size: Maximum tokens per chunk (context limit)
             breakpoint_percentile: Percentile for boundary detection (95 = top 5% drops)
             embedding_model: Model for sentence embeddings
+            overlap_ratio: Fraction of chunk size to overlap (0.0-0.5)
+                          0.1 = 10% overlap (recommended for context preservation)
         """
         self.min_chunk_size = min_chunk_size
         self.max_chunk_size = max_chunk_size
         self.breakpoint_percentile = breakpoint_percentile
         self.embedding_model = embedding_model
+        self.overlap_ratio = overlap_ratio
 
         # Initialize Chonkie embeddings
-        self.embeddings = AutoEmbeddings.get_embeddings(
-            model_name=embedding_model,
-            provider="sentence-transformers"
-        )
+        self.embeddings = AutoEmbeddings.get_embeddings(model=embedding_model)
 
         # Initialize Chonkie semantic chunker
         self.chunker = ChonkieSemanticChunker(
@@ -214,6 +215,10 @@ class SemanticChunker:
                     "end": buffer_chunks[-1]["end"]
                 })
 
+        # Apply overlap if enabled
+        if self.overlap_ratio > 0.0 and len(merged_chunks) > 1:
+            merged_chunks = self._apply_overlap(merged_chunks)
+
         # Convert to ChunkResult objects
         for chunk in merged_chunks:
             results.append(ChunkResult(
@@ -224,6 +229,61 @@ class SemanticChunker:
             ))
 
         return results
+
+    def _apply_overlap(self, chunks: list[dict]) -> list[dict]:
+        """
+        Apply overlap between adjacent chunks for context preservation.
+
+        Creates overlap chunks between each pair of adjacent chunks,
+        containing text from the end of one chunk and beginning of the next.
+
+        Args:
+            chunks: List of chunk dictionaries with 'text', 'tokens', 'start', 'end'
+
+        Returns:
+            List of chunks with overlap chunks inserted between base chunks
+        """
+        overlapping_chunks = []
+        overlap_tokens = int(self.max_chunk_size * self.overlap_ratio)
+
+        for i, chunk in enumerate(chunks):
+            # Add current chunk
+            overlapping_chunks.append(chunk)
+
+            # Add overlap chunk between this and next (if exists)
+            if i < len(chunks) - 1:
+                next_chunk = chunks[i + 1]
+
+                # Create overlap from end of current chunk + start of next chunk
+                curr_words = chunk["text"].split()
+                next_words = next_chunk["text"].split()
+
+                # Take last N words from current and first N words from next
+                # where N is half of overlap_tokens (so total is ~overlap_tokens)
+                half_overlap = overlap_tokens // 2
+
+                overlap_from_curr = curr_words[-half_overlap:] if len(curr_words) > half_overlap else curr_words
+                overlap_from_next = next_words[:half_overlap] if len(next_words) > half_overlap else next_words
+
+                # Combine to create overlap text
+                overlap_text = " ".join(overlap_from_curr + overlap_from_next)
+                overlap_token_count = len(overlap_from_curr) + len(overlap_from_next)
+
+                # Calculate approximate character positions for overlap chunk
+                # Position it at the boundary between the two chunks
+                overlap_start = chunk["end"] - len(" ".join(overlap_from_curr))
+                overlap_end = next_chunk["start"] + len(" ".join(overlap_from_next))
+
+                overlap_chunk = {
+                    "text": overlap_text,
+                    "tokens": overlap_token_count,
+                    "start": overlap_start,
+                    "end": overlap_end
+                }
+
+                overlapping_chunks.append(overlap_chunk)
+
+        return overlapping_chunks
 
     async def chunk_document(
         self,
