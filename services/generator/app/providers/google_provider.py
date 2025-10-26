@@ -31,7 +31,7 @@ class GoogleProvider(ModelProvider):
         """Initialize Google provider with API key from environment."""
         api_key = os.getenv("GOOGLE_API_KEY")
         if api_key:
-            genai.configure(api_key=api_key)  # type: ignore[attr-defined]
+            genai.configure(api_key=api_key)
             self.api_key: str | None = api_key
         else:
             self.api_key = None
@@ -95,7 +95,7 @@ Context:
 Provide a concise, accurate summary."""
 
         try:
-            model_instance = genai.GenerativeModel(api_model)  # type: ignore[attr-defined]
+            model_instance = genai.GenerativeModel(api_model)
             response = await model_instance.generate_content_async(
                 full_prompt,
                 generation_config={

@@ -69,22 +69,5 @@ class Settings(BaseSettings):
 
 
 # Global settings instance
-settings = Settings(
-    api_host="0.0.0.0",
-    api_port=8003,
-    api_workers=2,
-    log_level="INFO",
-    database_url="postgresql+asyncpg://raasuser:raaspass@postgres:5432/raasdb",
-    qdrant_url="http://qdrant:6333",
-    qdrant_collection="documents",
-    embedder_url="http://embedder:8001",
-    generator_url="http://generator:8002",
-    default_search_mode="hybrid",
-    default_top_k=10,
-    enable_query_expansion=True,
-    enable_reranking=True,
-    rerank_candidates=50,
-    reranking_model="cross-encoder/ms-marco-MiniLM-L-6-v2",
-    rrf_k=60,
-    query_expansion_variants=2
-)
+# Pydantic will load from environment variables and fall back to Field defaults
+settings = Settings()  # type: ignore[call-arg]
