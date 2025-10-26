@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { TrashIcon } from '@radix-ui/react-icons';
 import { api } from '@/services/api';
 import type { Document } from '@/types';
-import { formatBytes, formatDate } from '@/utils/formatters';
+import { formatBytes, formatDate, getFileTypeIcon, getFileTypeColor } from '@/utils/formatters';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -61,33 +61,54 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onClick })
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        whileHover={{ y: -4 }}
+        variants={{
+          hidden: { opacity: 0, y: 20 },
+          show: { opacity: 1, y: 0 }
+        }}
+        whileHover={{ y: -6, transition: { duration: 0.2 } }}
         transition={{ duration: 0.2 }}
       >
         <Card
-          className="cursor-pointer hover:shadow-md transition-shadow"
+          className="cursor-pointer hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 border-2 hover:border-primary/20 group"
           onClick={handleCardClick}
         >
-          <CardHeader>
-            <CardTitle className="text-lg">{document.title}</CardTitle>
-            {document.description && (
-              <CardDescription className="line-clamp-2">
-                {document.description}
-              </CardDescription>
-            )}
+          <CardHeader className="pb-3">
+            <div className="flex items-start gap-3">
+              {/* File Type Icon */}
+              <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl flex-shrink-0 ${getFileTypeColor(document.file_name)}`}>
+                {getFileTypeIcon(document.file_name)}
+              </div>
+
+              {/* Title and Description */}
+              <div className="flex-1 min-w-0">
+                <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                  {document.title}
+                </CardTitle>
+                {document.description && (
+                  <CardDescription className="line-clamp-2 mt-1">
+                    {document.description}
+                  </CardDescription>
+                )}
+              </div>
+            </div>
           </CardHeader>
 
-          <CardContent>
+          <CardContent className="pb-3">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">{formatBytes(document.file_size)}</Badge>
-              <Badge variant="secondary">{document.file_name}</Badge>
+              <Badge variant="secondary" className="font-mono text-xs">
+                {formatBytes(document.file_size)}
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                {document.file_name}
+              </Badge>
             </div>
           </CardContent>
 
-          <CardFooter className="flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">
+          <CardFooter className="flex justify-between items-center pt-3 border-t">
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               {formatDate(document.created_at)}
             </span>
             <Button
@@ -96,8 +117,9 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onClick })
               onClick={handleDeleteClick}
               disabled={deleteMutation.isPending}
               aria-label="Delete document"
+              className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
             >
-              <TrashIcon className="h-4 w-4 text-destructive" />
+              <TrashIcon className="h-4 w-4" />
             </Button>
           </CardFooter>
         </Card>

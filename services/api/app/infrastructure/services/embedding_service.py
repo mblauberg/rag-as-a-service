@@ -36,7 +36,7 @@ class HTTPEmbeddingService(EmbeddingService):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    f"{self.embedder_url}/generate-embeddings",
+                    f"{self.embedder_url}/api/v1/generate-embeddings",
                     json={"texts": texts},
                     timeout=30.0,
                 )

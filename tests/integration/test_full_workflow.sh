@@ -164,7 +164,7 @@ start_services() {
 
     wait_for_service "API Health Check" "$API_URL/api/v1/health" || exit 1
     wait_for_service "API Ready Check" "$API_URL/api/v1/ready" || exit 1
-    wait_for_service "Embedder Health Check" "$EMBEDDER_URL/health" || exit 1
+    wait_for_service "Embedder Health Check" "$EMBEDDER_URL/api/v1/health" || exit 1
     wait_for_service "Frontend" "$FRONTEND_URL" || exit 1
 
     echo ""
@@ -197,7 +197,7 @@ test_health_endpoints() {
     fi
 
     # Test Embedder health
-    if curl -s -f "$EMBEDDER_URL/health" > /dev/null 2>&1; then
+    if curl -s -f "$EMBEDDER_URL/api/v1/health" > /dev/null 2>&1; then
         record_test "Embedder health endpoint" "PASS"
     else
         record_test "Embedder health endpoint" "FAIL"

@@ -216,7 +216,7 @@ The API service calls this embedder service:
 
 - Verify Qdrant is running and accessible
 - Check `QDRANT_URL` environment variable
-- Ensure Qdrant is on version 1.7.0+
+- Ensure Qdrant is on version 1.15.1+ (matches client version)
 
 ### Memory issues
 
