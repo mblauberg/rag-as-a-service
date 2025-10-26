@@ -1,14 +1,18 @@
 """Application configuration with nested Pydantic Settings"""
 
-from typing import Any
 
 from pydantic import Field, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.core.constants import (DEFAULT_CHUNK_MAX_SIZE, DEFAULT_CHUNK_MIN_SIZE,
-                                DEFAULT_SEARCH_LIMIT, EMBEDDER_TIMEOUT_SECONDS,
-                                GENERATOR_TIMEOUT_SECONDS, MAX_SEARCH_LIMIT,
-                                SEMANTIC_BREAKPOINT_PERCENTILE)
+from app.core.constants import (
+    DEFAULT_CHUNK_MAX_SIZE,
+    DEFAULT_CHUNK_MIN_SIZE,
+    DEFAULT_SEARCH_LIMIT,
+    EMBEDDER_TIMEOUT_SECONDS,
+    GENERATOR_TIMEOUT_SECONDS,
+    MAX_SEARCH_LIMIT,
+    SEMANTIC_BREAKPOINT_PERCENTILE,
+)
 
 
 class ChunkingConfig(BaseSettings):

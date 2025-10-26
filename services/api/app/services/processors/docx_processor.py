@@ -4,9 +4,11 @@ from pathlib import Path
 from docx import Document
 from docx.opc.exceptions import PackageNotFoundError
 
-from app.services.processors.base_processor import (BaseDocumentProcessor,
-                                                    DocumentElement,
-                                                    ProcessedDocument)
+from app.services.processors.base_processor import (
+    BaseDocumentProcessor,
+    DocumentElement,
+    ProcessedDocument,
+)
 
 
 class DOCXProcessor(BaseDocumentProcessor):
@@ -111,7 +113,7 @@ class DOCXProcessor(BaseDocumentProcessor):
 
     def _table_to_markdown(self, table: object) -> str:
         """Convert table to markdown format."""
-        from typing import cast, Any
+        from typing import Any, cast
         rows = []
         table_rows = cast(Any, table).rows
         for row in table_rows:

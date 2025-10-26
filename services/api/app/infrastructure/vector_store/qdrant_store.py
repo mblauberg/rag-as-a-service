@@ -7,8 +7,7 @@ Search is now delegated to the dedicated search microservice.
 from uuid import UUID
 
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.models import (FieldCondition, Filter, FilterSelector,
-                                  MatchValue, PointStruct)
+from qdrant_client.models import FieldCondition, Filter, FilterSelector, MatchValue, PointStruct
 
 from app.core.exceptions import VectorStoreError
 from app.domain.entities.chunk import Chunk

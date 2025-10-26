@@ -5,14 +5,13 @@ with clean separation between HTTP layer and domain logic.
 """
 import logging
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.api.dependencies import get_search_service_client
 from app.api.mappers import chunk_to_search_result
 from app.api.models import SearchRequest, SearchResponse
 from app.infrastructure.services.search_service import SearchServiceClient
-from app.core.exceptions import EmbeddingServiceError, VectorStoreError
-import httpx
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

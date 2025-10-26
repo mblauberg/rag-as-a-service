@@ -7,24 +7,27 @@ principles with dependency injection and proper error handling.
 import logging
 from uuid import UUID
 
-from fastapi import (APIRouter, Depends, File, Form, HTTPException, UploadFile,
-                     status)
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 
-from app.api.dependencies import (get_delete_document_use_case,
-                                  get_get_document_use_case,
-                                  get_list_documents_use_case,
-                                  get_upload_document_use_case)
+from app.api.dependencies import (
+    get_delete_document_use_case,
+    get_get_document_use_case,
+    get_list_documents_use_case,
+    get_upload_document_use_case,
+)
 from app.api.mappers import chunk_to_response, document_to_response
-from app.api.models import (DocumentDetailResponse, ListDocumentsResponse,
-                            UploadDocumentResponse)
+from app.api.models import DocumentDetailResponse, ListDocumentsResponse, UploadDocumentResponse
 from app.application.use_cases.delete_document import DeleteDocumentUseCase
 from app.application.use_cases.get_document import GetDocumentUseCase
 from app.application.use_cases.list_documents import ListDocumentsUseCase
-from app.application.use_cases.upload_document import (UploadDocumentCommand,
-                                                       UploadDocumentUseCase)
-from app.core.exceptions import (ChunkingError, DocumentNotFoundError,
-                                 EmbeddingServiceError, FileProcessingError,
-                                 VectorStoreError)
+from app.application.use_cases.upload_document import UploadDocumentCommand, UploadDocumentUseCase
+from app.core.exceptions import (
+    ChunkingError,
+    DocumentNotFoundError,
+    EmbeddingServiceError,
+    FileProcessingError,
+    VectorStoreError,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -376,7 +379,7 @@ async def upload_document(
                                 "embedding_status": "completed",
                                 "created_at": "2025-10-26T09:15:00Z",
                                 "updated_at": "2025-10-26T09:15:00Z",
-                                "description": null
+                                "description": None
                             }
                         ],
                         "total": 47,

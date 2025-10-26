@@ -4,8 +4,7 @@ These mappers provide a centralized place for entity-to-DTO conversions,
 eliminating code duplication across route handlers and ensuring consistent
 mapping logic throughout the HTTP adapter layer.
 """
-from app.api.models import (ChunkSearchResult, DocumentChunkResponse,
-                            DocumentResponse)
+from app.api.models import ChunkSearchResult, DocumentChunkResponse, DocumentResponse
 from app.domain.entities.chunk import Chunk
 from app.domain.entities.document import Document
 

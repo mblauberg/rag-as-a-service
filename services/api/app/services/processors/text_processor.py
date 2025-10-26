@@ -2,9 +2,11 @@
 import re
 from pathlib import Path
 
-from app.services.processors.base_processor import (BaseDocumentProcessor,
-                                                    DocumentElement,
-                                                    ProcessedDocument)
+from app.services.processors.base_processor import (
+    BaseDocumentProcessor,
+    DocumentElement,
+    ProcessedDocument,
+)
 
 
 class TextProcessor(BaseDocumentProcessor):

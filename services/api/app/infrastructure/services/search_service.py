@@ -3,8 +3,9 @@
 Delegates all search operations to the dedicated search microservice.
 """
 import logging
-import httpx
 from uuid import UUID
+
+import httpx
 
 from app.domain.entities.chunk import Chunk
 

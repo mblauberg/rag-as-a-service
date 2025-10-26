@@ -163,7 +163,7 @@ async def generate_summary(
     if not chunks:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No chunks found for provided IDs",
+            detail="No chunks found for provided IDs",
         )
 
     if len(chunks) != len(request.chunk_ids):

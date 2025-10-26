@@ -1,8 +1,7 @@
 """Qdrant client wrapper for vector operations."""
 
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.models import (Distance, FieldCondition, Filter, MatchValue,
-                                  VectorParams)
+from qdrant_client.models import Distance, FieldCondition, Filter, MatchValue, VectorParams
 
 from app.core.config import settings
 

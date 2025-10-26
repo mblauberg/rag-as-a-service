@@ -3,9 +3,11 @@ from pathlib import Path
 
 import pypdf
 
-from app.services.processors.base_processor import (BaseDocumentProcessor,
-                                                    DocumentElement,
-                                                    ProcessedDocument)
+from app.services.processors.base_processor import (
+    BaseDocumentProcessor,
+    DocumentElement,
+    ProcessedDocument,
+)
 
 
 class PDFProcessor(BaseDocumentProcessor):

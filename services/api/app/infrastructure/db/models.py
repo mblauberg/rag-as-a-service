@@ -3,18 +3,17 @@
 These are NOT domain entities - they're database representations.
 Repositories map between these and domain entities.
 """
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import (JSON, Column, DateTime, ForeignKey, Integer, String,
-                        Text)
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 
 
-class DocumentModel(Base):  # type: ignore[misc]
+class DocumentModel(Base):
     """SQLAlchemy model for documents table."""
 
     __tablename__ = "documents"
@@ -34,7 +33,7 @@ class DocumentModel(Base):  # type: ignore[misc]
     updated_at = Column(
         DateTime,
         nullable=False,
-        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        default=lambda: datetime.now(UTC).replace(tzinfo=None),
     )  # Add missing field with default
 
     # Relationships
@@ -46,7 +45,7 @@ class DocumentModel(Base):  # type: ignore[misc]
     )
 
 
-class ChunkModel(Base):  # type: ignore[misc]
+class ChunkModel(Base):
     """SQLAlchemy model for chunks table."""
 
     __tablename__ = "document_chunks"
@@ -76,7 +75,7 @@ class ChunkModel(Base):  # type: ignore[misc]
     created_at = Column(
         DateTime,
         nullable=False,
-        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        default=lambda: datetime.now(UTC).replace(tzinfo=None),
     )
 
     # Relationships
