@@ -9,7 +9,7 @@ interface SearchResultsProps {
   results: SearchResult[];
   query: string;
   searchResponse?: SearchResponse;
-  onDocumentClick?: (documentId: string) => void;
+  onChunkClick: (documentId: string, chunkId: string) => void;
 }
 
 /**
@@ -20,13 +20,8 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   results,
   query,
   searchResponse,
-  onDocumentClick,
+  onChunkClick,
 }) => {
-  const handleResultClick = (documentId: string) => {
-    if (onDocumentClick) {
-      onDocumentClick(documentId);
-    }
-  };
 
   const highlightText = (text: string, query: string) => {
     if (!query.trim()) return text;
@@ -92,7 +87,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           >
             <Card
               className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => handleResultClick(result.document_id)}
+              onClick={() => onChunkClick(result.document_id, result.chunk_id)}
             >
               <CardHeader>
                 <div className="flex items-start justify-between gap-2">
