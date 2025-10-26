@@ -4,34 +4,43 @@ from app.providers.openai_provider import OpenAIProvider
 from app.models.schemas import Model
 
 
-@pytest.fixture
-def openai_provider():
-    """Create OpenAIProvider for testing."""
-    with patch.dict('os.environ', {'OPENAI_API_KEY': 'test-key'}):
-        return OpenAIProvider()
-
-
 def test_is_available_with_api_key():
     """is_available returns True when API key is set"""
+    # Arrange
     with patch.dict('os.environ', {'OPENAI_API_KEY': 'test-key'}):
         provider = OpenAIProvider()
-        assert provider.is_available() is True
+
+        # Act
+        result = provider.is_available()
+
+        # Assert
+        assert result is True
 
 
 def test_is_available_without_api_key():
     """is_available returns False when API key is missing"""
+    # Arrange
     with patch.dict('os.environ', {}, clear=True):
         provider = OpenAIProvider()
-        assert provider.is_available() is False
+
+        # Act
+        result = provider.is_available()
+
+        # Assert
+        assert result is False
 
 
 @pytest.mark.asyncio
 async def test_list_models_returns_openai_models(openai_provider):
     """list_models returns predefined OpenAI models"""
+    # Arrange
+    # Provider created by fixture
+
+    # Act
     models = await openai_provider.list_models()
 
+    # Assert
     assert len(models) >= 3  # gpt-5, gpt-5-mini, gpt-4.1
-
     gpt5 = next(m for m in models if m.name == "openai:gpt-5")
     assert gpt5.display_name == "GPT-5"
     assert gpt5.provider == "openai"
@@ -41,12 +50,15 @@ async def test_list_models_returns_openai_models(openai_provider):
 @pytest.mark.asyncio
 async def test_generate_calls_openai_api(openai_provider):
     """generate calls OpenAI API with correct parameters"""
+    # Arrange
     mock_response = Mock()
     mock_response.choices = [Mock(message=Mock(content="Generated summary"))]
 
+    # Act
     with patch.object(openai_provider.client.chat.completions, 'create', new_callable=AsyncMock, return_value=mock_response) as mock_create:
         result = await openai_provider.generate("openai:gpt-5", "query", "context")
 
+        # Assert
         assert result == "Generated summary"
         mock_create.assert_called_once()
         call_kwargs = mock_create.call_args.kwargs
