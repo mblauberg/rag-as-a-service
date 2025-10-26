@@ -14,10 +14,10 @@ async def test_search_with_model():
             search_request = {
                 "query": "test query",
                 "limit": 5,
-                "model": "openai:gpt-5-mini"
+                "model": "openai:gpt-4o-mini"
             }
 
-            print("Testing search with model: openai:gpt-5-mini")
+            print("Testing search with model: openai:gpt-4o-mini")
             print(f"Request: {search_request}")
 
             response = await client.post(
