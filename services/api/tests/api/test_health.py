@@ -105,15 +105,17 @@ async def test_readiness_check_database_unavailable(
 async def test_readiness_check_qdrant_unavailable(
     async_client,
     mock_qdrant_client,
-    mock_embedder_client
+    mock_embedder_client,
+    monkeypatch
 ):
     """
     Test readiness check when Qdrant is unavailable.
 
     Should report not_ready status with Qdrant failure details.
     """
-    # Mock Qdrant to fail
-    mock_qdrant_client.health_check = AsyncMock(return_value=False)
+    # Mock the global qdrant_client's health_check method
+    from app.core.qdrant_client import qdrant_client
+    monkeypatch.setattr(qdrant_client, "health_check", AsyncMock(return_value=False))
 
     response = await async_client.get("/api/v1/ready")
 
@@ -132,15 +134,17 @@ async def test_readiness_check_qdrant_unavailable(
 async def test_readiness_check_qdrant_exception(
     async_client,
     mock_qdrant_client,
-    mock_embedder_client
+    mock_embedder_client,
+    monkeypatch
 ):
     """
     Test readiness check when Qdrant raises exception.
 
     Should handle exception gracefully and report not_ready.
     """
-    # Mock Qdrant to raise exception
-    mock_qdrant_client.health_check = AsyncMock(side_effect=Exception("Connection timeout"))
+    # Mock the global qdrant_client's health_check method to raise exception
+    from app.core.qdrant_client import qdrant_client
+    monkeypatch.setattr(qdrant_client, "health_check", AsyncMock(side_effect=Exception("Connection timeout")))
 
     response = await async_client.get("/api/v1/ready")
 
@@ -251,8 +255,9 @@ async def test_readiness_check_multiple_services_down(
 
     monkeypatch.setattr(db_session, "execute", mock_db_execute)
 
-    # Mock Qdrant to fail
-    mock_qdrant_client.health_check = AsyncMock(return_value=False)
+    # Mock the global qdrant_client's health_check method to fail
+    from app.core.qdrant_client import qdrant_client
+    monkeypatch.setattr(qdrant_client, "health_check", AsyncMock(return_value=False))
 
     # Create mock HTTP client that raises exception
     mock_http_client = AsyncMock()
