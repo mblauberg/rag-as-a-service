@@ -89,7 +89,7 @@ class FileProcessor:
             return "\n\n".join(text)
         except Exception as e:
             logger.error(f"Error extracting PDF text: {e}")
-            raise ValueError(f"Could not extract text from PDF: {str(e)}")
+            raise ValueError(f"Could not extract text from PDF: {str(e)}") from e
 
     @staticmethod
     def _extract_text_docx(file_path: str) -> str:
@@ -105,7 +105,7 @@ class FileProcessor:
             return "\n\n".join(text)
         except Exception as e:
             logger.error(f"Error extracting DOCX text: {e}")
-            raise ValueError(f"Could not extract text from DOCX: {str(e)}")
+            raise ValueError(f"Could not extract text from DOCX: {str(e)}") from e
 
 
 # Global file processor instance

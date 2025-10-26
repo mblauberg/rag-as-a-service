@@ -273,7 +273,7 @@ async def upload_document(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Could not read file: {str(e)}",
-        )
+        ) from e
 
     # Validate file size
     if len(content) == 0:
@@ -310,34 +310,34 @@ async def upload_document(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to process file: {str(e)}",
-        )
+        ) from e
     except ChunkingError as e:
         logger.error(f"Chunking failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to chunk document: {str(e)}",
-        )
+        ) from e
     except EmbeddingServiceError as e:
         logger.error(f"Embedding generation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"Embedding service unavailable: {str(e)}",
-        )
+        ) from e
     except VectorStoreError as e:
         logger.error(f"Vector store operation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"Vector database unavailable: {str(e)}",
-        )
+        ) from e
     except ValueError as e:
         logger.error(f"Validation error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
     except Exception as e:
         logger.error(f"Unexpected error during upload: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to process document: {str(e)}",
-        )
+        ) from e
 
 
 @router.get(
@@ -537,13 +537,13 @@ async def list_documents(
         )
 
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
     except Exception as e:
         logger.error(f"Failed to list documents: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve documents: {str(e)}",
-        )
+        ) from e
 
 
 @router.get(
@@ -792,15 +792,15 @@ async def get_document(
             chunks=chunk_responses,
         )
 
-    except DocumentNotFoundError as e:
+    except DocumentNotFoundError:
         # DocumentNotFoundError is already an HTTPException with 404 status
-        raise e
+        raise
     except Exception as e:
         logger.error(f"Failed to get document: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve document: {str(e)}",
-        )
+        ) from e
 
 
 @router.delete(
@@ -968,18 +968,18 @@ async def delete_document(
         await use_case.execute(document_id)
         logger.info(f"Document {document_id} deleted successfully")
 
-    except DocumentNotFoundError as e:
+    except DocumentNotFoundError:
         # DocumentNotFoundError is already an HTTPException with 404 status
-        raise e
+        raise
     except VectorStoreError as e:
         logger.error(f"Vector store deletion failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"Failed to delete vectors: {str(e)}",
-        )
+        ) from e
     except Exception as e:
         logger.error(f"Failed to delete document: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete document: {str(e)}",
-        )
+        ) from e

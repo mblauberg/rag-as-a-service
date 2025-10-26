@@ -67,4 +67,4 @@ class HTTPGenerationService(GenerationService):
             raise GenerationServiceError(
                 f"Unexpected error during generation: {type(e).__name__}",
                 original_error=e,
-            )
+            ) from e

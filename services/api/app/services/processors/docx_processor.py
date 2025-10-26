@@ -55,7 +55,7 @@ class DOCXProcessor(BaseDocumentProcessor):
                             level = int(para.style.name.split()[-1])
                         else:
                             level = 1
-                    except:
+                    except (ValueError, IndexError):
                         level = 1
 
                     current_section = current_section[: level - 1] + [para.text.strip()]
@@ -100,12 +100,12 @@ class DOCXProcessor(BaseDocumentProcessor):
                 "num_tables": len(doc.tables),
             }
 
-        except PackageNotFoundError:
-            raise ValueError(f"DOCX file not found or invalid: {file_path}")
-        except FileNotFoundError:
-            raise ValueError(f"DOCX file not found: {file_path}")
+        except PackageNotFoundError as e:
+            raise ValueError(f"DOCX file not found or invalid: {file_path}") from e
+        except FileNotFoundError as e:
+            raise ValueError(f"DOCX file not found: {file_path}") from e
         except Exception as e:
-            raise ValueError(f"Error processing DOCX: {e}")
+            raise ValueError(f"Error processing DOCX: {e}") from e
 
         return ProcessedDocument(
             elements=elements, metadata=metadata, document_type="docx"

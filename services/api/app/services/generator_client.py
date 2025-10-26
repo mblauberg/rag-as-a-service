@@ -86,12 +86,12 @@ class GeneratorClient:
             logger.error(f"Failed to connect to generator: {e}")
             raise ServiceUnavailableError(
                 "Failed to connect to generator service", original_error=e
-            )
+            ) from e
         except httpx.TimeoutException as e:
             logger.error(f"Generator request timed out: {e}")
             raise ServiceUnavailableError(
                 "Generator service request timed out", original_error=e
-            )
+            ) from e
         except Exception as e:
             logger.error(f"Generator request failed: {e}")
             return None
@@ -155,12 +155,12 @@ class GeneratorClient:
             logger.error(f"Failed to connect to generator: {e}")
             raise ServiceUnavailableError(
                 "Failed to connect to generator service", original_error=e
-            )
+            ) from e
         except httpx.TimeoutException as e:
             logger.error(f"Generator request timed out: {e}")
             raise ServiceUnavailableError(
                 "Generator service request timed out", original_error=e
-            )
+            ) from e
         except Exception as e:
             logger.error(f"Generator request failed: {e}")
             return None
@@ -210,12 +210,12 @@ class GeneratorClient:
             logger.error(f"Failed to connect to generator: {e}")
             raise ServiceUnavailableError(
                 "Failed to connect to generator service", original_error=e
-            )
+            ) from e
         except httpx.TimeoutException as e:
             logger.error(f"Generator request timed out: {e}")
             raise ServiceUnavailableError(
                 "Generator service request timed out", original_error=e
-            )
+            ) from e
         except GenerationServiceError:
             # Re-raise our custom exception
             raise
@@ -224,4 +224,4 @@ class GeneratorClient:
             raise GenerationServiceError(
                 operation="list_models",
                 original_error=e
-            )
+            ) from e

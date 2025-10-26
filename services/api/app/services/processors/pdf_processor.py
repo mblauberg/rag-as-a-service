@@ -63,11 +63,11 @@ class PDFProcessor(BaseDocumentProcessor):
                             elements.append(element)
 
         except pypdf.errors.PdfReadError as e:
-            raise ValueError(f"Invalid or corrupt PDF file: {e}")
-        except FileNotFoundError:
-            raise ValueError(f"PDF file not found: {file_path}")
+            raise ValueError(f"Invalid or corrupt PDF file: {e}") from e
+        except FileNotFoundError as e:
+            raise ValueError(f"PDF file not found: {file_path}") from e
         except Exception as e:
-            raise ValueError(f"Error processing PDF: {e}")
+            raise ValueError(f"Error processing PDF: {e}") from e
 
         return ProcessedDocument(
             elements=elements, metadata=metadata, document_type="pdf"

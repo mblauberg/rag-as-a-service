@@ -91,7 +91,7 @@ class HTTPEmbeddingService(EmbeddingService):
                 except ValueError as e:
                     raise ValidationError(
                         "Failed to parse embedding service response", original_error=e
-                    )
+                    ) from e
 
                 # Validate response structure
                 if "embeddings" not in data:
@@ -112,22 +112,22 @@ class HTTPEmbeddingService(EmbeddingService):
         except httpx.ConnectError as e:
             raise ServiceUnavailableError(
                 "Failed to connect to embedding service", original_error=e
-            )
+            ) from e
         except httpx.TimeoutException as e:
             raise ServiceUnavailableError(
                 "Embedding service request timed out", original_error=e
-            )
+            ) from e
         except httpx.HTTPStatusError as e:
             # Raise ServiceUnavailableError for 503 to trigger retry
             if e.response.status_code == 503:
                 raise ServiceUnavailableError(
                     "Embedding service temporarily unavailable", original_error=e
-                )
+                ) from e
             # Other HTTP errors don't retry (use ValidationError to prevent retry)
             raise ValidationError(
                 f"Embedding service returned error: {e.response.status_code}",
                 original_error=e,
-            )
+            ) from e
         except (EmbeddingServiceError, ServiceUnavailableError, ValidationError):
             # Re-raise our own exceptions
             raise
@@ -136,4 +136,4 @@ class HTTPEmbeddingService(EmbeddingService):
             raise ValidationError(
                 f"Unexpected error during embedding generation: {type(e).__name__}",
                 original_error=e,
-            )
+            ) from e
