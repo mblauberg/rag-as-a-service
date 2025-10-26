@@ -41,13 +41,20 @@ async def test_root_endpoint(async_client):
 
 @pytest.mark.asyncio
 async def test_readiness_check_all_services_healthy(
-    async_client, mock_qdrant_client, mock_embedder_client
+    async_client, mock_qdrant_client, mock_embedder_client, monkeypatch
 ):
     """
     Test readiness check when all services are healthy.
 
     Verifies database, Qdrant, and embedder connectivity.
     """
+    # Patch httpx.AsyncClient to return our mock
+    import httpx
+    from app.core.qdrant_client import qdrant_client
+
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: mock_embedder_client)
+    monkeypatch.setattr(qdrant_client, "health_check", AsyncMock(return_value=True))
+
     response = await async_client.get("/api/v1/ready")
 
     assert response.status_code == 200

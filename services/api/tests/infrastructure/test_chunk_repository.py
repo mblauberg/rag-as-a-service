@@ -126,7 +126,8 @@ async def test_save_batch_with_metadata(chunk_repository, sample_document):
 
     # Assert
     assert len(saved) == 1
-    assert saved[0].metadata == {"section": "Introduction", "page": 1}
+    # Repository adds chunk_index to metadata for summary generation
+    assert saved[0].metadata == {"section": "Introduction", "page": 1, "chunk_index": 0}
 
 
 @pytest.mark.asyncio
@@ -331,8 +332,9 @@ async def test_empty_metadata_default(chunk_repository, sample_document):
     found = await chunk_repository.find_by_document_id(sample_document.id)
 
     # Assert
-    assert saved[0].metadata == {}
-    assert found[0].metadata == {}
+    # Repository adds chunk_index to metadata even when no metadata provided
+    assert saved[0].metadata == {"chunk_index": 0}
+    assert found[0].metadata == {"chunk_index": 0}
 
 
 @pytest.mark.asyncio

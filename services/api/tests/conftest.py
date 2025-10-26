@@ -174,6 +174,10 @@ def mock_embedder_client():
     mock.post = AsyncMock(side_effect=mock_post)
     mock.get = AsyncMock(side_effect=mock_get)
 
+    # Make it work as async context manager
+    mock.__aenter__ = AsyncMock(return_value=mock)
+    mock.__aexit__ = AsyncMock(return_value=None)
+
     return mock
 
 
