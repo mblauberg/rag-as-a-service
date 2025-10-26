@@ -13,7 +13,7 @@ import pytest_asyncio
 from typing import AsyncGenerator
 from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -182,7 +182,7 @@ async def async_client(db_session, mock_qdrant_client, mock_embedder_client):
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_qdrant_client] = override_get_qdrant_client
 
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         yield client
 
     # Clear overrides

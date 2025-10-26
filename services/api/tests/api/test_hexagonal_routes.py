@@ -10,7 +10,7 @@ from io import BytesIO
 from datetime import datetime, UTC
 
 from fastapi import UploadFile
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 from app.main import app
 from app.api.dependencies import (
@@ -51,7 +51,7 @@ async def test_upload_document_success():
     app.dependency_overrides[get_upload_document_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # Create file upload
             files = {"file": ("test.pdf", b"test content", "application/pdf")}
             data = {"title": "Test Doc", "description": "Test description"}
@@ -82,7 +82,7 @@ async def test_upload_document_empty_file():
     app.dependency_overrides[get_upload_document_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             files = {"file": ("test.pdf", b"", "application/pdf")}
             data = {"title": "Test Doc"}
 
@@ -129,7 +129,7 @@ async def test_list_documents_success():
     app.dependency_overrides[get_list_documents_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get("/api/v1/documents?page=1&limit=20")
 
         assert response.status_code == 200
@@ -155,7 +155,7 @@ async def test_list_documents_invalid_pagination():
     app.dependency_overrides[get_list_documents_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get("/api/v1/documents?page=0&limit=20")
 
         assert response.status_code == 400
@@ -176,7 +176,7 @@ async def test_delete_document_success():
     document_id = uuid4()
 
     try:
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.delete(f"/api/v1/documents/{document_id}")
 
         assert response.status_code == 204
@@ -196,7 +196,7 @@ async def test_delete_document_not_found():
     app.dependency_overrides[get_delete_document_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.delete(f"/api/v1/documents/{document_id}")
 
         assert response.status_code == 404
@@ -230,7 +230,7 @@ async def test_search_documents_success():
     app.dependency_overrides[get_search_documents_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/v1/search",
                 json={"query": "test query", "top_k": 10}
@@ -256,7 +256,7 @@ async def test_search_documents_empty_query():
     app.dependency_overrides[get_search_documents_use_case] = lambda: mock_use_case
 
     try:
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/v1/search",
                 json={"query": "", "top_k": 10}
