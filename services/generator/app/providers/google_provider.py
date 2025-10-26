@@ -47,7 +47,7 @@ class GoogleProvider(ModelProvider):
         Returns:
             List of Gemini Model objects
         """
-        from datetime import datetime
+        from datetime import datetime, timezone
 
         models = []
         for m in self.MODELS:
@@ -58,7 +58,7 @@ class GoogleProvider(ModelProvider):
                 size=m["size"],
                 description=m["description"],
                 capabilities=m["capabilities"],
-                modified_at=datetime.utcnow().isoformat() + "Z"
+                modified_at=datetime.now(timezone.utc).isoformat() + "Z"
             )
             models.append(model)
 

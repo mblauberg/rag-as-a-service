@@ -50,7 +50,7 @@ class AnthropicProvider(ModelProvider):
         Returns:
             List of Claude Model objects
         """
-        from datetime import datetime
+        from datetime import datetime, timezone
 
         models = []
         for m in self.MODELS:
@@ -61,7 +61,7 @@ class AnthropicProvider(ModelProvider):
                 size=m["size"],
                 description=m["description"],
                 capabilities=m["capabilities"],
-                modified_at=datetime.utcnow().isoformat() + "Z"
+                modified_at=datetime.now(timezone.utc).isoformat() + "Z"
             )
             models.append(model)
 

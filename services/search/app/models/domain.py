@@ -1,6 +1,5 @@
 """Domain models for search service."""
 from dataclasses import dataclass, field
-from typing import Optional
 from uuid import UUID
 
 
@@ -15,10 +14,10 @@ class Chunk:
     document_id: UUID
     content: str
     tokens: int
-    score: Optional[float] = None
-    document_title: Optional[str] = None
-    document_filename: Optional[str] = None
-    chunk_index: Optional[int] = None
+    score: float | None = None
+    document_title: str | None = None
+    document_filename: str | None = None
+    chunk_index: int | None = None
     metadata: dict = field(default_factory=dict)
 
     def with_score(self, score: float) -> "Chunk":

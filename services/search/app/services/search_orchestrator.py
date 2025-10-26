@@ -3,6 +3,7 @@
 Extracted from services/api/app/application/use_cases/search_documents.py
 and adapted for search service architecture (removed hexagonal architecture patterns).
 """
+import httpx
 import logging
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,9 +21,15 @@ logger = logging.getLogger(__name__)
 class EmbedderClient:
     """Client for embedder service."""
 
-    def __init__(self, embedder_url: str):
-        """Initialize embedder client."""
+    def __init__(self, embedder_url: str, timeout: float = 30.0):
+        """Initialize embedder client.
+
+        Args:
+            embedder_url: Base URL of embedder service
+            timeout: Request timeout in seconds (default: 30.0)
+        """
         self.embedder_url = embedder_url
+        self.timeout = timeout
 
     async def generate_embedding(self, text: str) -> list[float]:
         """Generate embedding for text via embedder service.
@@ -33,13 +40,10 @@ class EmbedderClient:
         Returns:
             Embedding vector
         """
-        import httpx
-
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
             response = await client.post(
                 f"{self.embedder_url}/api/v1/generate-embeddings",
                 json={"texts": [text]},
-                timeout=30.0
             )
             response.raise_for_status()
             data = response.json()
