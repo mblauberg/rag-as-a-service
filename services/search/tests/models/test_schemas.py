@@ -39,6 +39,31 @@ class TestChunk:
 
         assert chunk.score == 0.95
 
+    def test_chunk_with_score_method_immutability(self):
+        """Test that with_score creates a new instance and doesn't mutate original."""
+        original = Chunk(
+            id=uuid4(),
+            document_id=uuid4(),
+            content="Test content",
+            tokens=5,
+            score=0.5
+        )
+
+        # Create new chunk with different score
+        updated = original.with_score(0.95)
+
+        # Verify original is unchanged
+        assert original.score == 0.5
+        # Verify new chunk has updated score
+        assert updated.score == 0.95
+        # Verify they are different instances
+        assert original is not updated
+        # Verify other fields are the same
+        assert original.id == updated.id
+        assert original.document_id == updated.document_id
+        assert original.content == updated.content
+        assert original.tokens == updated.tokens
+
 
 class TestSearchRequest:
     """Test SearchRequest schema."""
