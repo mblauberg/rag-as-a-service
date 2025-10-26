@@ -43,7 +43,7 @@ async def upload_document(
     title: str = Form(..., description="Document title"),
     description: str | None = Form(None, description="Optional document description"),
     use_case: UploadDocumentUseCase = Depends(get_upload_document_use_case)
-):
+) -> UploadDocumentResponse:
     """Upload a document file with hexagonal architecture.
 
     This endpoint orchestrates the complete document upload workflow:
@@ -155,7 +155,7 @@ async def list_documents(
     page: int = 1,
     limit: int = 20,
     use_case: ListDocumentsUseCase = Depends(get_list_documents_use_case)
-):
+) -> ListDocumentsResponse:
     """Get paginated list of documents.
 
     Args:
@@ -200,7 +200,7 @@ async def list_documents(
 async def get_document(
     document_id: UUID,
     use_case: GetDocumentUseCase = Depends(get_get_document_use_case)
-):
+) -> DocumentDetailResponse:
     """Get a single document with all its chunks.
 
     Args:
@@ -228,7 +228,7 @@ async def get_document(
             title=document.title,
             file_name=document.file_name,
             file_type=document.file_type,
-            file_size=document.file_size,
+            file_size=document.file_size or 0,  # Default to 0 if None
             file_path=document.file_path,
             upload_status=document.upload_status.value,
             embedding_status=document.embedding_status.value if hasattr(document, 'embedding_status') else "completed",
@@ -253,7 +253,7 @@ async def get_document(
 async def delete_document(
     document_id: UUID,
     use_case: DeleteDocumentUseCase = Depends(get_delete_document_use_case)
-):
+) -> None:
     """Delete a document and all associated data.
 
     Removes:

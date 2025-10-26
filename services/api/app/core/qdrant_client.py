@@ -15,7 +15,7 @@ from app.core.config import settings
 class QdrantClientWrapper:
     """Wrapper class for Qdrant async client operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize async Qdrant client."""
         self.client = AsyncQdrantClient(url=settings.qdrant_url)
         self.collection_name = "documents"

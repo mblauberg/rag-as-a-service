@@ -34,7 +34,7 @@ async def search_documents(
         description="Enable cross-encoder reranking for improved precision (default: True, +8-12% precision@10)"
     ),
     use_case: SearchDocumentsUseCase = Depends(get_search_documents_use_case)
-):
+) -> SearchResponse:
     """Perform document search with hybrid retrieval (RECOMMENDED).
 
     This endpoint supports three search modes:

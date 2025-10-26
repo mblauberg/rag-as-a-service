@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class DocumentUploadService:
     """Service handling file I/O operations for document uploads."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize document upload service."""
         self.upload_dir = Path(settings.upload_dir)
         self.upload_dir.mkdir(parents=True, exist_ok=True)

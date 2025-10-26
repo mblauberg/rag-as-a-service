@@ -33,7 +33,7 @@ router = APIRouter()
 
 
 @router.get("/health", response_model=HealthResponse)
-async def health_check():
+async def health_check() -> HealthResponse:
     """
     Basic health check endpoint.
 
@@ -46,7 +46,7 @@ async def health_check():
 @router.get("/ready", response_model=ReadinessResponse)
 async def readiness_check(
     db: AsyncSession = Depends(get_db)
-):
+) -> ReadinessResponse:
     """
     Readiness check that validates connectivity to dependencies.
 

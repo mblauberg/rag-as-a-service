@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/models")
-async def list_models():
+async def list_models() -> dict[str, list[dict[str, str]]]:
     """
     List available LLM models from Generator service.
 

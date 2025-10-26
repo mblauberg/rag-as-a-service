@@ -1,6 +1,8 @@
 """Application configuration with nested Pydantic Settings"""
 
-from pydantic import Field, field_validator
+from typing import Any
+
+from pydantic import Field, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.core.constants import (
@@ -24,14 +26,14 @@ class ChunkingConfig(BaseSettings):
 
     @field_validator("breakpoint_percentile")
     @classmethod
-    def validate_percentile(cls, v):
+    def validate_percentile(cls, v: int) -> int:
         if not 0 <= v <= 100:
             raise ValueError("Percentile must be between 0 and 100")
         return v
 
     @field_validator("max_chunk_size")
     @classmethod
-    def validate_chunk_sizes(cls, v, info):
+    def validate_chunk_sizes(cls, v: int, info: ValidationInfo) -> int:
         if "min_chunk_size" in info.data and v <= info.data["min_chunk_size"]:
             raise ValueError("max_chunk_size must be greater than min_chunk_size")
         return v
@@ -53,7 +55,7 @@ class SearchConfig(BaseSettings):
 
     @field_validator("rrf_weight")
     @classmethod
-    def validate_rrf_weight(cls, v):
+    def validate_rrf_weight(cls, v: float) -> float:
         if not 0.0 <= v <= 1.0:
             raise ValueError("rrf_weight must be between 0.0 and 1.0")
         return v

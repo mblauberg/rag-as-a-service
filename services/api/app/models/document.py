@@ -10,7 +10,7 @@ from app.core.database import Base
 from app.core.enums import EmbeddingStatus, UploadStatus
 
 
-def utcnow():
+def utcnow() -> datetime:
     """Get current UTC time - wrapper for SQLAlchemy default."""
     return datetime.now(UTC)
 

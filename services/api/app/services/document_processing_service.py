@@ -18,7 +18,7 @@ class DocumentProcessingService:
     Coordinates document parsing, chunking, and metadata extraction.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize with all available processors and appropriate chunker based on config."""
         self.processors: dict[DocumentType, BaseDocumentProcessor] = {
             DocumentType.PDF: PDFProcessor(),
