@@ -69,6 +69,10 @@ export const MainPage: React.FC = () => {
     }
   }, [models.data, selectedModel]);
 
+  const handleModelChange = (value: string) => {
+    setSelectedModel(value === 'none' ? null : value);
+  };
+
   const showSearch = searchQuery.length > 0;
   const dataToDisplay = showSearch ? searchResults : documents;
 
@@ -115,7 +119,7 @@ export const MainPage: React.FC = () => {
             value={searchQuery}
             onChange={setSearchQuery}
             selectedModel={selectedModel}
-            onModelChange={setSelectedModel}
+            onModelChange={handleModelChange}
             models={models.data || []}
             modelsLoading={models.isLoading}
             autoFocus
