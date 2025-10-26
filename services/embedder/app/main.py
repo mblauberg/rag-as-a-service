@@ -1,9 +1,11 @@
 """FastAPI application entrypoint for the embedder service."""
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.responses import JSONResponse
 
 from app.core.config import settings
+from app.core.exceptions import RaasException
 from app.services.embedding_service import embedding_service
 from app.models.schemas import (
     EmbedRequest,
@@ -60,6 +62,40 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan
 )
+
+
+@app.exception_handler(RaasException)
+async def raas_exception_handler(
+    request: Request, exc: RaasException
+) -> JSONResponse:
+    """Handle all RAAS custom exceptions with structured responses."""
+    logger.error(
+        f"{exc.__class__.__name__}: {exc.message}",
+        extra={"path": str(request.url.path), "details": exc.details},
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": exc.__class__.__name__,
+            "message": exc.message,
+            "details": exc.details,
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(
+    request: Request, exc: Exception
+) -> JSONResponse:
+    """Catch-all for unexpected errors."""
+    logger.exception("Unexpected error", extra={"path": str(request.url.path)})
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "InternalServerError",
+            "message": "An unexpected error occurred",
+        },
+    )
 
 
 @app.get("/")

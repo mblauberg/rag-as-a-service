@@ -1,10 +1,12 @@
 """FastAPI application entrypoint for Generator service."""
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import settings
+from app.core.exceptions import RaasException
 from app.api.routes import generate, models, health
 from app.providers.registry import ProviderRegistry
 from app.providers.openai_provider import OpenAIProvider
@@ -69,6 +71,40 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(RaasException)
+async def raas_exception_handler(
+    request: Request, exc: RaasException
+) -> JSONResponse:
+    """Handle all RAAS custom exceptions with structured responses."""
+    logger.error(
+        f"{exc.__class__.__name__}: {exc.message}",
+        extra={"path": str(request.url.path), "details": exc.details},
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": exc.__class__.__name__,
+            "message": exc.message,
+            "details": exc.details,
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(
+    request: Request, exc: Exception
+) -> JSONResponse:
+    """Catch-all for unexpected errors."""
+    logger.exception("Unexpected error", extra={"path": str(request.url.path)})
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "InternalServerError",
+            "message": "An unexpected error occurred",
+        },
+    )
 
 # Include routers
 app.include_router(
