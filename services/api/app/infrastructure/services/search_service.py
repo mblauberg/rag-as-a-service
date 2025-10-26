@@ -69,29 +69,50 @@ class SearchServiceClient:
             f"Calling search service: query='{query[:50]}', mode={mode}, top_k={top_k}"
         )
 
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await client.post(
-                f"{self.search_url}/api/v1/search",
-                json=request_data
-            )
-            response.raise_for_status()
-            data = response.json()
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(
+                    f"{self.search_url}/api/v1/search",
+                    json=request_data
+                )
+                response.raise_for_status()
+                data = response.json()
 
-        # Convert response to Chunk entities
-        # Search service returns ChunkResult DTOs, convert to domain entities
-        chunks = []
-        for result in data["results"]:
-            chunk = Chunk(
-                id=UUID(result["chunk_id"]),
-                document_id=UUID(result["document_id"]),
-                content=result["content"],
-                tokens=0,  # Not critical for search results
-                score=result["score"],
-            )
-            # Set optional fields
-            chunk.document_title = result.get("document_title")
-            chunk.chunk_index = result.get("chunk_index")
-            chunks.append(chunk)
+            # Convert response to Chunk entities
+            # Search service returns ChunkResult DTOs, convert to domain entities
+            chunks = []
+            for result in data["results"]:
+                chunk = Chunk(
+                    id=UUID(result["chunk_id"]),
+                    document_id=UUID(result["document_id"]),
+                    content=result["content"],
+                    tokens=0,  # Not critical for search results
+                    score=result["score"],
+                )
+                # Set optional fields
+                chunk.document_title = result.get("document_title")
+                chunk.chunk_index = result.get("chunk_index")
+                chunks.append(chunk)
 
-        logger.info(f"Search service returned {len(chunks)} results")
-        return chunks
+            logger.info(f"Search service returned {len(chunks)} results")
+            return chunks
+
+        except httpx.HTTPStatusError as e:
+            # Add context to HTTP errors
+            error_msg = f"Search service HTTP error (status={e.response.status_code}): {str(e)}"
+            logger.error(error_msg)
+            raise httpx.HTTPStatusError(
+                message=error_msg,
+                request=e.request,
+                response=e.response,
+            ) from e
+        except httpx.RequestError as e:
+            # Add context to connection errors
+            error_msg = f"Search service connection error (url={self.search_url}): {str(e)}"
+            logger.error(error_msg)
+            raise httpx.RequestError(message=error_msg, request=e.request) from e
+        except Exception as e:
+            # Add context to unexpected errors
+            error_msg = f"Search service unexpected error: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            raise RuntimeError(error_msg) from e

@@ -1,15 +1,13 @@
 """Tests for QdrantVectorStore implementation.
 
-Uses mocked QdrantClient to test vector store operations without
-requiring an actual Qdrant instance.
+Uses mocked QdrantClient to test vector store upsert and delete operations.
+Search functionality has been moved to the dedicated search microservice.
 """
-from typing import List
-from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import UUID, uuid4
+from unittest.mock import AsyncMock
+from uuid import uuid4
 
 import pytest
-from qdrant_client.models import (FieldCondition, Filter, MatchValue,
-                                  PointStruct, ScoredPoint)
+from qdrant_client.models import FieldCondition, Filter, MatchValue, PointStruct
 
 from app.core.exceptions import VectorStoreError
 from app.domain.entities.chunk import Chunk
@@ -190,160 +188,6 @@ async def test_upsert_client_error_raises_vector_store_error(
 
     assert "upsert" in str(exc_info.value).lower()
     assert exc_info.value.original_error is not None
-
-
-@pytest.mark.asyncio
-async def test_search_success(vector_store, mock_qdrant_client):
-    """Test successful vector search."""
-    # Arrange
-    query_vector = [0.2, 0.3, 0.4, 0.3, 0.2]
-    doc_id = uuid4()
-
-    # Mock search response
-    mock_scored_points = [
-        ScoredPoint(
-            id=str(uuid4()),
-            score=0.95,
-            version=1,
-            payload={
-                "document_id": str(doc_id),
-                "content": "Matching chunk",
-                "tokens": 8,
-                "metadata": {},
-                "section_title": None,
-                "section_level": None,
-                "page_number": None,
-            },
-            vector=None,
-        ),
-        ScoredPoint(
-            id=str(uuid4()),
-            score=0.87,
-            version=1,
-            payload={
-                "document_id": str(doc_id),
-                "content": "Another match",
-                "tokens": 10,
-                "metadata": {"page": 1},
-                "section_title": "Intro",
-                "section_level": 1,
-                "page_number": 1,
-            },
-            vector=None,
-        ),
-    ]
-    mock_qdrant_client.search = AsyncMock(return_value=mock_scored_points)
-
-    # Act
-    results = await vector_store.search(
-        query_vector=query_vector, top_k=5, document_id=None
-    )
-
-    # Assert
-    mock_qdrant_client.search.assert_called_once()
-    call_args = mock_qdrant_client.search.call_args
-
-    assert call_args.kwargs["collection_name"] == "test_collection"
-    assert call_args.kwargs["query_vector"] == query_vector
-    assert call_args.kwargs["limit"] == 5
-    assert call_args.kwargs["query_filter"] is None
-
-    # Verify results
-    assert len(results) == 2
-    assert isinstance(results[0], Chunk)
-    assert results[0].content == "Matching chunk"
-    assert results[0].tokens == 8
-    assert results[1].content == "Another match"
-    assert results[1].section_title == "Intro"
-
-
-@pytest.mark.asyncio
-async def test_search_with_document_filter(vector_store, mock_qdrant_client):
-    """Test search with document_id filter."""
-    # Arrange
-    query_vector = [0.1, 0.2, 0.3]
-    doc_id = uuid4()
-    mock_qdrant_client.search = AsyncMock(return_value=[])
-
-    # Act
-    await vector_store.search(query_vector=query_vector, top_k=10, document_id=doc_id)
-
-    # Assert
-    call_args = mock_qdrant_client.search.call_args
-    query_filter = call_args.kwargs["query_filter"]
-
-    # Verify filter structure
-    assert query_filter is not None
-    assert isinstance(query_filter, Filter)
-    assert len(query_filter.must) == 1
-
-    field_condition = query_filter.must[0]
-    assert isinstance(field_condition, FieldCondition)
-    assert field_condition.key == "document_id"
-    assert isinstance(field_condition.match, MatchValue)
-    assert field_condition.match.value == str(doc_id)
-
-
-@pytest.mark.asyncio
-async def test_search_uuid_conversion(vector_store, mock_qdrant_client):
-    """Test that UUIDs are properly converted from strings in results."""
-    # Arrange
-    chunk_id = uuid4()
-    doc_id = uuid4()
-
-    mock_scored_point = ScoredPoint(
-        id=str(chunk_id),
-        score=0.95,
-        version=1,
-        payload={
-            "document_id": str(doc_id),
-            "content": "Test",
-            "tokens": 5,
-            "metadata": {},
-            "section_title": None,
-            "section_level": None,
-            "page_number": None,
-        },
-        vector=None,
-    )
-    mock_qdrant_client.search = AsyncMock(return_value=[mock_scored_point])
-
-    # Act
-    results = await vector_store.search([0.1, 0.2], top_k=1)
-
-    # Assert
-    assert results[0].id == chunk_id
-    assert results[0].document_id == doc_id
-    assert isinstance(results[0].id, UUID)
-    assert isinstance(results[0].document_id, UUID)
-
-
-@pytest.mark.asyncio
-async def test_search_empty_results(vector_store, mock_qdrant_client):
-    """Test search with no matching results."""
-    # Arrange
-    mock_qdrant_client.search = AsyncMock(return_value=[])
-
-    # Act
-    results = await vector_store.search([0.1, 0.2, 0.3], top_k=5)
-
-    # Assert
-    assert results == []
-
-
-@pytest.mark.asyncio
-async def test_search_client_error_raises_vector_store_error(
-    vector_store, mock_qdrant_client
-):
-    """Test that search errors are wrapped in VectorStoreError."""
-    # Arrange
-    mock_qdrant_client.search = AsyncMock(side_effect=Exception("Search failed"))
-
-    # Act & Assert
-    with pytest.raises(VectorStoreError) as exc_info:
-        await vector_store.search([0.1, 0.2], top_k=5)
-
-    assert "search" in str(exc_info.value).lower()
 
 
 @pytest.mark.asyncio

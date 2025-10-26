@@ -21,7 +21,13 @@ class VectorSearchService:
         """
         self.qdrant_url = qdrant_url
         self.collection_name = collection_name
-        self.client: AsyncQdrantClient | None = None
+        # Initialize persistent client to avoid resource leak
+        self._client = AsyncQdrantClient(url=self.qdrant_url)
+
+    @property
+    def client(self) -> AsyncQdrantClient:
+        """Get Qdrant client instance."""
+        return self._client
 
     async def search(
         self,
@@ -39,41 +45,42 @@ class VectorSearchService:
         Returns:
             List of chunks ordered by similarity
         """
-        async with AsyncQdrantClient(url=self.qdrant_url) as client:
-            # Build filter if document_id provided
-            query_filter = None
-            if document_id:
-                query_filter = Filter(
-                    must=[
-                        FieldCondition(
-                            key="document_id",
-                            match=MatchValue(value=str(document_id))
-                        )
-                    ]
-                )
+        client = self.client
 
-            # Execute search
-            results = await client.search(
-                collection_name=self.collection_name,
-                query_vector=query_vector,
-                limit=top_k,
-                query_filter=query_filter
+        # Build filter if document_id provided
+        query_filter = None
+        if document_id:
+            query_filter = Filter(
+                must=[
+                    FieldCondition(
+                        key="document_id",
+                        match=MatchValue(value=str(document_id))
+                    )
+                ]
             )
 
-            # Convert to Chunk objects
-            chunks = []
-            for result in results:
-                chunk = Chunk(
-                    id=UUID(result.id),
-                    document_id=UUID(result.payload["document_id"]),
-                    content=result.payload["content"],
-                    tokens=result.payload.get("tokens", 0),
-                    score=result.score,
-                    document_title=result.payload.get("document_title"),
-                    document_filename=result.payload.get("document_filename"),
-                    chunk_index=result.payload.get("chunk_index")
-                )
-                chunks.append(chunk)
+        # Execute search
+        results = await client.search(
+            collection_name=self.collection_name,
+            query_vector=query_vector,
+            limit=top_k,
+            query_filter=query_filter
+        )
 
-            logger.info(f"Vector search returned {len(chunks)} results")
-            return chunks
+        # Convert to Chunk objects
+        chunks = []
+        for result in results:
+            chunk = Chunk(
+                id=UUID(result.id),
+                document_id=UUID(result.payload["document_id"]),
+                content=result.payload["content"],
+                tokens=result.payload.get("tokens", 0),
+                score=result.score,
+                document_title=result.payload.get("document_title"),
+                document_filename=result.payload.get("document_filename"),
+                chunk_index=result.payload.get("chunk_index")
+            )
+            chunks.append(chunk)
+
+        logger.info(f"Vector search returned {len(chunks)} results")
+        return chunks

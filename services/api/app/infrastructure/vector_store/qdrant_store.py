@@ -1,7 +1,8 @@
 """Qdrant vector store implementation.
 
 Implements the VectorStore port using Qdrant as the vector database.
-Handles chunk vector storage, similarity search, and deletion operations.
+Handles chunk vector storage and deletion operations.
+Search is now delegated to the dedicated search microservice.
 """
 from uuid import UUID
 
@@ -17,8 +18,9 @@ from app.ports.services import VectorStore
 class QdrantVectorStoreImpl(VectorStore):
     """Qdrant implementation of VectorStore port.
 
-    Uses Qdrant async client to store and retrieve chunk embeddings.
-    Stores chunk metadata as payload for filtering and reconstruction.
+    Uses Qdrant async client to store chunk embeddings for document upload.
+    Stores chunk metadata as payload.
+    Search operations are handled by the dedicated search microservice.
     """
 
     def __init__(self, client: AsyncQdrantClient, collection_name: str) -> None:
@@ -82,69 +84,6 @@ class QdrantVectorStoreImpl(VectorStore):
             raise
         except Exception as e:
             raise VectorStoreError(operation="upsert", original_error=e) from e
-
-    async def search(
-        self, query_vector: list[float], top_k: int, document_id: UUID | None = None
-    ) -> list[Chunk]:
-        """Search for similar vectors in Qdrant.
-
-        Args:
-            query_vector: Query embedding vector
-            top_k: Number of results to return
-            document_id: Optional filter by document
-
-        Returns:
-            List of most similar chunks (ordered by similarity)
-
-        Raises:
-            VectorStoreError: If search operation fails
-        """
-        try:
-            # Build filter if document_id provided
-            query_filter = None
-            if document_id is not None:
-                query_filter = Filter(
-                    must=[
-                        FieldCondition(
-                            key="document_id", match=MatchValue(value=str(document_id))
-                        )
-                    ]
-                )
-
-            # Search Qdrant
-            results = await self.client.search(
-                collection_name=self.collection_name,
-                query_vector=query_vector,
-                limit=top_k,
-                query_filter=query_filter,
-            )
-
-            # Convert results to Chunk entities with similarity scores
-            chunks = []
-            for scored_point in results:
-                payload = scored_point.payload
-
-                chunk = Chunk(
-                    id=UUID(scored_point.id),
-                    document_id=UUID(payload["document_id"]),
-                    content=payload["content"],
-                    tokens=payload["tokens"],
-                    metadata=payload.get("metadata", {}),
-                    section_title=payload.get("section_title"),
-                    section_level=payload.get("section_level"),
-                    page_number=payload.get("page_number"),
-                    # Note: We don't retrieve embedding_vector from search results
-                    # to save bandwidth - it can be regenerated if needed
-                    embedding_vector=None,
-                    # Attach Qdrant similarity score (cosine similarity: -1 to 1, typically 0.5-1.0)
-                    score=scored_point.score,
-                )
-                chunks.append(chunk)
-
-            return chunks
-
-        except Exception as e:
-            raise VectorStoreError(operation="search", original_error=e) from e
 
     async def delete_by_document(self, document_id: UUID) -> None:
         """Delete all vectors for a document.

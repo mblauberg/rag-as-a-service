@@ -3,13 +3,18 @@
 Extracted from services/api/app/infrastructure/reranking/cross_encoder_reranker.py
 and adapted for search service architecture.
 """
+import asyncio
 import logging
+from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 from sentence_transformers import CrossEncoder
 
 from app.models.domain import Chunk
 
 logger = logging.getLogger(__name__)
+
+# Shared thread pool for CPU-intensive reranking operations
+_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="reranker")
 
 
 class CrossEncoderReranker:
@@ -32,6 +37,20 @@ class CrossEncoderReranker:
         self.model = CrossEncoder(model_name, device='cpu')
         logger.info("Cross-encoder model loaded")
 
+    def _compute_scores(self, pairs: list[tuple[str, str]]) -> np.ndarray:
+        """Compute cross-encoder scores in thread pool.
+
+        This is CPU-intensive, so we run it in a thread executor
+        to avoid blocking the async event loop.
+
+        Args:
+            pairs: List of (query, chunk) pairs
+
+        Returns:
+            Array of raw scores
+        """
+        return self.model.predict(pairs)
+
     async def rerank(self, query: str, chunks: list[Chunk], top_k: int) -> list[Chunk]:
         """Rerank chunks using cross-encoder scores.
 
@@ -40,6 +59,9 @@ class CrossEncoderReranker:
 
         Attaches normalized cross-encoder relevance scores (0-1) to chunk.score field.
         Uses min-max normalization to map raw scores to [0, 1] range.
+
+        Runs CPU-intensive model inference in thread executor to avoid blocking
+        the async event loop.
 
         Args:
             query: Search query
@@ -55,8 +77,9 @@ class CrossEncoderReranker:
         # Create query-chunk pairs
         pairs = [(query, chunk.content) for chunk in chunks]
 
-        # Score all pairs (batch processing)
-        raw_scores = self.model.predict(pairs)
+        # Score all pairs (batch processing) in thread executor
+        loop = asyncio.get_running_loop()
+        raw_scores = await loop.run_in_executor(_executor, self._compute_scores, pairs)
 
         # Normalize scores to 0-1 range using min-max normalization
         min_score = float(np.min(raw_scores))

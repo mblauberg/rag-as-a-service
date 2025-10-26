@@ -29,7 +29,11 @@ class EmbeddingService(ABC):
 
 
 class VectorStore(ABC):
-    """Port for vector database operations."""
+    """Port for vector database operations.
+
+    Used only for document upload/delete operations.
+    Search is now handled by the dedicated search microservice.
+    """
 
     @abstractmethod
     async def upsert(self, chunks: list[Chunk]) -> None:
@@ -40,22 +44,6 @@ class VectorStore(ABC):
 
         Raises:
             VectorStoreError: If upsert operation fails
-        """
-        pass
-
-    @abstractmethod
-    async def search(
-        self, query_vector: list[float], top_k: int, document_id: UUID | None = None
-    ) -> list[Chunk]:
-        """Search for similar vectors.
-
-        Args:
-            query_vector: Query embedding vector
-            top_k: Number of results to return
-            document_id: Optional filter by document
-
-        Returns:
-            List of most similar chunks (ordered by similarity)
         """
         pass
 
@@ -134,54 +122,6 @@ class TextChunker(ABC):
         pass
 
 
-class KeywordStore(ABC):
-    """Port for keyword-based (lexical) search.
-
-    Implementations use BM25, TF-IDF, or full-text search
-    to find chunks matching query keywords.
-    """
-
-    @abstractmethod
-    async def search(
-        self, query_text: str, top_k: int, document_id: UUID | None = None
-    ) -> list[Chunk]:
-        """Search using keyword matching.
-
-        Args:
-            query_text: Raw query string
-            top_k: Number of results to return
-            document_id: Optional document filter
-
-        Returns:
-            List of chunks ranked by keyword relevance
-        """
-        pass
-
-
-class FusionService(ABC):
-    """Port for fusing multiple ranked result lists.
-
-    Uses algorithms like Reciprocal Rank Fusion (RRF)
-    to combine results from different retrieval methods.
-    """
-
-    @abstractmethod
-    def fuse(
-        self, result_sets: list[list[Chunk]], method: str = "rrf", k: int = 60
-    ) -> list[Chunk]:
-        """Fuse multiple ranked lists into one.
-
-        Args:
-            result_sets: List of ranked chunk lists
-            method: Fusion algorithm ("rrf" or "weighted")
-            k: RRF constant (default 60, research-proven)
-
-        Returns:
-            Single fused and ranked list
-        """
-        pass
-
-
 class QueryAugmenter(ABC):
     """Port for query expansion and augmentation.
 
@@ -202,27 +142,5 @@ class QueryAugmenter(ABC):
 
         Returns:
             List containing original + variant queries
-        """
-        pass
-
-
-class Reranker(ABC):
-    """Port for reranking search results.
-
-    Uses more expensive but accurate models (cross-encoders)
-    to rerank an initial candidate set.
-    """
-
-    @abstractmethod
-    async def rerank(self, query: str, chunks: list[Chunk], top_k: int) -> list[Chunk]:
-        """Rerank chunks using query-document relevance.
-
-        Args:
-            query: Search query
-            chunks: Initial candidate chunks
-            top_k: Number of top results to return
-
-        Returns:
-            Reranked list of top_k chunks
         """
         pass

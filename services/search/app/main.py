@@ -72,15 +72,22 @@ async def health_check():
 
 
 @app.get("/api/v1/ready", response_model=ReadinessResponse)
-async def readiness_check():
+async def readiness_check(db: AsyncSession = Depends(get_db)):
     """Readiness check endpoint."""
     try:
         # Check if reranker is loaded
         reranker = get_reranker()
         models_loaded = reranker.model is not None
 
-        # TODO: Check database connection
-        database_connected = True
+        # Check database connection
+        database_connected = False
+        try:
+            # Execute simple query to verify database connectivity
+            from sqlalchemy import text
+            await db.execute(text("SELECT 1"))
+            database_connected = True
+        except Exception as db_error:
+            logger.warning(f"Database connection check failed: {db_error}")
 
         status_value = "ready" if (models_loaded and database_connected) else "not_ready"
 
