@@ -35,7 +35,6 @@ class DocumentProcessingService:
             max_chunk_size=settings.chunking.max_chunk_size,
             breakpoint_percentile=settings.chunking.breakpoint_percentile
         )
-        self.use_async_chunker = True
 
     def get_processor(self, document_type: DocumentType) -> BaseDocumentProcessor:
         """
@@ -143,7 +142,7 @@ class DocumentProcessingService:
         section_context: str = None
     ) -> list[dict[str, Any]]:
         """
-        Chunk text using the configured chunker (handles both sync and async chunkers).
+        Chunk text using the configured SemanticChunker.
 
         Args:
             text: Text to chunk
@@ -152,18 +151,14 @@ class DocumentProcessingService:
         Returns:
             List of dicts with 'content' and 'tokens' keys
         """
-        if self.use_async_chunker:
-            # Use async SemanticChunker
-            chunk_results = await self.chunker.chunk_text(text)
+        # Use async SemanticChunker
+        chunk_results = await self.chunker.chunk_text(text)
 
-            # Convert ChunkResult objects to expected format
-            return [
-                {
-                    'content': chunk.text,
-                    'tokens': chunk.token_count or len(chunk.text.split())
-                }
-                for chunk in chunk_results
-            ]
-        else:
-            # Use legacy synchronous chunker
-            return self.chunker.chunk_with_metadata(text, section_context)
+        # Convert ChunkResult objects to expected format
+        return [
+            {
+                'content': chunk.text,
+                'tokens': chunk.token_count or len(chunk.text.split())
+            }
+            for chunk in chunk_results
+        ]
