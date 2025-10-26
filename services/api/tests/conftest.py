@@ -291,6 +291,8 @@ async def sample_document_with_chunks(db_session) -> DocumentModel:
 
     Returns a DocumentModel instance with associated chunks for testing.
     """
+    from datetime import datetime, UTC
+
     document = DocumentModel(
         id=uuid4(),
         title="Test Document with Chunks",
@@ -301,6 +303,7 @@ async def sample_document_with_chunks(db_session) -> DocumentModel:
         file_path="/test/path/test.pdf",
         upload_status="completed",
         embedding_status="completed",
+        created_at=datetime.now(UTC),
     )
 
     db_session.add(document)

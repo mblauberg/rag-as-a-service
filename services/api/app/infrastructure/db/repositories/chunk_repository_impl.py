@@ -125,12 +125,16 @@ class ChunkRepositoryImpl(ChunkRepository):
         Returns:
             Chunk domain entity
         """
+        metadata = model.chunk_metadata or {}
+        # Add chunk_index to metadata for use in summary generation
+        metadata['chunk_index'] = model.chunk_index
+
         return Chunk(
             id=model.id,
             document_id=model.document_id,
             content=model.chunk_text,
             tokens=model.token_count or 0,
-            metadata=model.chunk_metadata or {},  # Ensure not None
+            metadata=metadata,
             section_title=model.section_title,
             section_level=model.section_level,
             page_number=model.page_number,

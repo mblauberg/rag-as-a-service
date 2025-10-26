@@ -41,6 +41,7 @@ from app.infrastructure.services.generation_service import \
     HTTPGenerationService
 from app.infrastructure.vector_store.qdrant_store import QdrantVectorStoreImpl
 # Ports
+from app.ports.repositories import ChunkRepository
 from app.ports.services import (EmbeddingService, FusionService,
                                 GenerationService, KeywordStore,
                                 QueryAugmenter, Reranker, VectorStore)
@@ -225,3 +226,11 @@ def get_search_documents_use_case(
         query_augmenter=query_augmenter,
         reranker=reranker,
     )
+
+
+# Chunk Repository
+async def get_chunk_repository(
+    session: AsyncSession = Depends(get_db),
+) -> ChunkRepository:
+    """Get chunk repository instance."""
+    return ChunkRepositoryImpl(session)
