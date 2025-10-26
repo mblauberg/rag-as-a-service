@@ -6,7 +6,7 @@ from app.models.schemas import ChunkInput, Model
 
 
 @pytest.mark.asyncio
-async def test_generate_summary_success():
+async def test_generate_summary_with_valid_chunks_returns_summary():
     """Test successful summary generation."""
     chunks = [
         ChunkInput(text="ML is AI", document_id="doc1", chunk_index=0),
@@ -36,7 +36,7 @@ async def test_generate_summary_success():
 
 
 @pytest.mark.asyncio
-async def test_generate_summary_with_default_model():
+async def test_generate_summary_without_model_specified_uses_default():
     """Test generation falls back to default model."""
     chunks = [ChunkInput(text="Test", document_id="doc1", chunk_index=0)]
     query = "Test query"
@@ -57,7 +57,7 @@ async def test_generate_summary_with_default_model():
 
 
 @pytest.mark.asyncio
-async def test_list_available_models():
+async def test_list_available_models_returns_all_provider_models():
     """Test listing available models."""
     mock_models = [
         Model(
