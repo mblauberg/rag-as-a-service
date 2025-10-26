@@ -82,22 +82,22 @@ docker run -p 8000:8000 --env-file .env raas-api:latest
 
 ### Documents
 
-- `POST /api/v1/documents/upload` - Upload a document
-- `GET /api/v1/documents` - List documents (paginated)
-- `GET /api/v1/documents/{id}` - Get document details
-- `DELETE /api/v1/documents/{id}` - Delete document
+- `POST /api/v1/documents` - Upload a document with automatic chunking and embedding
+- `GET /api/v1/documents` - List all documents (paginated)
+- `GET /api/v1/documents/{id}` - Get document details with chunks
+- `DELETE /api/v1/documents/{id}` - Delete document and all associated data
 
 ### Search
 
-- `POST /api/v1/search` - Perform semantic search
+- `POST /api/v1/search` - Hybrid semantic + keyword search with optional AI summarization
 
 ### Models
 
-- `GET /api/v1/models` - List available LLM models
+- `GET /api/v1/models` - List available LLM models from all enabled providers
 
 ### Health
 
-- `GET /api/v1/health` - Health check
+- `GET /api/v1/health` - Liveness check
 - `GET /api/v1/health/ready` - Readiness check
 
 ## Documentation
@@ -131,5 +131,26 @@ Required variables:
 - `GENERATOR_URL` - Generator service URL (for RAG responses)
 
 ## Architecture
+
+This service follows **Hexagonal Architecture** (Ports and Adapters):
+
+**Layers:**
+- **Domain** (`app/domain/`): Core business entities (Document, Chunk) and value objects (SearchQuery)
+- **Application** (`app/application/`): Use cases orchestrating business logic
+  - `UploadDocumentUseCase`: Handle document upload, chunking, embedding
+  - `SearchDocumentsUseCase`: Execute hybrid search with optional summarization
+  - `ListDocumentsUseCase`: Retrieve paginated document list
+  - `DeleteDocumentUseCase`: Remove documents and cleanup
+- **Infrastructure** (`app/infrastructure/`): External system adapters
+  - Repositories: PostgreSQL data access
+  - Services: Embedder/Generator HTTP clients
+  - Vector Store: Qdrant integration
+- **API** (`app/api/`): HTTP routes and DTOs
+- **Ports** (`app/ports/`): Interface definitions for external dependencies
+
+**Benefits:**
+- Testable: Business logic independent of frameworks
+- Flexible: Swap implementations via dependency injection
+- SOLID: Single Responsibility, Dependency Inversion throughout
 
 For comprehensive architecture details, see the root [README.md](../../README.md).
