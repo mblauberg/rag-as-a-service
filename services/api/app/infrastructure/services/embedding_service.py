@@ -33,19 +33,48 @@ class HTTPEmbeddingService(EmbeddingService):
         retry=retry_if_exception_type(ServiceUnavailableError),
     )
     async def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
-        """Generate vector embeddings for texts via HTTP with retry logic.
+        """Generate vector embeddings via embedder microservice with retry logic.
 
-        Retries up to 3 times with exponential backoff (2-10s) on service unavailability.
+        Calls the embedder service to generate dense vector representations
+        of text using sentence-transformers models (e.g., all-MiniLM-L6-v2).
+
+        Implements resilient retry logic with exponential backoff:
+        - Retries up to 3 times on service unavailability (503 errors)
+        - Exponential backoff: 2s, 4s, 8s (max 10s between retries)
+        - Immediate failure for validation errors (no retry)
+
+        The embedder service uses CPU-optimized sentence-transformers for
+        batch embedding generation, supporting various model architectures
+        (MiniLM, BERT, RoBERTa, etc.).
 
         Args:
-            texts: List of text strings to embed
+            texts: List of text strings to embed (chunks, queries, etc.).
+                Sent to embedder service in batch for efficiency.
 
         Returns:
-            List of embedding vectors (one per input text)
+            List of embedding vectors (one per input text). Each vector is
+            a list of floats with dimensionality matching the model
+            (e.g., 384 for all-MiniLM-L6-v2, 768 for BERT-base).
 
         Raises:
-            ServiceUnavailableError: If embedding service is unavailable (will retry)
-            EmbeddingServiceError: If embedding generation fails for other reasons
+            ServiceUnavailableError: If embedder service unavailable after
+                3 retry attempts. Includes original httpx exception.
+            ValidationError: If request validation fails, response parsing
+                fails, or embedding count doesn't match input count.
+                These errors do NOT trigger retry.
+            EmbeddingServiceError: Base exception for other embedding errors.
+
+        Note:
+            The @retry decorator automatically retries on ServiceUnavailableError.
+            ValidationError is used to prevent retry for non-transient failures.
+
+        Example:
+            >>> service = HTTPEmbeddingService("http://embedder:8001")
+            >>> embeddings = await service.generate_embeddings(
+            ...     ["hello world", "semantic search"]
+            ... )
+            >>> print(f"Generated {len(embeddings)} embeddings")
+            >>> print(f"Dimension: {len(embeddings[0])}")
         """
         try:
             async with httpx.AsyncClient() as client:

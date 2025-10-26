@@ -26,13 +26,38 @@ class RRFFusionService:
         self.k = k
 
     def fuse(self, result_sets: list[list[Chunk]]) -> list[Chunk]:
-        """Fuse multiple ranked lists using RRF.
+        """Fuse multiple ranked lists using Reciprocal Rank Fusion algorithm.
+
+        Implements RRF (Cormack et al., SIGIR 2009) to merge results from
+        different retrieval methods without requiring score normalization:
+
+        For each chunk across all result sets:
+            RRF_score = sum(1 / (k + rank_in_list))
+
+        where k=60 is the RRF constant and rank starts at 1.
+
+        RRF is particularly effective for hybrid search because:
+        - No score normalization needed (vector scores vs keyword scores)
+        - Robust to outliers in individual rankings
+        - Balances contribution from all result sets
+        - Research-proven to outperform Condorcet and score-based fusion
 
         Args:
-            result_sets: List of ranked chunk lists to fuse
+            result_sets: List of ranked chunk lists to fuse. Each list should
+                be pre-sorted by descending relevance. Can come from different
+                retrieval methods (e.g., [vector_results, keyword_results]).
 
         Returns:
-            Single fused list ranked by RRF score
+            Single fused list of unique chunks, sorted by RRF score (descending).
+            Chunks appearing in multiple input lists receive higher scores due
+            to additive RRF formula.
+
+        Example:
+            >>> fusion = RRFFusionService(k=60)
+            >>> vector_results = [chunk1, chunk2, chunk3]
+            >>> keyword_results = [chunk2, chunk4, chunk1]
+            >>> fused = fusion.fuse([vector_results, keyword_results])
+            >>> # chunk2 and chunk1 rank higher (appear in both lists)
         """
         if not result_sets:
             return []
