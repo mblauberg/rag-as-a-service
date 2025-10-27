@@ -58,7 +58,7 @@ class GoogleProvider(ModelProvider):
                 size=str(m["size"]),
                 description=str(m["description"]),
                 capabilities=list(m["capabilities"]),
-                modified_at=datetime.now(timezone.utc).isoformat() + "Z"
+                modified_at=datetime.now(timezone.utc).isoformat()
             )
             models.append(model)
 
@@ -70,8 +70,8 @@ class GoogleProvider(ModelProvider):
 
         Args:
             model: Gemini model name (e.g., "google:gemini-2-5-pro")
-            prompt: User query
-            context: Retrieved context
+            prompt: User query (unused, query is already in context)
+            context: Complete RAG prompt with instructions, chunks, and query
 
         Returns:
             Generated summary
@@ -86,18 +86,12 @@ class GoogleProvider(ModelProvider):
         # "google:gemini-2-5-pro" -> "gemini-2.5-pro"
         api_model = model.replace("google:", "").replace("-", ".", 1).replace("-", ".", 1)
 
-        # Construct prompt
-        full_prompt = f"""Based on the following context, answer this query: {prompt}
-
-Context:
-{context}
-
-Provide a concise, accurate summary."""
+        # Use context directly - it's already a complete prompt from PromptService
 
         try:
             model_instance = genai.GenerativeModel(api_model)
             response = await model_instance.generate_content_async(
-                full_prompt,
+                context,
                 generation_config={
                     "temperature": 0.3,
                     "max_output_tokens": 500

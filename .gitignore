@@ -50,6 +50,14 @@ ENV/
 env.bak/
 venv.bak/
 
+# Secret files (API keys, credentials)
+.secrets.env
+*.secrets.env
+secrets.env
+*.secret
+.secret
+*/secret.yaml
+
 # IDE
 .idea/
 .vscode/

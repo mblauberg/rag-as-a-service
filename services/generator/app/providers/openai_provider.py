@@ -68,7 +68,7 @@ class OpenAIProvider(ModelProvider):
                 size=str(m["size"]),
                 description=str(m["description"]),
                 capabilities=list(m["capabilities"]),
-                modified_at=datetime.now(timezone.utc).isoformat() + "Z"
+                modified_at=datetime.now(timezone.utc).isoformat()
             )
             models.append(model)
 
@@ -80,8 +80,8 @@ class OpenAIProvider(ModelProvider):
 
         Args:
             model: OpenAI model name (e.g., "openai:gpt-5")
-            prompt: User query
-            context: Retrieved context
+            prompt: User query (unused, query is already in context)
+            context: Complete RAG prompt with instructions, chunks, and query
 
         Returns:
             Generated summary
@@ -95,21 +95,15 @@ class OpenAIProvider(ModelProvider):
         # Strip "openai:" prefix for API call
         api_model = model.replace("openai:", "")
 
-        # Construct messages
+        # Use context directly - it's already a complete prompt from PromptService
         system_message = "You are a helpful assistant that summarizes document search results."
-        user_message = f"""Based on the following context, answer this query: {prompt}
-
-Context:
-{context}
-
-Provide a concise, accurate summary."""
 
         try:
             response = await self.client.chat.completions.create(
                 model=api_model,
                 messages=[
                     {"role": "system", "content": system_message},
-                    {"role": "user", "content": user_message}
+                    {"role": "user", "content": context}
                 ],
                 max_completion_tokens=500
             )

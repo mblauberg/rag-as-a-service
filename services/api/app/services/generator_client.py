@@ -47,7 +47,7 @@ class GeneratorClient:
         Raises:
             ServiceUnavailableError: If generator service is unavailable (will retry)
         """
-        url = f"{self.base_url}/api/v1/generate"
+        url = f"{self.base_url}/api/v1/generate/"
 
         # Format chunks for generator
         chunk_inputs = [
@@ -119,7 +119,7 @@ class GeneratorClient:
         Raises:
             ServiceUnavailableError: If generator service is unavailable (will retry)
         """
-        url = f"{self.base_url}/api/v1/generate"
+        url = f"{self.base_url}/api/v1/generate/"
 
         payload = {
             "prompt": prompt,
@@ -182,7 +182,7 @@ class GeneratorClient:
             ServiceUnavailableError: If the generator service is unavailable (will retry)
             GenerationServiceError: If the generator service returns an error
         """
-        url = f"{self.base_url}/api/v1/models"
+        url = f"{self.base_url}/api/v1/models/"
 
         try:
             async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:

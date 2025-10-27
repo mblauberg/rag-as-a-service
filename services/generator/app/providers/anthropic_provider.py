@@ -62,7 +62,7 @@ class AnthropicProvider(ModelProvider):
                 size=str(m["size"]),
                 description=str(m["description"]),
                 capabilities=list(m["capabilities"]),
-                modified_at=datetime.now(timezone.utc).isoformat() + "Z"
+                modified_at=datetime.now(timezone.utc).isoformat()
             )
             models.append(model)
 
@@ -74,8 +74,8 @@ class AnthropicProvider(ModelProvider):
 
         Args:
             model: Claude model name (e.g., "anthropic:claude-sonnet-4-5")
-            prompt: User query
-            context: Retrieved context
+            prompt: User query (unused, query is already in context)
+            context: Complete RAG prompt with instructions, chunks, and query
 
         Returns:
             Generated summary
@@ -89,13 +89,7 @@ class AnthropicProvider(ModelProvider):
         # Strip "anthropic:" prefix for API call
         api_model = model.replace("anthropic:", "")
 
-        # Construct user message
-        user_message = f"""Based on the following context, answer this query: {prompt}
-
-Context:
-{context}
-
-Provide a concise, accurate summary."""
+        # Use context directly - it's already a complete prompt from PromptService
 
         try:
             response = await self.client.messages.create(
@@ -103,7 +97,7 @@ Provide a concise, accurate summary."""
                 max_tokens=500,
                 temperature=0.3,
                 messages=[
-                    {"role": "user", "content": user_message}
+                    {"role": "user", "content": context}
                 ]
             )
 

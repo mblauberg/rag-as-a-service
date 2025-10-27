@@ -17,7 +17,8 @@ export function useSummaryGeneration(
   chunkIds: string[],
   model: string | null
 ) {
-  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  // Use relative URLs to leverage Vite's proxy in development
+  const baseURL = import.meta.env.VITE_API_URL || '';
 
   return useQuery<GenerateSummaryResponse>({
     queryKey: ['summary', query, chunkIds, model],

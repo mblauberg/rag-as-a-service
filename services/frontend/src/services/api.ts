@@ -14,7 +14,9 @@ class ApiClient {
   private client: AxiosInstance;
 
   constructor() {
-    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    // Use relative URLs to leverage Vite's proxy in development
+    // and direct paths in production (served from same origin)
+    const baseURL = import.meta.env.VITE_API_URL || '';
 
     this.client = axios.create({
       baseURL,
