@@ -65,7 +65,36 @@ Year: 2025
 
 ## Quick Start
 
-### Local Development
+### Prerequisites
+
+- Docker 24.0+ and Docker Compose 2.0+
+- Python 3.13+ and Poetry (for local dev)
+- Node.js 18+ (for frontend dev)
+- **OpenAI API Key** (required for AI summaries)
+
+### Setup
+
+1. **Configure API Keys**
+
+```bash
+# Copy environment template
+cp infrastructure/docker-compose/.env.example infrastructure/docker-compose/.env
+
+# Edit .env and add your API keys
+# Required:
+OPENAI_API_KEY=sk-your-key-here
+
+# Optional (for alternative providers):
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+GOOGLE_API_KEY=your-key-here
+```
+
+Get API keys:
+- OpenAI: https://platform.openai.com/api-keys
+- Anthropic: https://console.anthropic.com/settings/keys
+- Google: https://makersuite.google.com/app/apikey
+
+2. **Start Services**
 
 ```bash
 # Start all services
@@ -129,24 +158,24 @@ npm run dev
 
 ## Configuration
 
-### Generator Service
+API keys are configured in `infrastructure/docker-compose/.env`:
 
 ```bash
-# OpenAI (primary)
+# OpenAI (Primary - Required)
 ENABLE_OPENAI=true
-OPENAI_API_KEY=sk-...
+OPENAI_API_KEY=sk-your-openai-key
 DEFAULT_MODEL=openai:gpt-5-mini
 
-# Anthropic (optional)
-ENABLE_ANTHROPIC=true
-ANTHROPIC_API_KEY=sk-ant-...
+# Anthropic (Optional)
+ENABLE_ANTHROPIC=false
+ANTHROPIC_API_KEY=
 
-# Google (optional)
-ENABLE_GOOGLE=true
-GOOGLE_API_KEY=...
+# Google (Optional)
+ENABLE_GOOGLE=false
+GOOGLE_API_KEY=
 ```
 
-See `services/*/. env.example` for full config options.
+See `.env.example` files in each service directory for additional options.
 
 ## Testing
 
@@ -198,12 +227,6 @@ raas/
 ```
 
 ## Development
-
-### Prerequisites
-
-- Docker 24.0+ and Docker Compose 2.0+
-- Python 3.13+ and Poetry (for local dev)
-- Node.js 18+ (for frontend dev)
 
 ### Adding a New LLM Provider
 
