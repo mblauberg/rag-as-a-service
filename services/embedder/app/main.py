@@ -30,20 +30,13 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """
-    Application lifespan manager for startup and shutdown events.
-
-    Args:
-        app: FastAPI application instance
-    """
-    # Startup
+    """Application lifespan manager for startup and shutdown events."""
     logger.info("Starting RAAS Embedder Service")
     logger.info(f"Model: {settings.model_name}")
     logger.info(f"Qdrant URL: {settings.qdrant_url}")
     logger.info(f"Batch size: {settings.batch_size}")
 
     try:
-        # Load the embedding model
         embedding_service.load_model()
         logger.info("Embedder service ready")
     except Exception as e:
@@ -52,11 +45,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     yield
 
-    # Shutdown
     logger.info("Shutting down RAAS Embedder Service")
 
 
-# Create FastAPI application
 app = FastAPI(
     title="RAAS Embedder Service",
     description="Vector embedding generation service using sentence-transformers",
@@ -111,23 +102,13 @@ async def root() -> Dict[str, str]:
 
 @app.get("/api/v1/health", response_model=HealthResponse)
 async def health_check() -> HealthResponse:
-    """
-    Basic health check endpoint.
-
-    Returns:
-        Health status
-    """
+    """Basic health check endpoint."""
     return HealthResponse(status="healthy")
 
 
 @app.get("/api/v1/ready", response_model=ReadinessResponse)
 async def readiness_check() -> ReadinessResponse:
-    """
-    Readiness check that validates model loading.
-
-    Returns:
-        Readiness status with model loading state
-    """
+    """Readiness check that validates model loading."""
     model_loaded = embedding_service.model_loaded
 
     status_value = "ready" if model_loaded else "not_ready"
@@ -140,20 +121,16 @@ async def readiness_check() -> ReadinessResponse:
 
 @app.post("/api/v1/embed", response_model=EmbedResponse, status_code=status.HTTP_200_OK)
 async def embed_chunks(request: EmbedRequest) -> EmbedResponse:
-    """
-    Generate embeddings for text chunks and store in Qdrant.
-
-    Accepts a list of chunks with text and metadata, generates embeddings
-    in batches, and stores them in the Qdrant vector database.
+    """Generate embeddings for text chunks and store in Qdrant.
 
     Args:
-        request: Embedding request with list of chunks
+        request: Embedding request with list of chunks.
 
     Returns:
-        Success status and count of processed chunks
+        Success status and count of processed chunks.
 
     Raises:
-        HTTPException: If embedding generation or storage fails
+        HTTPException: If embedding generation or storage fails.
     """
     try:
         logger.info(f"Received embedding request for {len(request.chunks)} chunks")
@@ -182,17 +159,16 @@ async def embed_chunks(request: EmbedRequest) -> EmbedResponse:
 
 @app.post("/api/v1/embed-query", response_model=EmbedQueryResponse)
 async def embed_query(request: EmbedQueryRequest) -> EmbedQueryResponse:
-    """
-    Generate embedding for a search query.
+    """Generate embedding for a search query.
 
     Args:
-        request: Query embedding request with query text
+        request: Query embedding request with query text.
 
     Returns:
-        Query embedding vector
+        Query embedding vector.
 
     Raises:
-        HTTPException: If embedding generation fails
+        HTTPException: If embedding generation fails.
     """
     try:
         logger.info(f"Generating embedding for query: {request.query[:50]}...")
@@ -217,20 +193,16 @@ async def embed_query(request: EmbedQueryRequest) -> EmbedQueryResponse:
 
 @app.post("/api/v1/generate-embeddings", response_model=GenerateEmbeddingsResponse)
 async def generate_embeddings(request: GenerateEmbeddingsRequest) -> GenerateEmbeddingsResponse:
-    """
-    Generate embeddings for a batch of texts without storing them.
-
-    This endpoint is designed for use by the API service which handles
-    its own vector storage. It only generates and returns embeddings.
+    """Generate embeddings for a batch of texts without storing them.
 
     Args:
-        request: Batch embedding request with list of texts
+        request: Batch embedding request with list of texts.
 
     Returns:
-        List of embedding vectors (one per input text)
+        List of embedding vectors (one per input text).
 
     Raises:
-        HTTPException: If embedding generation fails
+        HTTPException: If embedding generation fails.
     """
     try:
         logger.info(f"Generating embeddings for {len(request.texts)} texts")

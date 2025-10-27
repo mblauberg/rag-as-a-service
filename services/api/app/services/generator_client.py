@@ -34,8 +34,6 @@ class GeneratorClient:
     ) -> dict[str, Any] | None:
         """Generate summary from chunks with retry logic.
 
-        Retries up to 3 times with exponential backoff (2-10s) on service unavailability.
-
         Args:
             query: Search query
             chunks: Retrieved chunks with text, document_id, chunk_index
@@ -45,11 +43,10 @@ class GeneratorClient:
             Generation response or None if failed
 
         Raises:
-            ServiceUnavailableError: If generator service is unavailable (will retry)
+            ServiceUnavailableError: Retried up to 3 times with exponential backoff
         """
         url = f"{self.base_url}/api/v1/generate/"
 
-        # Format chunks for generator
         chunk_inputs = [
             {
                 "text": chunk["text"],
@@ -80,17 +77,16 @@ class GeneratorClient:
                     return None
 
         except ServiceUnavailableError:
-            # Re-raise to trigger retry
             raise
         except httpx.ConnectError as e:
-            logger.error(f"Failed to connect to generator: {e}")
+            logger.error(f"Connection to generator failed: {e}")
             raise ServiceUnavailableError(
-                "Failed to connect to generator service", original_error=e
+                "Unable to reach generator service", original_error=e
             ) from e
         except httpx.TimeoutException as e:
-            logger.error(f"Generator request timed out: {e}")
+            logger.error(f"Generator request exceeded timeout: {e}")
             raise ServiceUnavailableError(
-                "Generator service request timed out", original_error=e
+                "Generator service did not respond in time", original_error=e
             ) from e
         except Exception as e:
             logger.error(f"Generator request failed: {e}")
@@ -104,20 +100,18 @@ class GeneratorClient:
     async def generate(
         self, prompt: str, max_tokens: int = 150, temperature: float = 0.3
     ) -> Any | None:
-        """Generate text from a prompt using the generator service with retry logic.
-
-        Retries up to 3 times with exponential backoff (2-10s) on service unavailability.
+        """Generate text from a prompt with retry logic.
 
         Args:
             prompt: Text prompt for generation
             max_tokens: Maximum tokens to generate
-            temperature: Sampling temperature (0.0-1.0)
+            temperature: Sampling temperature
 
         Returns:
             Generation response object with 'text' attribute, or None if failed
 
         Raises:
-            ServiceUnavailableError: If generator service is unavailable (will retry)
+            ServiceUnavailableError: Retried up to 3 times with exponential backoff
         """
         url = f"{self.base_url}/api/v1/generate/"
 
@@ -135,7 +129,6 @@ class GeneratorClient:
 
                 if response.status_code == 200:
                     result = response.json()
-                    # Return object with 'text' attribute for compatibility
                     return type(
                         "GenerateResponse", (), {"text": result.get("text", "")}
                     )()
@@ -149,20 +142,19 @@ class GeneratorClient:
                     return None
 
         except ServiceUnavailableError:
-            # Re-raise to trigger retry
             raise
         except httpx.ConnectError as e:
-            logger.error(f"Failed to connect to generator: {e}")
+            logger.error(f"Generator connection failed: {e}")
             raise ServiceUnavailableError(
-                "Failed to connect to generator service", original_error=e
+                "Cannot establish connection to generator", original_error=e
             ) from e
         except httpx.TimeoutException as e:
-            logger.error(f"Generator request timed out: {e}")
+            logger.error(f"Request to generator timed out: {e}")
             raise ServiceUnavailableError(
-                "Generator service request timed out", original_error=e
+                "No response from generator service", original_error=e
             ) from e
         except Exception as e:
-            logger.error(f"Generator request failed: {e}")
+            logger.error(f"Unexpected error in generation: {e}")
             return None
 
     @retry(
@@ -173,14 +165,12 @@ class GeneratorClient:
     async def list_models(self) -> list[dict[str, Any]]:
         """List available models from Generator with retry logic.
 
-        Retries up to 3 times with exponential backoff (2-10s) on service unavailability.
-
         Returns:
             List of model info dictionaries
 
         Raises:
-            ServiceUnavailableError: If the generator service is unavailable (will retry)
-            GenerationServiceError: If the generator service returns an error
+            ServiceUnavailableError: Retried up to 3 times with exponential backoff
+            GenerationServiceError: Generator service returned an error
         """
         url = f"{self.base_url}/api/v1/models/"
 
@@ -204,23 +194,21 @@ class GeneratorClient:
                     )
 
         except ServiceUnavailableError:
-            # Re-raise to trigger retry
             raise
         except httpx.ConnectError as e:
-            logger.error(f"Failed to connect to generator: {e}")
+            logger.error(f"Could not reach generator service: {e}")
             raise ServiceUnavailableError(
-                "Failed to connect to generator service", original_error=e
+                "Generator service connection unavailable", original_error=e
             ) from e
         except httpx.TimeoutException as e:
-            logger.error(f"Generator request timed out: {e}")
+            logger.error(f"Timeout while listing models: {e}")
             raise ServiceUnavailableError(
-                "Generator service request timed out", original_error=e
+                "Generator took too long to respond", original_error=e
             ) from e
         except GenerationServiceError:
-            # Re-raise our custom exception
             raise
         except Exception as e:
-            logger.error(f"Unexpected error listing models: {e}")
+            logger.error(f"Model listing failed unexpectedly: {e}")
             raise GenerationServiceError(
                 operation="list_models",
                 original_error=e

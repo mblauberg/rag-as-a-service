@@ -30,15 +30,10 @@ class DocumentRepositoryImpl(DocumentRepository):
         self.session = session
 
     async def save(self, document: Document) -> Document:
-        """Persist document to database.
+        """Persist document to database (handles both insert and update).
 
-        Handles both insert (new document) and update (existing document).
-
-        Args:
-            document: Document entity to persist
-
-        Returns:
-            Persisted document entity
+        Args: document - Document entity to persist
+        Returns: Persisted document entity
         """
         # Check if document exists
         stmt = select(DocumentModel).where(DocumentModel.id == document.id)
@@ -76,11 +71,8 @@ class DocumentRepositoryImpl(DocumentRepository):
     async def find_by_id(self, document_id: UUID) -> Document | None:
         """Retrieve document by ID.
 
-        Args:
-            document_id: Document UUID
-
-        Returns:
-            Document entity if found, None otherwise
+        Args: document_id - Document UUID
+        Returns: Document entity if found, None otherwise
         """
         stmt = select(DocumentModel).where(DocumentModel.id == document_id)
         result = await self.session.execute(stmt)
@@ -94,12 +86,8 @@ class DocumentRepositoryImpl(DocumentRepository):
     async def find_all(self, page: int, limit: int) -> tuple[list[Document], int]:
         """Retrieve paginated documents.
 
-        Args:
-            page: Page number (1-indexed)
-            limit: Items per page
-
-        Returns:
-            Tuple of (documents list, total count)
+        Args: page - Page number (1-indexed), limit - Items per page
+        Returns: Tuple of (documents list, total count)
         """
         # Get total count
         count_stmt = select(func.count()).select_from(DocumentModel)
@@ -124,8 +112,7 @@ class DocumentRepositoryImpl(DocumentRepository):
     async def delete(self, document_id: UUID) -> None:
         """Delete document from database.
 
-        Args:
-            document_id: Document UUID to delete
+        Args: document_id - Document UUID to delete
         """
         stmt = select(DocumentModel).where(DocumentModel.id == document_id)
         result = await self.session.execute(stmt)
@@ -138,11 +125,8 @@ class DocumentRepositoryImpl(DocumentRepository):
     def _to_model(self, entity: Document) -> DocumentModel:
         """Convert domain entity to ORM model.
 
-        Args:
-            entity: Document domain entity
-
-        Returns:
-            DocumentModel ORM instance
+        Args: entity - Document domain entity
+        Returns: DocumentModel ORM instance
         """
         return DocumentModel(
             id=entity.id,
@@ -159,11 +143,8 @@ class DocumentRepositoryImpl(DocumentRepository):
     def _to_entity(self, model: DocumentModel) -> Document:
         """Convert ORM model to domain entity.
 
-        Args:
-            model: DocumentModel ORM instance
-
-        Returns:
-            Document domain entity
+        Args: model - DocumentModel ORM instance
+        Returns: Document domain entity
         """
         return Document(
             id=model.id,  # type: ignore[arg-type]

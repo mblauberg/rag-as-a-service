@@ -21,20 +21,16 @@ class QdrantClientWrapper:
         self._initialize_collection()
 
     def _initialize_collection(self) -> None:
-        """
-        Ensure the documents collection exists with proper configuration.
+        """Ensure the documents collection exists with proper configuration.
 
-        Creates a collection with 384-dimensional vectors using cosine distance
-        if it doesn't already exist. Retries on connection failures to handle
-        startup race conditions. Creates a fresh client on each retry to avoid
-        connection caching issues.
+        Creates collection with configured vector dimensions using cosine distance.
+        Retries on connection failures with exponential backoff.
         """
         max_retries = 10
-        retry_delay = 3  # seconds
+        retry_delay = 3
 
         for attempt in range(max_retries):
             try:
-                # Create a fresh client on each attempt to avoid connection caching
                 client = QdrantClient(url=self.qdrant_url)
                 collections = client.get_collections().collections
                 collection_names = [c.name for c in collections]
@@ -52,7 +48,6 @@ class QdrantClientWrapper:
                 else:
                     logger.info(f"Collection '{self.collection_name}' already exists")
 
-                # Success! Store the working client
                 self.client = client
                 return
             except Exception as e:
@@ -60,20 +55,19 @@ class QdrantClientWrapper:
                     logger.warning(f"Error initializing collection (attempt {attempt + 1}/{max_retries}): {e}")
                     logger.info(f"Retrying in {retry_delay} seconds...")
                     time.sleep(retry_delay)
-                    retry_delay *= 2  # Exponential backoff
+                    retry_delay *= 2
                 else:
                     logger.error(f"Error initializing collection after {max_retries} attempts: {e}")
                     raise
 
     def upsert_vectors(self, points: List[PointStruct]) -> None:
-        """
-        Upsert vectors into the collection.
+        """Upsert vectors into the collection.
 
         Args:
-            points: List of PointStruct objects containing vectors and metadata
+            points: List of PointStruct objects with vectors and metadata.
 
         Raises:
-            Exception: If upsert operation fails
+            Exception: If upsert operation fails.
         """
         try:
             self.client.upsert(
@@ -86,11 +80,10 @@ class QdrantClientWrapper:
             raise
 
     def health_check(self) -> bool:
-        """
-        Check if Qdrant is accessible.
+        """Check if Qdrant is accessible.
 
         Returns:
-            True if Qdrant is healthy, False otherwise
+            True if Qdrant is healthy, False otherwise.
         """
         try:
             self.client.get_collections()
@@ -100,11 +93,10 @@ class QdrantClientWrapper:
             return False
 
 
-# Global Qdrant client instance (lazy initialization)
 _qdrant_client: QdrantClientWrapper | None = None
 
 def get_qdrant_client() -> QdrantClientWrapper:
-    """Get or create the global Qdrant client instance (lazy initialization)."""
+    """Get or create the global Qdrant client instance."""
     global _qdrant_client
     if _qdrant_client is None:
         _qdrant_client = QdrantClientWrapper()

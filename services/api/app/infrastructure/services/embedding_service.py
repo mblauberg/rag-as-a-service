@@ -13,17 +13,13 @@ from app.ports.services import EmbeddingService
 
 
 class HTTPEmbeddingService(EmbeddingService):
-    """HTTP adapter for embedding generation service.
-
-    This adapter communicates with the embedder microservice via HTTP
-    to generate vector embeddings for text chunks.
-    """
+    """HTTP adapter for embedding generation service."""
 
     def __init__(self, embedder_url: str):
         """Initialize HTTP embedding service.
 
         Args:
-            embedder_url: Base URL of the embedder service (e.g., "http://localhost:8001")
+            embedder_url: Base URL of the embedder service
         """
         self.embedder_url = embedder_url.rstrip("/")
 
@@ -35,46 +31,16 @@ class HTTPEmbeddingService(EmbeddingService):
     async def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Generate vector embeddings via embedder microservice with retry logic.
 
-        Calls the embedder service to generate dense vector representations
-        of text using sentence-transformers models (e.g., all-MiniLM-L6-v2).
-
-        Implements resilient retry logic with exponential backoff:
-        - Retries up to 3 times on service unavailability (503 errors)
-        - Exponential backoff: 2s, 4s, 8s (max 10s between retries)
-        - Immediate failure for validation errors (no retry)
-
-        The embedder service uses CPU-optimized sentence-transformers for
-        batch embedding generation, supporting various model architectures
-        (MiniLM, BERT, RoBERTa, etc.).
-
         Args:
-            texts: List of text strings to embed (chunks, queries, etc.).
-                Sent to embedder service in batch for efficiency.
+            texts: List of text strings to embed
 
         Returns:
-            List of embedding vectors (one per input text). Each vector is
-            a list of floats with dimensionality matching the model
-            (e.g., 384 for all-MiniLM-L6-v2, 768 for BERT-base).
+            List of embedding vectors, one per input text
 
         Raises:
-            ServiceUnavailableError: If embedder service unavailable after
-                3 retry attempts. Includes original httpx exception.
-            ValidationError: If request validation fails, response parsing
-                fails, or embedding count doesn't match input count.
-                These errors do NOT trigger retry.
-            EmbeddingServiceError: Base exception for other embedding errors.
-
-        Note:
-            The @retry decorator automatically retries on ServiceUnavailableError.
-            ValidationError is used to prevent retry for non-transient failures.
-
-        Example:
-            >>> service = HTTPEmbeddingService("http://embedder:8001")
-            >>> embeddings = await service.generate_embeddings(
-            ...     ["hello world", "semantic search"]
-            ... )
-            >>> print(f"Generated {len(embeddings)} embeddings")
-            >>> print(f"Dimension: {len(embeddings[0])}")
+            ServiceUnavailableError: Retried up to 3 times with exponential backoff
+            ValidationError: Response validation failed, no retry
+            EmbeddingServiceError: Base exception for other errors
         """
         try:
             async with httpx.AsyncClient() as client:
@@ -85,7 +51,6 @@ class HTTPEmbeddingService(EmbeddingService):
                 )
                 response.raise_for_status()
 
-                # Parse response
                 try:
                     data = response.json()
                 except ValueError as e:
@@ -93,7 +58,6 @@ class HTTPEmbeddingService(EmbeddingService):
                         "Failed to parse embedding service response", original_error=e
                     ) from e
 
-                # Validate response structure
                 if "embeddings" not in data:
                     raise ValidationError(
                         "Invalid response format: missing 'embeddings' key"
@@ -101,7 +65,6 @@ class HTTPEmbeddingService(EmbeddingService):
 
                 embeddings = data["embeddings"]
 
-                # Validate embedding count matches input count
                 if len(embeddings) != len(texts):
                     raise ValidationError(
                         f"Expected {len(texts)} embeddings but got {len(embeddings)}"
@@ -118,21 +81,17 @@ class HTTPEmbeddingService(EmbeddingService):
                 "Embedding service request timed out", original_error=e
             ) from e
         except httpx.HTTPStatusError as e:
-            # Raise ServiceUnavailableError for 503 to trigger retry
             if e.response.status_code == 503:
                 raise ServiceUnavailableError(
                     "Embedding service temporarily unavailable", original_error=e
                 ) from e
-            # Other HTTP errors don't retry (use ValidationError to prevent retry)
             raise ValidationError(
                 f"Embedding service returned error: {e.response.status_code}",
                 original_error=e,
             ) from e
         except (EmbeddingServiceError, ServiceUnavailableError, ValidationError):
-            # Re-raise our own exceptions
             raise
         except Exception as e:
-            # Catch any other unexpected errors (wrap as ValidationError so no retry)
             raise ValidationError(
                 f"Unexpected error during embedding generation: {type(e).__name__}",
                 original_error=e,

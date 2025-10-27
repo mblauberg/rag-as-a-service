@@ -32,11 +32,8 @@ class ChunkRepositoryImpl(ChunkRepository):
     async def save_batch(self, chunks: list[Chunk]) -> list[Chunk]:
         """Persist multiple chunks atomically.
 
-        Args:
-            chunks: List of chunk entities
-
-        Returns:
-            Persisted chunks
+        Args: chunks - List of chunk entities
+        Returns: Persisted chunks with database-generated values
         """
         # Convert chunks to models with proper chunk_index
         db_chunks = [self._to_model(chunk, idx) for idx, chunk in enumerate(chunks)]
@@ -57,11 +54,8 @@ class ChunkRepositoryImpl(ChunkRepository):
     async def find_by_document_id(self, document_id: UUID) -> list[Chunk]:
         """Retrieve all chunks for a document.
 
-        Args:
-            document_id: Document UUID
-
-        Returns:
-            List of chunks (may be empty)
+        Args: document_id - Document UUID
+        Returns: List of chunks (may be empty)
         """
         stmt = select(ChunkModel).where(ChunkModel.document_id == document_id)
         result = await self.session.execute(stmt)
@@ -72,8 +66,7 @@ class ChunkRepositoryImpl(ChunkRepository):
     async def delete_by_document_id(self, document_id: UUID) -> None:
         """Delete all chunks for a document.
 
-        Args:
-            document_id: Document UUID
+        Args: document_id - Document UUID
         """
         stmt = delete(ChunkModel).where(ChunkModel.document_id == document_id)
         await self.session.execute(stmt)
@@ -91,17 +84,10 @@ class ChunkRepositoryImpl(ChunkRepository):
         return [self._to_entity(model) for model in chunk_models]
 
     def _to_model(self, entity: Chunk, chunk_index: int = 0) -> ChunkModel:
-        """Convert domain entity to ORM model.
+        """Convert domain entity to ORM model (embeddings go to Qdrant, not DB).
 
-        Note: Embedding vectors are intentionally NOT stored in the database.
-        They are stored in Qdrant vector database instead.
-
-        Args:
-            entity: Chunk domain entity
-            chunk_index: Position of chunk in document (0-indexed)
-
-        Returns:
-            ChunkModel ORM instance
+        Args: entity - Chunk domain entity, chunk_index - Position in document (0-indexed)
+        Returns: ChunkModel ORM instance
         """
         return ChunkModel(
             id=entity.id,
@@ -119,11 +105,8 @@ class ChunkRepositoryImpl(ChunkRepository):
     def _to_entity(self, model: ChunkModel) -> Chunk:
         """Convert ORM model to domain entity.
 
-        Args:
-            model: ChunkModel ORM instance
-
-        Returns:
-            Chunk domain entity
+        Args: model - ChunkModel ORM instance
+        Returns: Chunk domain entity
         """
         metadata: dict[str, object] = model.chunk_metadata or {}  # type: ignore[assignment]
         # Add chunk_index to metadata for use in summary generation

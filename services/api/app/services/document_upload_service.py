@@ -24,47 +24,37 @@ class DocumentUploadService:
         self.file_detector = FileTypeDetector()
 
     async def save_file(self, file_content: bytes, filename: str) -> dict[str, Any]:
-        """
-        Save uploaded file to disk and extract metadata.
+        """Save uploaded file to disk and extract metadata.
 
         Args:
             file_content: File binary content
             filename: Original filename
 
         Returns:
-            Dictionary containing file metadata:
-            - file_id: UUID for the file
-            - file_path: Path where file was saved
-            - file_type: MIME type
-            - file_size: Size in bytes
-            - document_type: Document type enum value
+            Dictionary with file_id, file_path, file_type, file_size, document_type
 
         Raises:
-            FileOperationError: If file save fails
-            ValueError: If file type is unsupported
+            FileOperationError: File save fails
+            ValueError: Unsupported file type
         """
-        # Detect document type from filename
         try:
             document_type = self.file_detector.detect_from_filename(filename)
         except ValueError as e:
             logger.error(f"Unsupported file type for {filename}: {e}")
             raise FileOperationError("detect_file_type", filename, e) from e
 
-        # Generate unique file path
         file_id = uuid4()
         file_extension = Path(filename).suffix
         file_path = self.upload_dir / f"{file_id}{file_extension}"
 
-        # Save file to disk
         try:
             async with aiofiles.open(file_path, "wb") as f:
                 await f.write(file_content)
             logger.info(f"Saved file to {file_path}")
         except Exception as e:
-            logger.error(f"Failed to save file {file_path}: {e}")
+            logger.error(f"Could not write file to {file_path}: {e}")
             raise FileOperationError("write", str(file_path), e) from e
 
-        # Detect MIME type
         file_type = file_processor.detect_file_type(str(file_path))
         file_size = len(file_content)
 
@@ -77,14 +67,13 @@ class DocumentUploadService:
         }
 
     async def delete_file(self, file_path: str) -> None:
-        """
-        Delete file from disk.
+        """Delete file from disk.
 
         Args:
             file_path: Path to file to delete
 
         Raises:
-            FileOperationError: If file deletion fails
+            FileOperationError: File deletion fails
         """
         path = Path(file_path)
         try:
@@ -92,14 +81,13 @@ class DocumentUploadService:
                 path.unlink()
                 logger.info(f"Deleted file: {file_path}")
             else:
-                logger.warning(f"File not found at stored path: {file_path}")
+                logger.warning(f"File not found at path: {file_path}")
         except Exception as e:
-            logger.error(f"Error deleting file {file_path}: {e}")
+            logger.error(f"Deletion failed for {file_path}: {e}")
             raise FileOperationError("delete", str(file_path), e) from e
 
     def get_file_metadata(self, file_path: str) -> dict[str, Any]:
-        """
-        Get metadata for an existing file.
+        """Get metadata for an existing file.
 
         Args:
             file_path: Path to file
@@ -108,7 +96,7 @@ class DocumentUploadService:
             Dictionary with file_type and file_size
 
         Raises:
-            FileOperationError: If file doesn't exist or metadata extraction fails
+            FileOperationError: File not found or metadata extraction fails
         """
         path = Path(file_path)
         try:
@@ -124,5 +112,5 @@ class DocumentUploadService:
         except FileOperationError:
             raise
         except Exception as e:
-            logger.error(f"Error getting file metadata for {file_path}: {e}")
+            logger.error(f"Metadata extraction failed for {file_path}: {e}")
             raise FileOperationError("read", file_path, e) from e
