@@ -31,3 +31,11 @@ metadata:
   namespace: raas
 spec:
   replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search
+  namespace: raas
+spec:
+  replicas: 1

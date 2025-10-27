@@ -13,54 +13,45 @@
 
 ### Background
 
-RAAS (Retrieval-Augmented Generation as a Service) is an intelligent document search platform using semantic understanding and AI. Unlike traditional keyword search that matches exact words, RAAS uses vector embeddings to understand document meaning, enabling users to find information based on concepts rather than exact text matches.
-
-The platform implements Retrieval-Augmented Generation (RAG), combining vector similarity search with LLMs for AI-generated summaries with citations. It uses sentence-transformers to convert documents into 384-dimensional vectors, enabling fast semantic searches through HNSW indexing.
+RAAS (Retrieval-Augmented Generation as a Service) is an intelligent document search platform using semantic understanding and AI-generated summaries. The system converts documents into vector embeddings for semantic search and provides LLM-powered summaries with citations.
 
 ### Motivation
 
-Organisations accumulate massive repositories of technical specs, legal contracts, research papers, and internal wikis. Traditional Boolean keyword search can't capture semantic nuances, forcing users to craft specific queries and manually sift through results.
+Organizations accumulate large repositories of technical documentation, research papers, and internal wikis. Traditional keyword search cannot capture semantic relationships, forcing users to craft specific queries and manually review results.
 
-For example, a legal firm searching "contract breach" would miss cases described as "agreement violation" or "contractual default." RAAS solves this by understanding semantic relationships, surfacing relevant cases regardless of terminology. This reduces time spent hunting for information, improves decision-making, and enables easier knowledge access.
+RAAS solves this by understanding semantic meaning rather than exact word matches. A search for "contract breach" will also surface documents describing "agreement violation" or "contractual default," reducing time spent searching and improving knowledge access.
 
 ### Objectives and Features
 
-**Primary Objective:** Build a scalable, intelligent document search system that understands semantic meaning and provides AI-powered summaries.
+Build a scalable, intelligent document search system with the following features:
 
-**Core Features:**
-1. **Multi-format Document Upload** - TXT, PDF, DOCX, CSV, Markdown with drag-and-drop interface
+1. **Document Upload** - Multi-format support (TXT, PDF, DOCX, CSV, Markdown)
 2. **Semantic Search** - Vector similarity search using 384-dimensional embeddings
-3. **AI-Powered Summarisation** - LLM-generated summaries with inline citations
-4. **Document Management** - Full CRUD operations for document lifecycle
-5. **Multi-Provider LLM Support** - OpenAI GPT, Anthropic Claude, Google Gemini for production reliability
-6. **Real-time Status Tracking** - Asynchronous processing with upload/embedding monitoring
-7. **Responsive Web Interface** - Mobile-friendly React/Tailwind CSS UI
+3. **Hybrid Search** - Combines semantic and keyword search with rank fusion
+4. **AI Summaries** - LLM-generated summaries with inline citations
+5. **Document Management** - Full CRUD operations
+6. **Multi-Provider LLM** - OpenAI, Anthropic, and Google integrations
+7. **Real-time Status** - Asynchronous processing with progress tracking
 
 ### Limitations of Traditional Computing
 
-Traditional monolithic deployments face critical constraints:
+**Scalability:** Monolithic applications cannot scale components independently. Embedding generation is computationally expensive, requiring entire application scaling during traffic spikes.
 
-**Scalability Issues:** Embedding generation is computationally expensive. Monolithic apps can't scale components independently, forcing you to scale the entire application during traffic spikes. Vertical scaling hits physical limits and becomes expensive.
+**Resource Inefficiency:** Fixed provisioning leads to over-provisioning waste or under-provisioning failures. Embedding models require significant memory that concurrent requests can exhaust.
 
-**Resource Inefficiency:** Fixed provisioning leads to over-provisioning (wasting resources) or under-provisioning (causing performance issues). Embedding models consume 2GB+ memory, which concurrent requests can quickly exhaust.
+**Reliability:** Single-server deployments create single points of failure. Hardware failures cause complete downtime with slow manual failover.
 
-**Reliability Problems:** Single-server deployments create single points of failure. Hardware failures or crashes cause complete downtime. Manual failover is slow and error-prone.
-
-**Operational Complexity:** Updates require system restarts, causing interruptions. Rollbacks are manual. Dependency conflicts complicate maintenance.
+**Operational Complexity:** Updates require system restarts and downtime. Rollbacks are manual and error-prone.
 
 ### Cloud Computing Benefits
 
-Cloud-native architecture solves these through microservices, containerisation, and orchestration:
+**Elastic Scalability:** Kubernetes Horizontal Pod Autoscaling (HPA) automatically scales services based on CPU/memory usage, enabling independent scaling of API, embedder, and search services.
 
-**Elastic Scalability:** Kubernetes HPA automatically scales services based on CPU/memory usage. API service scales from 2 to 5 replicas during traffic spikes while embedder stays at 1 replica during off-peak hours, optimising resource use and costs.
+**High Availability:** Multiple pod replicas across nodes ensure fault tolerance. Automatic pod restart and load balancing maintain service during failures.
 
-**High Availability:** Multiple replicas across nodes ensure fault tolerance. If one pod crashes, Kubernetes automatically restarts it while remaining pods handle traffic. Load balancing prevents hotspots.
+**Zero-Downtime Deployments:** Rolling updates deploy incrementally while maintaining availability. Failed deployments automatically rollback.
 
-**Zero-Downtime Deployments:** Rolling updates deploy new versions incrementally while maintaining availability. Failed deployments automatically rollback within seconds.
-
-**Cost Optimisation:** HPA scales down during low traffic. Preemptible VMs offer 60-80% discounts. Pay-per-use eliminates over-provisioning waste.
-
-**Infrastructure as Code:** Kubernetes manifests ensure consistency from development to production. Version-controlled infrastructure enables audit trails and rapid disaster recovery.
+**Cost Optimization:** HPA scales down during low traffic. Infrastructure-as-code ensures consistent deployments and rapid recovery.
 
 ---
 
@@ -68,56 +59,45 @@ Cloud-native architecture solves these through microservices, containerisation, 
 
 ### Cloud Technologies
 
-**Frontend Technologies:**
-- **React 18 + TypeScript** - Component-based UI with type safety
-- **Tailwind CSS + shadcn/ui** - Utility-first styling
-- **React Query** - Server state management with caching
+**Frontend:**
+- React 18 with TypeScript for type-safe UI components
+- Tailwind CSS with shadcn/ui component library
+- React Query for server state management and caching
 
 **Backend Services:**
-- **FastAPI (Python 3.11)** - Async web framework with OpenAPI documentation
-- **PostgreSQL 15** - Relational database for metadata and text chunks
-- **Qdrant** - Vector database with HNSW indexing
-- **sentence-transformers** - Embedding model (`all-MiniLM-L6-v2`) for 384-dim vectors
-- **Cloud LLM Providers** - OpenAI (GPT-5, GPT-5 Mini), Anthropic (Claude), Google (Gemini)
-- **SQLAlchemy + asyncpg** - Async ORM with non-blocking driver
+- FastAPI (Python 3.13) for async web framework
+- PostgreSQL 15 for document metadata and text chunks
+- Qdrant vector database with HNSW indexing
+- sentence-transformers (all-MiniLM-L6-v2) for 384-dim embeddings
+- Cloud LLM APIs: OpenAI (GPT-5), Anthropic (Claude), Google (Gemini)
+- SQLAlchemy with asyncpg for async database operations
 
-**Cloud Infrastructure:**
-- **Docker** - Containerisation of 7 microservices
-- **Google Kubernetes Engine (GKE)** - Managed Kubernetes orchestration
-- **NGINX Ingress Controller** - Layer 7 load balancing
-- **Horizontal Pod Autoscaler (HPA)** - Auto-scaling on CPU (70%) and memory (80%)
-- **Persistent Volumes** - Durable storage for PostgreSQL and Qdrant
-
-**Architecture Patterns:**
-- Microservice architecture (7 independent services)
-- Database-per-service (PostgreSQL for relational, Qdrant for vectors)
-- API Gateway pattern (centralised entry point)
-- Event-driven async processing (non-blocking I/O)
-- Health check patterns (liveness/readiness probes)
+**Infrastructure:**
+- Docker for containerization (5 microservices + 2 databases)
+- Google Kubernetes Engine (GKE) for orchestration
+- NGINX Ingress Controller for load balancing
+- Horizontal Pod Autoscaler (HPA) targeting 70% CPU / 80% memory
+- Persistent Volumes (PV) for stateful storage
 
 ### Monthly Cost Estimation
 
-**Deployment Options:** GCP (production) or Kind (local demo, recommended for marking session)
+**GCP Production Deployment (us-central1, 730 hours/month):**
 
-**GCP Production Deployment (us-central1, 730 hours/month)**
-
-| **Resource** | **Specification** | **Unit Cost** | **Quantity** | **Monthly Cost** |
-|--------------|-------------------|---------------|--------------|------------------|
-| **GKE Cluster Management** | Zonal cluster | $72.00/month | 1 cluster | $72.00 |
-| **Compute Nodes** | e2-standard-4 (4 vCPU, 16GB) | $97.83/node/month | 3 nodes | $293.49 |
-| **Persistent Disk SSD** | PostgreSQL data (in-cluster) | $0.17/GB/month | 10 GB | $1.70 |
-| **Persistent Disk SSD** | Qdrant vectors (in-cluster) | $0.17/GB/month | 20 GB | $3.40 |
-| **Persistent Disk SSD** | Model cache (embedder) | $0.17/GB/month | 5 GB | $0.85 |
-| **Disk Snapshots** | Daily backups (7-day retention) | $0.026/GB/month | 50 GB | $1.30 |
-| **Load Balancer** | TCP forwarding rule (Layer 4) | $0.025/hour | 730 hours | $18.25 |
-| **Egress Traffic** | Within us regions | $0.01/GB | 50 GB | $0.50 |
-| **Container Registry** | Docker image storage | $0.026/GB/month | 15 GB | $0.39 |
-| **Cloud Logging** | Structured logs (5GB limit) | $0.50/GB/month | 5 GB | $2.50 |
+| Resource | Specification | Unit Cost | Quantity | Monthly Cost |
+|----------|---------------|-----------|----------|--------------|
+| GKE Cluster Management | Zonal cluster | $72.00/month | 1 | $72.00 |
+| Compute Nodes | e2-standard-4 (4 vCPU, 16GB) | $97.83/node/month | 3 | $293.49 |
+| Persistent Disk SSD | PostgreSQL + Qdrant | $0.17/GB/month | 35 GB | $5.95 |
+| Disk Snapshots | Daily backups (7-day) | $0.026/GB/month | 50 GB | $1.30 |
+| Load Balancer | NGINX Ingress | $0.025/hour | 730 hrs | $18.25 |
+| Egress Traffic | Within US regions | $0.01/GB | 50 GB | $0.50 |
+| Container Registry | Image storage | $0.026/GB/month | 15 GB | $0.39 |
+| Cloud Logging | Structured logs | $0.50/GB/month | 5 GB | $2.50 |
 | **TOTAL** | | | | **$394.38** |
 
-**Cost Optimisations:** 1-year commitment reduces compute by 25% (~$73 savings → **$320/month**). HPA dynamic scaling saves ~30% off-peak. Preemptible VMs reduce dev/staging costs by 70%.
+**Cost Optimizations:** 1-year committed use discount reduces compute by 25% (~$73 savings → $320/month). HPA dynamic scaling saves approximately 30% during off-peak hours.
 
-**Local Demo (Recommended for Marking):** Kind cluster on local machine. $0 cost. No network dependencies. Guaranteed availability. Requires Docker Desktop, 16GB RAM, 50GB disk.
+**Local Demo Alternative:** Kind cluster requires Docker Desktop, 16GB RAM, 50GB disk. Zero cloud costs, no network dependencies, guaranteed availability for marking sessions.
 
 ---
 
