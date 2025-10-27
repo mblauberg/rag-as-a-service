@@ -39,11 +39,13 @@ export function useUploadDocument() {
       file,
       title,
       description,
+      onUploadProgress,
     }: {
       file: File;
       title: string;
       description?: string;
-    }) => api.uploadDocument(file, title, description),
+      onUploadProgress?: (progressPercent: number) => void;
+    }) => api.uploadDocument(file, title, description, onUploadProgress),
     onSuccess: (data: DocumentUploadResponse) => {
       // Invalidate documents list to refetch
       queryClient.invalidateQueries({ queryKey: documentKeys.lists() });

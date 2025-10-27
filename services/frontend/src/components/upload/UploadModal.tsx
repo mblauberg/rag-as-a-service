@@ -38,13 +38,15 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const uploadDocument = useUploadDocument();
 
-  // Clear error when modal opens
+  // Clear error and progress when modal opens
   useEffect(() => {
     if (open) {
       setError(null);
+      setUploadProgress(0);
     }
   }, [open]);
 
@@ -123,12 +125,16 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     }
 
     setError(null);
+    setUploadProgress(0);
 
     try {
       const result = await uploadDocument.mutateAsync({
         file,
         title,
-        description: description || undefined
+        description: description || undefined,
+        onUploadProgress: (progress) => {
+          setUploadProgress(progress);
+        }
       });
 
       // Show success briefly before closing
@@ -140,10 +146,12 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         setFile(null);
         setTitle('');
         setDescription('');
+        setUploadProgress(0);
       }, 500);
     } catch (error) {
       console.error('Upload failed:', error);
       setError(error instanceof Error ? error.message : 'Failed to upload document');
+      setUploadProgress(0);
     }
   };
 
@@ -212,6 +220,21 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           {error && (
             <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
               {error}
+            </div>
+          )}
+
+          {uploadDocument.isPending && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Uploading...</span>
+                <span className="font-medium">{uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-primary h-full transition-all duration-300 ease-out"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
             </div>
           )}
 
