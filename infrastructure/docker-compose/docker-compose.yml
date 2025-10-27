@@ -115,7 +115,9 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - VITE_API_URL=http://localhost:8000
+      # Leave empty to use Vite's built-in proxy (recommended for development)
+      # The proxy in vite.config.ts will route /api requests to http://api:8000
+      - VITE_API_URL=
     volumes:
       - ../../services/frontend:/app
       - /app/node_modules
