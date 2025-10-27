@@ -36,6 +36,7 @@ coverage.xml
 .dmypy.json
 dmypy.json
 .pyre/
+.ruff_cache/
 
 # Virtual environments
 .env

@@ -115,10 +115,13 @@ class VectorSearchService:
             if chunk_index_val is not None:
                 chunk_index = int(chunk_index_val)
 
+            # Support both "content" (new) and "text" (legacy) field names for backward compatibility
+            content_text = payload.get("content") or payload.get("text", "")
+
             chunk = Chunk(
                 id=UUID(result_id),
                 document_id=UUID(str(payload.get("document_id", ""))),
-                content=str(payload.get("content", "")),
+                content=str(content_text),
                 tokens=int(payload.get("tokens", 0)),
                 score=result.score,
                 document_title=str(payload.get("document_title")) if payload.get("document_title") else None,

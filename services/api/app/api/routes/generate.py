@@ -50,7 +50,6 @@ async def generate_summary(
         - OpenAI: gpt-4o, gpt-4o-mini, gpt-3.5-turbo
         - Anthropic: claude-3-5-sonnet, claude-3-opus, claude-3-haiku
         - Google: gemini-1.5-pro, gemini-1.5-flash
-        - Open source via Ollama: llama3, mistral, etc.
 
     **Citation Format:**
         Generated summaries include inline citations like [1], [2] that reference

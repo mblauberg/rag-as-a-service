@@ -5,7 +5,7 @@ from app.models.schemas import Model
 
 
 class ModelProvider(ABC):
-    """Abstract base class for LLM providers (Ollama, OpenAI, Anthropic, Google)."""
+    """Abstract base class for LLM providers (OpenAI, Anthropic, Google)."""
 
     @abstractmethod
     async def list_models(self) -> List[Model]:

@@ -22,7 +22,6 @@ router = APIRouter()
     - Flagship: Highest quality, premium pricing (GPT-4, Claude Opus)
     - Balanced: Good quality/cost ratio (GPT-4o-mini, Claude Sonnet)
     - Fast: Lower latency, economical (GPT-3.5, Claude Haiku)
-    - Open Source: Self-hosted via Ollama (Llama 3, Mistral)
     """,
     responses={
         200: {
@@ -60,16 +59,6 @@ router = APIRouter()
                                 "cost_per_1k_tokens": 0.0001,
                                 "recommended": False,
                                 "description": "Very fast and economical"
-                            },
-                            {
-                                "model_id": "llama-3.1-8b",
-                                "display_name": "Llama 3.1 8B",
-                                "provider": "ollama",
-                                "max_tokens": 128000,
-                                "supports_streaming": True,
-                                "cost_per_1k_tokens": 0.0,
-                                "recommended": False,
-                                "description": "Open source, requires local deployment"
                             }
                         ]
                     }
@@ -130,13 +119,11 @@ async def list_models() -> ModelsListResponse:
           (e.g., GPT-4o-mini, Claude Sonnet, Gemini Flash)
         - **Fast Models:** Lower latency, smaller context, economical
           (e.g., GPT-3.5 Turbo, Claude Haiku)
-        - **Open Source:** Self-hosted via Ollama, no API costs, variable quality
-          (e.g., Llama 3, Mistral, Phi-3)
 
     **Typical Model Metadata:**
         - model_id: Unique identifier for API calls (e.g., "gpt-4o-mini")
         - display_name: Human-readable name for UI (e.g., "GPT-4 Omni Mini")
-        - provider: API provider (openai, anthropic, google, ollama)
+        - provider: API provider (openai, anthropic, google)
         - max_tokens: Maximum context window size
         - supports_streaming: Whether streaming responses available
         - cost_per_1k_tokens: Approximate pricing (prompt + completion)
@@ -234,7 +221,6 @@ async def list_models() -> ModelsListResponse:
         - Model availability depends on generator service configuration and API keys
         - Costs are approximate and may vary based on actual usage patterns
         - Some models may be temporarily unavailable due to provider rate limits
-        - Open source models (Ollama) require local deployment and have no API costs
         - Model catalog is cached in generator service; updates require service restart
         - Context limits include both prompt and completion tokens
         - Streaming support enables real-time response generation in UI

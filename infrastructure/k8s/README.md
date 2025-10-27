@@ -18,7 +18,7 @@ This directory contains Kubernetes manifests for deploying the RAAS (Retrieval-A
 | api | Deployment | 1/3 | 8000 | FastAPI gateway |
 | embedder | Deployment | 1/3 | 8001 | Embedding service |
 | generator | Deployment | 1/2 | 8002 | Text generation |
-| ollama | Deployment | 1/1 | 11434 | Ollama LLM backend |
+| search | Deployment | 1/2 | 8003 | Search service |
 | frontend | Deployment | 1/2 | 3000 | React SPA |
 
 ## Prerequisites
@@ -439,7 +439,7 @@ infrastructure/k8s/
 │   │   ├── service.yaml
 │   │   └── configmap.yaml
 │   ├── generator/                 # Generator
-│   ├── ollama/                    # Ollama
+│   ├── search/                    # Search service
 │   ├── ingress.yaml              # Ingress controller
 │   └── kustomization.yaml        # Base kustomization
 ├── overlays/

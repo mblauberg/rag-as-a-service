@@ -43,14 +43,3 @@ spec:
     requests:
       storage: 5Gi
   storageClassName: standard
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: ollama-data
-  namespace: raas
-spec:
-  resources:
-    requests:
-      storage: 5Gi
-  storageClassName: standard
