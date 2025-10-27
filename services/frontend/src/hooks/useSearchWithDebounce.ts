@@ -2,15 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from './useDebounce';
 import { api } from '../services/api';
 
-/**
- * Search with automatic debouncing (300ms).
- * Only triggers search when query length > 0.
- *
- * @param query - Search query string
- * @param model - Optional LLM model for generation
- * @param limit - Maximum number of results (default 20)
- * @returns React Query result with search data
- */
+/** Search with automatic debouncing (300ms). Only triggers when query length > 0. */
 export function useSearchWithDebounce(
   query: string,
   model?: string | null,

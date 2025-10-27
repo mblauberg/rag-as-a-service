@@ -9,9 +9,7 @@ interface FileIconProps {
   className?: string;
 }
 
-/**
- * FileIcon - Renders appropriate lucide-react icon based on file type.
- */
+/** FileIcon - Renders appropriate icon based on file type. */
 export const FileIcon: React.FC<FileIconProps> = ({ type, className }) => {
   const iconClass = cn('w-6 h-6', className);
 

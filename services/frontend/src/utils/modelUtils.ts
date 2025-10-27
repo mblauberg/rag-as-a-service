@@ -1,11 +1,6 @@
 import { Model } from '../types';
 
-/**
- * Abbreviate model display name for compact UI.
- *
- * @param displayName - Full model display name
- * @returns Abbreviated name
- */
+/** Abbreviate model display name for compact UI. */
 export function abbreviateModelName(displayName: string): string {
   // "Llama 3.3 70B" -> "Llama 3.3"
   // "GPT-5" -> "GPT-5" (keep short)
@@ -33,12 +28,7 @@ export function abbreviateModelName(displayName: string): string {
   return withoutSize;
 }
 
-/**
- * Group models by provider for dropdown menu.
- *
- * @param models - List of models
- * @returns Models grouped by provider
- */
+/** Group models by provider for dropdown menu. */
 export function groupModelsByProvider(models: Model[]): Record<string, Model[]> {
   const grouped: Record<string, Model[]> = {};
 

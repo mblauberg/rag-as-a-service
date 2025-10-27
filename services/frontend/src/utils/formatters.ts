@@ -1,12 +1,6 @@
-/**
- * Shared formatting utilities for dates, file sizes, and status badges.
- */
-
 import type { FileIconType } from '@/components/ui/file-icon';
 
-/**
- * Format a date string with optional time.
- */
+/** Format date string with optional time. */
 export function formatDate(dateString: string, includeTime = false): string {
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -17,18 +11,14 @@ export function formatDate(dateString: string, includeTime = false): string {
   return new Date(dateString).toLocaleString('en-US', options);
 }
 
-/**
- * Format bytes to human-readable file size.
- */
+/** Format bytes to human-readable file size. */
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
   return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
 }
 
-/**
- * Get file type icon based on file extension.
- */
+/** Get file type icon based on extension. */
 export const getFileTypeIcon = (filename: string): FileIconType => {
   const ext = filename.split('.').pop()?.toLowerCase();
 
@@ -45,9 +35,7 @@ export const getFileTypeIcon = (filename: string): FileIconType => {
   return iconMap[ext || ''] || 'default';
 };
 
-/**
- * Get file type color classes based on file extension.
- */
+/** Get file type color classes based on extension. */
 export const getFileTypeColor = (filename: string): string => {
   const ext = filename.split('.').pop()?.toLowerCase();
 

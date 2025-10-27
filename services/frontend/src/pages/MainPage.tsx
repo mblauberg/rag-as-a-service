@@ -42,17 +42,7 @@ const BENEFITS = [
   }
 ] as const;
 
-/**
- * MainPage - Single-page search-centric application.
- *
- * Features:
- * - Prominent search bar at center
- * - Debounced search with automatic results
- * - Document grid when not searching
- * - Upload modal with FAB
- * - Document detail modal (overlay instead of route)
- * - Smooth animations
- */
+/** MainPage - Single-page search-centric application with debounced search and document grid. */
 export const MainPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
@@ -104,7 +94,6 @@ export const MainPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-gradient-to-br from-slate-50 to-slate-100 border-b border-border/50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -133,7 +122,6 @@ export const MainPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Hero Search */}
       <main className="container mx-auto px-4">
         <div className={showSearch ? "py-8" : "py-16"}>
           <EnhancedSearchBar
@@ -147,7 +135,6 @@ export const MainPage: React.FC = () => {
           />
         </div>
 
-        {/* Results or Documents */}
         <div className="pb-12">
           {dataToDisplay.isLoading && (
             <div className="space-y-4">
@@ -192,14 +179,12 @@ export const MainPage: React.FC = () => {
           {dataToDisplay.isSuccess && (
             <div className="space-y-4">
               {showSearch ? (
-                // Search Results
                 <>
                   <p className="text-sm text-muted-foreground">
                     {searchResults.data?.total_results || 0} results for "{searchQuery}"
                   </p>
                   {searchResults.data?.results && (
                     <>
-                      {/* Summary Section */}
                       {summaryQuery.isLoading && (
                         <div className="bg-white rounded-lg shadow-md p-6 mb-6 animate-pulse">
                           <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
@@ -234,7 +219,6 @@ export const MainPage: React.FC = () => {
                   )}
                 </>
               ) : (
-                // Document Grid
                 <>
                   <p className="text-sm text-muted-foreground">
                     {documents.data?.total || 0} documents
@@ -247,7 +231,6 @@ export const MainPage: React.FC = () => {
                       className="text-center py-16"
                     >
                       <div className="max-w-2xl mx-auto space-y-8">
-                        {/* Hero Icon */}
                         <div className="flex justify-center">
                           <div className="relative">
                             <motion.div
@@ -282,7 +265,6 @@ export const MainPage: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Heading & Description */}
                         <div className="space-y-3">
                           <h2 className="text-3xl font-bold text-foreground">
                             Welcome to RAAS
@@ -292,7 +274,6 @@ export const MainPage: React.FC = () => {
                           </p>
                         </div>
 
-                        {/* Supported File Types */}
                         <div className="flex flex-wrap justify-center gap-6">
                           {FILE_TYPES.map((type, index) => {
                             const IconComponent = type.Icon;
@@ -315,7 +296,6 @@ export const MainPage: React.FC = () => {
                           })}
                         </div>
 
-                        {/* CTA Button */}
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -331,7 +311,6 @@ export const MainPage: React.FC = () => {
                           </Button>
                         </motion.div>
 
-                        {/* Benefits List */}
                         <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
@@ -381,7 +360,6 @@ export const MainPage: React.FC = () => {
         </div>
       </main>
 
-      {/* Upload Modal */}
       <UploadModal
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}
@@ -390,12 +368,10 @@ export const MainPage: React.FC = () => {
         }}
       />
 
-      {/* Floating Action Button */}
       {documents.data && documents.data.documents.length > 0 && (
         <UploadFAB onClick={() => setUploadOpen(true)} />
       )}
 
-      {/* Document Detail Modal */}
       {selectedDocId && (
         <DocumentDetailModal
           documentId={selectedDocId}

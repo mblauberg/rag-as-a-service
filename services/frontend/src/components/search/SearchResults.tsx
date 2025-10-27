@@ -10,10 +10,7 @@ interface SearchResultsProps {
   onChunkClick: (documentId: string, chunkId: string) => void;
 }
 
-/**
- * SearchResults - Displays search results.
- * Click result to open document detail modal.
- */
+/** SearchResults - Displays search results. Click to open detail modal. */
 export const SearchResults: React.FC<SearchResultsProps> = ({
   results,
   query,
@@ -65,7 +62,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Results */}
       <div className="space-y-3">
         {results.map((result, index) => (
           <motion.div

@@ -20,10 +20,7 @@ interface DocumentDetailModalProps {
   onClose: () => void;
 }
 
-/**
- * DocumentDetailModal - Full document view in modal overlay.
- * Replaces the DocumentDetailPage route.
- */
+/** DocumentDetailModal - Full document view in modal overlay. */
 export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
   documentId,
   highlightChunkId,
@@ -85,7 +82,6 @@ export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
             </DialogHeader>
 
             <div className="space-y-6">
-              {/* Metadata */}
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">
                   {formatBytes(document.file_size)}
@@ -98,7 +94,6 @@ export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
                 </Badge>
               </div>
 
-              {/* Chunks */}
               {document.chunks && document.chunks.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Content</h3>

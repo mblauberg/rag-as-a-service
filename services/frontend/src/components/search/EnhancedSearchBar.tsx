@@ -26,15 +26,7 @@ interface EnhancedSearchBarProps {
   placeholder?: string;
 }
 
-/**
- * Enhanced SearchBar component with integrated model selector.
- *
- * Features:
- * - Press "/" to focus from anywhere
- * - Press "Escape" to clear and blur
- * - Glassmorphism styling with backdrop-blur
- * - shadcn/ui Select component for model selection
- */
+/** Enhanced SearchBar with model selector. Press "/" to focus, "Escape" to clear. */
 export const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
   value,
   onChange,
@@ -104,7 +96,6 @@ export const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
           "
         />
 
-        {/* Model Select */}
         <div className="absolute right-6 top-1/2 -translate-y-1/2">
           {modelsLoading ? (
             <Skeleton className="h-10 w-40" />

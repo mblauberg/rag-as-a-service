@@ -1,9 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../services/api';
 
-/**
- * Hook to fetch and cache available models.
- */
+/** Hook to fetch and cache available models. */
 export function useModels() {
   return useQuery({
     queryKey: ['models'],

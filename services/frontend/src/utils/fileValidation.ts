@@ -1,8 +1,3 @@
-/**
- * File validation utilities for document uploads.
- * Centralizes validation logic to avoid duplication.
- */
-
 export const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.txt', '.md', '.markdown', '.csv'] as const;
 export const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
@@ -11,9 +6,7 @@ export interface FileValidationResult {
   error?: string;
 }
 
-/**
- * Validate file for upload based on extension and size.
- */
+/** Validate file for upload based on extension and size. */
 export function validateUploadFile(file: File): FileValidationResult {
   // Check extension
   const hasValidExtension = ALLOWED_EXTENSIONS.some(ext =>
@@ -38,9 +31,7 @@ export function validateUploadFile(file: File): FileValidationResult {
   return { valid: true };
 }
 
-/**
- * Extract document title from filename by removing extension.
- */
+/** Extract document title from filename by removing extension. */
 export function extractTitleFromFilename(filename: string): string {
   return filename.replace(/\.[^/.]+$/, '');
 }

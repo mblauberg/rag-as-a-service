@@ -19,15 +19,7 @@ interface UploadModalProps {
   onSuccess?: (documentId: string) => void;
 }
 
-/**
- * UploadModal component with drag-and-drop file upload.
- *
- * Features:
- * - Drag and drop file upload
- * - File validation (.pdf, .docx, .txt)
- * - Auto-fill title from filename
- * - shadcn/ui Dialog component
- */
+/** UploadModal with drag-and-drop file upload and validation. */
 export const UploadModal: React.FC<UploadModalProps> = ({
   open,
   onClose,

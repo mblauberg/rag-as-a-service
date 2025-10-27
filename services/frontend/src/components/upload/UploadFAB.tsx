@@ -7,10 +7,7 @@ interface UploadFABProps {
   onClick: () => void;
 }
 
-/**
- * Floating Action Button for document uploads.
- * Positioned in bottom-right corner, always accessible.
- */
+/** Floating Action Button for document uploads. */
 export const UploadFAB: React.FC<UploadFABProps> = ({ onClick }) => {
   return (
     <motion.div
