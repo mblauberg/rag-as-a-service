@@ -61,8 +61,7 @@ class ApiClient {
   async uploadDocument(
     file: File,
     title: string,
-    description?: string,
-    onUploadProgress?: (progressPercent: number) => void
+    description?: string
   ): Promise<DocumentUploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
@@ -77,14 +76,6 @@ class ApiClient {
       {
         headers: {
           'Content-Type': 'multipart/form-data',
-        },
-        onUploadProgress: (progressEvent) => {
-          if (onUploadProgress && progressEvent.total) {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            onUploadProgress(percentCompleted);
-          }
         },
       }
     );
