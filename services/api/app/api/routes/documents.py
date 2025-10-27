@@ -153,111 +153,19 @@ async def upload_document(
 ) -> UploadDocumentResponse:
     """Upload a document for semantic search with full RAG pipeline processing.
 
-    This endpoint orchestrates the complete document upload workflow using hexagonal
-    architecture principles. Documents are validated, chunked into semantic segments,
-    embedded using sentence transformers, and stored in both PostgreSQL (metadata)
-    and Qdrant (vectors) for hybrid search.
-
-    The upload process follows these stages:
-        1. **File Validation**: Verifies file type (TXT, PDF, DOCX), size (<100MB),
-           and content integrity
-        2. **Text Extraction**: Extracts raw text using appropriate parser for file type
-        3. **Semantic Chunking**: Splits text into semantically coherent segments with
-           overlap for context preservation
-        4. **Embedding Generation**: Calls embedder microservice to generate 384-dim
-           vectors using sentence-transformers
-        5. **Vector Storage**: Stores embeddings in Qdrant for efficient ANN search
-        6. **Metadata Persistence**: Saves document and chunk metadata in PostgreSQL
-           with full-text search indexes
-
-    **Supported File Formats:**
-        - TXT: Plain text files (UTF-8 encoding)
-        - PDF: Adobe PDF documents (text extraction only, no OCR)
-        - DOCX: Microsoft Word documents
-
-    **Processing Limits:**
-        - Max file size: 100 MB
-        - Max processing time: 60 seconds
-        - Recommended chunk size: 512 tokens with 50 token overlap
+    Validates, chunks, embeds, and stores documents in PostgreSQL and Qdrant.
 
     Args:
-        file: Uploaded file object with content and metadata. Must have valid
-            filename and non-empty content. Multipart form-data field.
-        title: Human-readable document title for display and search. Used in
-            search results and document listings. Required field.
-        description: Optional longer description providing context about document
-            content, source, or purpose. Indexed for full-text search.
-        use_case: Injected upload document use case following clean architecture.
-            Handles domain logic and orchestration. Auto-injected via FastAPI
-            dependency injection.
+        file: Uploaded file (TXT, PDF, DOCX). Max 100MB.
+        title: Document title for display and search.
+        description: Optional description for search context.
+        use_case: Injected upload use case.
 
     Returns:
-        UploadDocumentResponse containing:
-            - document: Full document metadata including UUID, status, timestamps
-            - chunk_count: Number of semantic chunks created (typically 5-20 per document)
-            - message: Success confirmation message
-
-        Example response:
-            {
-                "document": {
-                    "id": "550e8400-e29b-41d4-a716-446655440000",
-                    "title": "Machine Learning Research Paper",
-                    "file_name": "ml_paper.pdf",
-                    "file_type": "application/pdf",
-                    "file_size": 2048576,
-                    "upload_status": "completed",
-                    "embedding_status": "completed",
-                    "created_at": "2025-10-26T10:30:00Z",
-                    "updated_at": "2025-10-26T10:30:05Z",
-                    "description": "Survey of transformer architectures"
-                },
-                "chunk_count": 12,
-                "message": "Document uploaded and processed successfully"
-            }
+        UploadDocumentResponse with document metadata, chunk count, and success message.
 
     Raises:
-        HTTPException: Multiple failure modes with appropriate status codes:
-            - 400 BAD_REQUEST: Invalid file (empty, no filename), validation failures,
-              or file processing errors (corrupt PDF, unsupported encoding)
-            - 500 INTERNAL_SERVER_ERROR: Unexpected failures during chunking or
-              internal processing errors
-            - 503 SERVICE_UNAVAILABLE: Embedder microservice unreachable or Qdrant
-              vector database connection failures
-
-        Specific exception types handled:
-            - FileProcessingError: File parsing or text extraction failures
-            - ChunkingError: Semantic segmentation failures
-            - EmbeddingServiceError: Embedder microservice unavailable or timeout
-            - VectorStoreError: Qdrant connection or insertion failures
-            - ValueError: Invalid parameters or business rule violations
-
-    Example:
-        Using httpx for testing:
-            >>> import httpx
-            >>> async with httpx.AsyncClient() as client:
-            ...     files = {"file": ("doc.txt", b"AI research content", "text/plain")}
-            ...     data = {"title": "AI Research", "description": "Overview of AI"}
-            ...     response = await client.post(
-            ...         "http://localhost:8000/api/v1/documents/upload",
-            ...         files=files,
-            ...         data=data
-            ...     )
-            ...     print(response.json()["chunk_count"])
-            8
-
-        Using curl:
-            $ curl -X POST "http://localhost:8000/api/v1/documents/upload" \\
-                -F "file=@document.pdf" \\
-                -F "title=Research Paper" \\
-                -F "description=ML transformer survey"
-
-    Notes:
-        - Processing is synchronous; client waits for full pipeline completion
-        - Large documents (>50MB) may experience longer processing times
-        - Duplicate detection is not performed; same document can be uploaded multiple times
-        - Document embeddings are immutable after creation (no re-embedding support)
-        - Failed uploads automatically rollback database transactions but may leave
-          orphaned vectors in Qdrant (cleaned up by background job)
+        HTTPException: 400 for invalid files, 500 for chunking errors, 503 for service unavailability.
     """
     # Validate file
     if not file.filename:
@@ -429,101 +337,18 @@ async def list_documents(
 ) -> ListDocumentsResponse:
     """Retrieve paginated list of all uploaded documents with metadata.
 
-    Returns all documents in the system ordered by creation date (newest first),
-    with pagination support for efficient loading of large document collections.
-    Each document includes full metadata but excludes chunk content for
-    performance.
-
-    This endpoint is designed for document management UIs, enabling users to:
-        - Browse their document library
-        - View upload and processing status
-        - Check file metadata (size, type, timestamps)
-        - Navigate to detailed document views
-
-    **Pagination Behavior:**
-        - Page numbers are 1-indexed (first page is 1, not 0)
-        - Empty pages return empty results array (not 404)
-        - Total count reflects all documents regardless of pagination
-        - Default limit of 20 balances performance and UX
+    Returns documents ordered by creation date (newest first) with pagination support.
 
     Args:
-        page: Page number for pagination, starting at 1. Must be positive integer.
-            Requesting page beyond available pages returns empty results.
-            Default: 1 (first page)
-        limit: Maximum number of documents per page. Must be between 1 and 100.
-            Higher limits may impact response time for large document collections.
-            Default: 20 documents per page
-        use_case: Injected list documents use case handling query logic and data
-            access. Auto-injected via FastAPI dependency system following clean
-            architecture principles.
+        page: Page number (1-indexed). Default: 1.
+        limit: Documents per page (1-100). Default: 20.
+        use_case: Injected list documents use case.
 
     Returns:
-        ListDocumentsResponse containing:
-            - documents: Array of document metadata objects (see DocumentResponse)
-            - total: Total number of documents in system (all pages)
-            - page: Current page number (echoed from request)
-            - limit: Current page size (echoed from request)
-
-        Example response:
-            {
-                "documents": [
-                    {
-                        "id": "550e8400-e29b-41d4-a716-446655440000",
-                        "title": "Research Paper 2024",
-                        "file_name": "paper.pdf",
-                        "file_type": "application/pdf",
-                        "file_size": 2048576,
-                        "upload_status": "completed",
-                        "embedding_status": "completed",
-                        "created_at": "2025-10-26T10:30:00Z",
-                        "updated_at": "2025-10-26T10:30:00Z",
-                        "description": "Machine learning survey"
-                    }
-                ],
-                "total": 47,
-                "page": 1,
-                "limit": 20
-            }
+        ListDocumentsResponse with documents array, total count, page, and limit.
 
     Raises:
-        HTTPException: Validation or processing failures:
-            - 400 BAD_REQUEST: Invalid pagination parameters (page < 1, limit < 1
-              or limit > 100, or non-integer values)
-            - 500 INTERNAL_SERVER_ERROR: Database query failures or unexpected
-              errors during document retrieval
-
-        Specific validation rules:
-            - ValueError: Raised by use case for invalid page/limit values, converted
-              to 400 BAD_REQUEST by route handler
-
-    Example:
-        Fetch first page with default limit:
-            >>> import httpx
-            >>> async with httpx.AsyncClient() as client:
-            ...     response = await client.get("http://localhost:8000/api/v1/documents")
-            ...     documents = response.json()["documents"]
-            ...     print(f"Found {len(documents)} documents")
-            Found 20 documents
-
-        Fetch specific page with custom limit:
-            >>> async with httpx.AsyncClient() as client:
-            ...     response = await client.get(
-            ...         "http://localhost:8000/api/v1/documents?page=2&limit=50"
-            ...     )
-            ...     print(response.json()["total"])
-            47
-
-        Using curl:
-            $ curl "http://localhost:8000/api/v1/documents?page=1&limit=10"
-
-    Notes:
-        - Documents are ordered by created_at descending (newest first)
-        - Pagination uses OFFSET/LIMIT SQL queries (may be slow for deep pages
-          on very large collections; consider cursor-based pagination for >10k docs)
-        - Document status fields reflect processing state: 'pending', 'processing',
-          'completed', or 'failed'
-        - Deleted documents are excluded from results (soft delete not implemented)
-        - Response includes total count for pagination UI (e.g., "Page 2 of 5")
+        HTTPException: 400 for invalid pagination, 500 for database errors.
     """
     # Validation is done by use case, but we catch exceptions
     try:
@@ -645,125 +470,17 @@ async def get_document(
 ) -> DocumentDetailResponse:
     """Retrieve detailed information for a specific document including all chunks.
 
-    Fetches complete document metadata and all associated text chunks with their
-    embeddings metadata. This endpoint is designed for document detail views,
-    content inspection, and debugging the chunking/embedding pipeline.
-
-    Unlike the list endpoint which only returns document-level metadata, this
-    endpoint includes the full chunk collection with:
-        - Chunk text content
-        - Chunk position/index within document
-        - Embedding status and metadata
-        - Token counts and boundaries
-
-    This data is essential for:
-        - Displaying document content in the UI
-        - Debugging why search results include/exclude certain passages
-        - Understanding how documents were segmented
-        - Verifying embedding pipeline processed all chunks
+    Fetches complete document metadata and all associated text chunks with content and embedding metadata.
 
     Args:
-        document_id: UUID of the document to retrieve. Must be a valid UUID v4
-            format and correspond to an existing document in the database.
-            Example: "550e8400-e29b-41d4-a716-446655440000"
-        use_case: Injected get document use case handling data retrieval and
-            domain logic. Auto-injected via FastAPI dependency system.
+        document_id: UUID of the document to retrieve.
+        use_case: Injected get document use case.
 
     Returns:
-        DocumentDetailResponse containing:
-            - All document metadata (id, title, file info, status, timestamps)
-            - chunks: Complete array of all chunks with content and metadata
-            - Each chunk includes: id, content, chunk_index, token_count, metadata
-
-        Example response:
-            {
-                "id": "550e8400-e29b-41d4-a716-446655440000",
-                "title": "Machine Learning Research",
-                "file_name": "ml_paper.pdf",
-                "file_type": "application/pdf",
-                "file_size": 2048576,
-                "upload_status": "completed",
-                "embedding_status": "completed",
-                "created_at": "2025-10-26T10:30:00Z",
-                "updated_at": "2025-10-26T10:30:05Z",
-                "description": "Survey of transformer architectures",
-                "chunks": [
-                    {
-                        "id": "660e8400-e29b-41d4-a716-446655440111",
-                        "content": "Transformers are neural network architectures...",
-                        "chunk_index": 0,
-                        "document_id": "550e8400-e29b-41d4-a716-446655440000",
-                        "token_count": 512,
-                        "metadata": {
-                            "start_char": 0,
-                            "end_char": 2450,
-                            "embedding_model": "all-MiniLM-L6-v2"
-                        }
-                    },
-                    {
-                        "id": "660e8400-e29b-41d4-a716-446655440222",
-                        "content": "Attention mechanisms enable models to focus...",
-                        "chunk_index": 1,
-                        "document_id": "550e8400-e29b-41d4-a716-446655440000",
-                        "token_count": 498,
-                        "metadata": {
-                            "start_char": 2400,
-                            "end_char": 4820,
-                            "embedding_model": "all-MiniLM-L6-v2"
-                        }
-                    }
-                ]
-            }
+        DocumentDetailResponse with document metadata and all chunks (ordered by chunk_index).
 
     Raises:
-        HTTPException: Multiple failure scenarios:
-            - 404 NOT_FOUND: Document with specified UUID does not exist in database.
-              This is the most common error when document_id is invalid or document
-              was deleted.
-            - 500 INTERNAL_SERVER_ERROR: Database query failures, connection errors,
-              or unexpected exceptions during retrieval.
-
-        Specific exception types:
-            - DocumentNotFoundError: Raised by use case when document doesn't exist,
-              automatically converted to 404 by route handler
-            - Database connection errors: Converted to 500 status
-
-    Example:
-        Retrieve document with all chunks:
-            >>> import httpx
-            >>> async with httpx.AsyncClient() as client:
-            ...     doc_id = "550e8400-e29b-41d4-a716-446655440000"
-            ...     response = await client.get(
-            ...         f"http://localhost:8000/api/v1/documents/{doc_id}"
-            ...     )
-            ...     document = response.json()
-            ...     print(f"Document has {len(document['chunks'])} chunks")
-            Document has 12 chunks
-
-        Check if document exists:
-            >>> async with httpx.AsyncClient() as client:
-            ...     response = await client.get(
-            ...         f"http://localhost:8000/api/v1/documents/{doc_id}"
-            ...     )
-            ...     if response.status_code == 200:
-            ...         print("Document exists")
-            ...     elif response.status_code == 404:
-            ...         print("Document not found")
-            Document exists
-
-        Using curl:
-            $ curl "http://localhost:8000/api/v1/documents/550e8400-e29b-41d4-a716-446655440000"
-
-    Notes:
-        - Chunks are returned in order by chunk_index (document reading order)
-        - Large documents with many chunks may have significant response sizes
-          (typical: 50-500KB for research papers with 20-50 chunks)
-        - Chunk content includes overlap regions for context preservation
-        - Embedding vectors are NOT included in response (stored separately in Qdrant)
-        - This endpoint does not perform search or relevance ranking; chunks are
-          in document order, not relevance order
-        - Document status 'completed' means all chunks have embeddings; 'failed'
-          indicates embedding pipeline errors
+        HTTPException: 404 if document not found, 500 for database errors.
     """
     try:
         document, chunks = await use_case.execute(document_id)
@@ -875,94 +592,17 @@ async def delete_document(
 ) -> None:
     """Permanently delete a document and all associated data from all storage systems.
 
-    Performs cascading deletion across all storage layers in the RAG system,
-    ensuring complete removal of document data and freeing storage resources.
-    This operation is irreversible and should be used with caution.
-
-    The deletion process removes data from three storage systems:
-        1. **PostgreSQL (Relational DB):**
-           - Document metadata record (title, file info, timestamps)
-           - All associated chunk records with text content
-           - Full-text search indexes for the document
-
-        2. **Qdrant (Vector DB):**
-           - All embedding vectors for document chunks
-           - Vector metadata and payload data
-           - Frees vector storage space
-
-        3. **File Storage (if implemented):**
-           - Original uploaded file from disk/S3 (future feature)
-
-    The operation uses database transactions to ensure consistency. If deletion
-    fails in any system (e.g., Qdrant connection error), the transaction is
-    rolled back and document metadata remains intact for retry.
-
-    **Safety Considerations:**
-        - Deletion is permanent; no undo or recovery mechanism exists
-        - Related search results immediately stop returning this document's chunks
-        - In-flight searches may briefly reference deleted chunks (eventual consistency)
-        - Consider archiving instead of deletion for audit/compliance requirements
+    Performs cascading deletion across PostgreSQL (metadata/chunks) and Qdrant (vectors). This operation is irreversible.
 
     Args:
-        document_id: UUID of the document to delete. Must be a valid UUID v4
-            format corresponding to an existing document.
-            Example: "550e8400-e29b-41d4-a716-446655440000"
-        use_case: Injected delete document use case handling deletion orchestration
-            across storage layers. Auto-injected via FastAPI dependency system.
+        document_id: UUID of the document to delete.
+        use_case: Injected delete document use case.
 
     Returns:
-        None. Success is indicated by 204 NO CONTENT status code with empty response
-        body. This follows RESTful conventions for successful DELETE operations.
+        None. Success indicated by 204 NO CONTENT status.
 
     Raises:
-        HTTPException: Multiple failure scenarios:
-            - 404 NOT_FOUND: Document with specified UUID does not exist. Already
-              deleted documents or invalid UUIDs trigger this error.
-            - 503 SERVICE_UNAVAILABLE: Qdrant vector store is unreachable or
-              vector deletion failed. Document metadata remains intact for retry.
-            - 500 INTERNAL_SERVER_ERROR: Unexpected errors during deletion,
-              database transaction failures, or connection issues.
-
-        Specific exception types:
-            - DocumentNotFoundError: Document doesn't exist, converted to 404
-            - VectorStoreError: Qdrant connection or deletion failures, converted
-              to 503 to indicate temporary service unavailability
-            - Database errors: Connection or transaction failures, converted to 500
-
-    Example:
-        Delete a document:
-            >>> import httpx
-            >>> async with httpx.AsyncClient() as client:
-            ...     doc_id = "550e8400-e29b-41d4-a716-446655440000"
-            ...     response = await client.delete(
-            ...         f"http://localhost:8000/api/v1/documents/{doc_id}"
-            ...     )
-            ...     if response.status_code == 204:
-            ...         print("Document deleted successfully")
-            Document deleted successfully
-
-        Delete with error handling:
-            >>> async with httpx.AsyncClient() as client:
-            ...     response = await client.delete(
-            ...         f"http://localhost:8000/api/v1/documents/{doc_id}"
-            ...     )
-            ...     if response.status_code == 404:
-            ...         print("Document not found or already deleted")
-            ...     elif response.status_code == 503:
-            ...         print("Vector store unavailable, retry later")
-
-        Using curl:
-            $ curl -X DELETE "http://localhost:8000/api/v1/documents/550e8400-e29b-41d4-a716-446655440000"
-
-    Notes:
-        - Deletion is synchronous; client waits for complete removal from all systems
-        - Database cascading deletes automatically remove chunks when document is deleted
-        - Orphaned vectors in Qdrant are removed by document_id payload filter
-        - Failed deletions can be retried safely (idempotent operation for 404 case)
-        - Large documents with many chunks may take several seconds to delete
-        - Background cleanup job periodically removes any orphaned data from failed deletions
-        - Consider implementing soft delete (marking as deleted) instead of hard delete
-          for audit trails and potential recovery
+        HTTPException: 404 if not found, 503 for Qdrant failures, 500 for database errors.
     """
     try:
         await use_case.execute(document_id)
