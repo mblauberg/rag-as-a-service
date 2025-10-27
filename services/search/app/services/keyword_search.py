@@ -74,15 +74,15 @@ class KeywordSearchService:
         SELECT
             c.id,
             c.document_id,
-            c.content,
-            c.tokens,
+            c.chunk_text as content,
+            c.chunk_tokens as tokens,
             c.chunk_index,
             d.title as document_title,
             d.file_name as document_filename,
-            ts_rank(c.search_vector, plainto_tsquery('english', :query)) as rank
-        FROM chunks c
+            ts_rank(c.text_search_vector, plainto_tsquery('english', :query)) as rank
+        FROM document_chunks c
         JOIN documents d ON c.document_id = d.id
-        WHERE c.search_vector @@ plainto_tsquery('english', :query)
+        WHERE c.text_search_vector @@ plainto_tsquery('english', :query)
         """
 
         params = {"query": query_text, "limit": top_k}

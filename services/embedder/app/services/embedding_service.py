@@ -8,7 +8,7 @@ from qdrant_client.models import PointStruct
 from uuid import UUID
 
 from app.core.config import settings
-from app.core.qdrant_client import qdrant_client
+from app.core.qdrant_client import get_qdrant_client
 from app.models.schemas import ChunkItem
 
 logger = logging.getLogger(__name__)
@@ -190,7 +190,7 @@ class EmbeddingService:
 
             # Store in Qdrant
             logger.info(f"Storing {len(points)} vectors in Qdrant")
-            qdrant_client.upsert_vectors(points)
+            get_qdrant_client().upsert_vectors(points)
 
             logger.info(f"Successfully processed and stored {len(chunks)} chunks")
             return True

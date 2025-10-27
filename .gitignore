@@ -85,6 +85,7 @@ node_modules/
 
 # Project specific
 data/
+docs/
 !data/uploads/.gitkeep
 .kind-cluster/
 .worktrees/
