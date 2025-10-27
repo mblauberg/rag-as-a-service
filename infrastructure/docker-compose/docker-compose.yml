@@ -116,7 +116,8 @@ services:
       - "3000:3000"
     environment:
       # Leave empty to use Vite's built-in proxy (recommended for development)
-      # The proxy in vite.config.ts will route /api requests to http://api:8000
+      # The dev server proxy in vite.config.ts routes /api requests to http://api:8000
+      # In production, NGINX handles API proxying (see services/frontend/nginx.conf)
       - VITE_API_URL=
     volumes:
       - ../../services/frontend:/app
