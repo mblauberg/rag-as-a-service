@@ -1,6 +1,6 @@
 # RAaS – Retrieval-Augmented Generation as a Service
 
-A microservices-based document search platform that combines vector embeddings with LLM-powered summarization.
+A microservices-based document search platform that combines vector embeddings with LLM-powered summarisation.
 
 > Academic project for INFS3208 (Cloud Computing), University of Queensland, 2025
 
@@ -43,7 +43,7 @@ Services:
 - API (FastAPI) - orchestrates requests, manages document CRUD
 - Search (FastAPI) - hybrid retrieval with cross-encoder reranking
 - Embedder (FastAPI) - generates vectors using sentence-transformers
-- Generator (FastAPI) - creates summaries via OpenAI/Anthropic/Google
+- Generator (FastAPI) - creates summarisations via OpenAI/Anthropic/Google
 - Frontend (React) - single-page app with live search
 
 Infrastructure:
@@ -124,7 +124,7 @@ Provider settings in `infrastructure/docker-compose/.env`:
 ```bash
 # Required
 OPENAI_API_KEY=sk-your-key
-DEFAULT_MODEL=openai:gpt-4o-mini
+DEFAULT_MODEL=openai:gpt-5-mini
 
 # Optional providers
 ANTHROPIC_API_KEY=sk-ant-your-key
