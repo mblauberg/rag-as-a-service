@@ -131,16 +131,14 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         description: description || undefined
       });
 
-      // Show success briefly before closing
-      setTimeout(() => {
-        onSuccess?.(result.id);
-        onClose();
+      // Reset form
+      setFile(null);
+      setTitle('');
+      setDescription('');
 
-        // Reset form
-        setFile(null);
-        setTitle('');
-        setDescription('');
-      }, 500);
+      // Close modal and notify success
+      onClose();
+      onSuccess?.(result.id);
     } catch (error) {
       console.error('Upload failed:', error);
       setError(error instanceof Error ? error.message : 'Failed to upload document');
