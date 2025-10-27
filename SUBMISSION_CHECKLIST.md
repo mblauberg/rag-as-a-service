@@ -352,9 +352,9 @@ kubectl logs -l app=api -n raas | grep CORS
 
 ## Post-Submission
 
-- [ ] Git tag created: `git tag -a v1.0-submission -m "Final submission"`
-- [ ] Repository backed up
-- [ ] Demo environment preserved (local Kind cluster)
+- [x] Git tag created: `git tag -a v1.0-submission -m "Final submission"`
+- [x] Repository backed up
+- [x] Demo environment preserved (local Kind cluster)
 - [ ] Lessons learned documented
 
 ---
