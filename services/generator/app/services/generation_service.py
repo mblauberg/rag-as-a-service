@@ -29,59 +29,15 @@ class GenerationService:
         chunks: List[ChunkInput],
         model: Optional[str] = None
     ) -> GenerateResponse:
-        """Generate AI summary from retrieved chunks using RAG architecture.
-
-        Implements Retrieval-Augmented Generation (RAG) by combining:
-        1. Retrieved document chunks (from search service)
-        2. User's original query
-        3. Cloud LLM API (OpenAI, Anthropic, Google)
-
-        Process:
-        1. Build RAG prompt with chunks and citation markers [1], [2], etc.
-        2. Route to appropriate LLM provider based on model name
-        3. Generate summary with inline citations
-        4. Return summary with metadata (model used, token count)
-
-        The PromptService formats chunks with citation markers, instructing
-        the LLM to cite sources when making claims. This provides:
-        - Answer attribution to source documents
-        - Fact verification capability
-        - Transparency in information sources
-
-        Supported providers (via ProviderRegistry):
-        - OpenAI: gpt-4o, gpt-4o-mini, gpt-3.5-turbo
-        - Anthropic: claude-3-5-sonnet, claude-3-opus, claude-3-haiku
-        - Google: gemini-1.5-pro, gemini-1.5-flash
+        """Generate summary from chunks using RAG with specified LLM.
 
         Args:
-            query: User's original search query (natural language question).
-            chunks: Retrieved document chunks to use as context. Each chunk
-                contains text and metadata from relevant documents.
-            model: LLM model identifier (e.g., "gpt-4o-mini", "claude-3-5-sonnet").
-                If None, uses settings.default_model. Must be in format
-                recognized by ProviderRegistry.
+            query: Search query
+            chunks: Retrieved document chunks
+            model: LLM model (defaults to settings.default_model)
 
         Returns:
-            GenerateResponse containing:
-            - summary: AI-generated answer with inline citations
-            - model_used: Actual model identifier used for generation
-            - tokens_used: Token count (not implemented yet, returns 0)
-
-        Raises:
-            RuntimeError: If provider registry not initialized at startup.
-            ValueError: If model name not recognized by any provider.
-            httpx.RequestError: If LLM API call fails (network, auth, quota).
-
-        Example:
-            >>> service = GenerationService()
-            >>> chunks = [ChunkInput(text="RAG combines retrieval...", ...)]
-            >>> response = await service.generate_summary(
-            ...     query="What is RAG?",
-            ...     chunks=chunks,
-            ...     model="gpt-4o-mini"
-            ... )
-            >>> print(response.summary)
-            >>> print(f"Generated with {response.model_used}")
+            GenerateResponse with summary and metadata
         """
         # Use default model if not specified
         model_to_use = model or settings.default_model

@@ -28,7 +28,6 @@ class GoogleProvider(ModelProvider):
     ]
 
     def __init__(self) -> None:
-        """Initialize Google provider with API key from environment."""
         api_key = os.getenv("GOOGLE_API_KEY")
         if api_key:
             genai.configure(api_key=api_key)
@@ -37,16 +36,10 @@ class GoogleProvider(ModelProvider):
             self.api_key = None
 
     def is_available(self) -> bool:
-        """Check if Google API key is configured."""
         return self.api_key is not None
 
     async def list_models(self) -> List[Model]:
-        """
-        Return predefined Gemini models.
-
-        Returns:
-            List of Gemini Model objects
-        """
+        """Get available Gemini models."""
         from datetime import datetime, timezone
 
         models: List[Model] = []
@@ -65,28 +58,10 @@ class GoogleProvider(ModelProvider):
         return models
 
     async def generate(self, model: str, prompt: str, context: str) -> str:
-        """
-        Generate summary using Google Gemini API.
-
-        Args:
-            model: Gemini model name (e.g., "google:gemini-2-5-pro")
-            prompt: User query (unused, query is already in context)
-            context: Complete RAG prompt with instructions, chunks, and query
-
-        Returns:
-            Generated summary
-
-        Raises:
-            RuntimeError: If API call fails
-        """
         if not self.api_key:
             raise RuntimeError("Google API key not configured")
 
-        # Strip "google:" prefix and convert to API format
-        # "google:gemini-2-5-pro" -> "gemini-2.5-pro"
         api_model = model.replace("google:", "").replace("-", ".", 1).replace("-", ".", 1)
-
-        # Use context directly - it's already a complete prompt from PromptService
 
         try:
             model_instance = genai.GenerativeModel(api_model)

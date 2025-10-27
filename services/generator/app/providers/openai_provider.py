@@ -42,21 +42,15 @@ class OpenAIProvider(ModelProvider):
     ]
 
     def __init__(self) -> None:
-        """Initialize OpenAI provider with API key from environment."""
+        """Initialize provider with OpenAI API key."""
         api_key = os.getenv("OPENAI_API_KEY")
         self.client: AsyncOpenAI | None = AsyncOpenAI(api_key=api_key) if api_key else None
 
     def is_available(self) -> bool:
-        """Check if OpenAI API key is configured."""
         return self.client is not None
 
     async def list_models(self) -> List[Model]:
-        """
-        Return predefined OpenAI models.
-
-        Returns:
-            List of OpenAI Model objects
-        """
+        """List predefined OpenAI models."""
         from datetime import datetime, timezone
 
         models: List[Model] = []
@@ -75,27 +69,11 @@ class OpenAIProvider(ModelProvider):
         return models
 
     async def generate(self, model: str, prompt: str, context: str) -> str:
-        """
-        Generate summary using OpenAI API.
-
-        Args:
-            model: OpenAI model name (e.g., "openai:gpt-5")
-            prompt: User query (unused, query is already in context)
-            context: Complete RAG prompt with instructions, chunks, and query
-
-        Returns:
-            Generated summary
-
-        Raises:
-            RuntimeError: If API call fails
-        """
+        """Call OpenAI API to generate summary."""
         if not self.client:
             raise RuntimeError("OpenAI client not initialized")
 
-        # Strip "openai:" prefix for API call
         api_model = model.replace("openai:", "")
-
-        # Use context directly - it's already a complete prompt from PromptService
         system_message = "You are a helpful assistant that summarizes document search results."
 
         try:
