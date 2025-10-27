@@ -7,7 +7,7 @@ Search is now delegated to the dedicated search microservice.
 from uuid import UUID
 
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.models import FieldCondition, Filter, FilterSelector, MatchValue, PointStruct
+from qdrant_client.models import Distance, FieldCondition, Filter, FilterSelector, MatchValue, PointStruct, VectorParams
 
 from app.core.exceptions import VectorStoreError
 from app.domain.entities.chunk import Chunk
@@ -31,6 +31,30 @@ class QdrantVectorStoreImpl(VectorStore):
         """
         self.client = client
         self.collection_name = collection_name
+        self._initialized = False
+
+    async def _ensure_collection(self) -> None:
+        """Ensure the collection exists with proper configuration.
+
+        Creates the collection if it doesn't exist. This is idempotent and safe
+        to call multiple times.
+        """
+        if self._initialized:
+            return
+
+        collections = await self.client.get_collections()
+        collection_names = [c.name for c in collections.collections]
+
+        if self.collection_name not in collection_names:
+            await self.client.create_collection(
+                collection_name=self.collection_name,
+                vectors_config=VectorParams(
+                    size=384,  # all-MiniLM-L6-v2 dimension
+                    distance=Distance.COSINE
+                ),
+            )
+
+        self._initialized = True
 
     async def upsert(self, chunks: list[Chunk]) -> None:
         """Insert or update chunk vectors in Qdrant.
@@ -43,6 +67,9 @@ class QdrantVectorStoreImpl(VectorStore):
         """
         if not chunks:
             return
+
+        # Ensure collection exists before upserting
+        await self._ensure_collection()
 
         # Validate all chunks have embeddings
         for chunk in chunks:
@@ -93,6 +120,9 @@ class QdrantVectorStoreImpl(VectorStore):
         Raises:
             VectorStoreError: If deletion fails
         """
+        # Ensure collection exists before deleting
+        await self._ensure_collection()
+
         try:
             # Build filter for document_id
             query_filter = Filter(
