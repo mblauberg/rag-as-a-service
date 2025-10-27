@@ -57,6 +57,9 @@ docker build -t raas-embedder:latest -f services/embedder/Dockerfile services/em
 echo "Building Generator service..."
 docker build -t raas-generator:latest -f services/generator/Dockerfile services/generator
 
+echo "Building Search service..."
+docker build -t raas-search:latest -f services/search/Dockerfile services/search
+
 echo "Building Frontend..."
 docker build -t raas-frontend:latest -f services/frontend/Dockerfile services/frontend
 
@@ -65,6 +68,7 @@ echo "Loading images into Kind cluster..."
 kind load docker-image raas-api:latest --name $CLUSTER_NAME
 kind load docker-image raas-embedder:latest --name $CLUSTER_NAME
 kind load docker-image raas-generator:latest --name $CLUSTER_NAME
+kind load docker-image raas-search:latest --name $CLUSTER_NAME
 kind load docker-image raas-frontend:latest --name $CLUSTER_NAME
 
 echo ""
@@ -93,6 +97,9 @@ kubectl rollout status deployment/embedder -n $NAMESPACE --timeout=120s
 
 echo "Waiting for Generator..."
 kubectl rollout status deployment/generator -n $NAMESPACE --timeout=120s
+
+echo "Waiting for Search..."
+kubectl rollout status deployment/search -n $NAMESPACE --timeout=120s
 
 echo "Waiting for Frontend..."
 kubectl rollout status deployment/frontend -n $NAMESPACE --timeout=120s

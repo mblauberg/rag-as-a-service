@@ -32,4 +32,8 @@ resources:
 - generator/configmap.yaml
 - generator/secret.yaml
 - generator/hpa.yaml
+- search/deployment.yaml
+- search/service.yaml
+- search/configmap.yaml
+- search/hpa.yaml
 - ingress.yaml
