@@ -4,11 +4,11 @@ RAG summary generation with multi-provider LLM support.
 
 ## Supported Providers
 
-All providers are cloud-based for production reliability, scalability, and consistent performance:
+Cloud-based LLM providers:
 
-- **OpenAI** (GPT-4o, GPT-4o Mini, GPT-5, GPT-5 Mini) - Primary provider, recommended for production
-- **Anthropic** (Claude Opus 4.1, Claude Sonnet 4.5) - Alternative provider for graceful degradation
-- **Google** (Gemini 2.5 Pro, Gemini 2.5 Flash) - Alternative provider for vendor flexibility
+- **OpenAI** (GPT-4o, GPT-4o Mini, GPT-5, GPT-5 Mini) - Primary
+- **Anthropic** (Claude Opus 4.1, Claude Sonnet 4.5) - Alternative
+- **Google** (Gemini 2.5 Pro, Gemini 2.5 Flash) - Alternative
 
 ## Quick Start
 
@@ -46,7 +46,7 @@ export ENABLE_GOOGLE=true
 export GOOGLE_API_KEY=AIza...
 ```
 
-Providers register automatically if API keys are valid. At least one provider must be configured for the service to function.
+Providers register when API keys are valid. At least one provider is required.
 
 ## API Endpoints
 
@@ -148,11 +148,7 @@ The registry routes requests to the appropriate provider based on the prefix.
 
 ### Graceful Degradation
 
-- At least one provider (OpenAI recommended) must be configured
-- Additional providers register automatically when API keys are valid
-- Missing optional API keys logged as warnings, not errors
-- Frontend automatically discovers available models via `/api/v1/models`
-- Provider abstraction enables switching between vendors without code changes
+At least one provider must be configured (OpenAI recommended). Additional providers register when API keys are valid. Missing keys log warnings. Frontend discovers models via `/api/v1/models`.
 
 ## Testing
 

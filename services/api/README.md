@@ -15,11 +15,13 @@ FastAPI gateway service for RAAS (Retrieval-Augmented Generation as a Service).
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.13+
 - Poetry
 - PostgreSQL
 - Qdrant
 - Embedder service running
+- Generator service running
+- Search service running
 
 ### Installation
 
@@ -132,25 +134,14 @@ Required variables:
 
 ## Architecture
 
-This service follows **Hexagonal Architecture** (Ports and Adapters):
+Uses Hexagonal Architecture (Ports and Adapters):
 
-**Layers:**
-- **Domain** (`app/domain/`): Core business entities (Document, Chunk) and value objects (SearchQuery)
-- **Application** (`app/application/`): Use cases orchestrating business logic
-  - `UploadDocumentUseCase`: Handle document upload, chunking, embedding
-  - `SearchDocumentsUseCase`: Execute hybrid search with optional summarization
-  - `ListDocumentsUseCase`: Retrieve paginated document list
-  - `DeleteDocumentUseCase`: Remove documents and cleanup
-- **Infrastructure** (`app/infrastructure/`): External system adapters
-  - Repositories: PostgreSQL data access
-  - Services: Embedder/Generator HTTP clients
-  - Vector Store: Qdrant integration
-- **API** (`app/api/`): HTTP routes and DTOs
-- **Ports** (`app/ports/`): Interface definitions for external dependencies
+- **Domain**: Core entities (Document, Chunk)
+- **Application**: Use cases (upload, search, list, delete)
+- **Infrastructure**: External adapters (PostgreSQL, Qdrant, HTTP clients)
+- **API**: HTTP routes and DTOs
+- **Ports**: Interface definitions
 
-**Benefits:**
-- Testable: Business logic independent of frameworks
-- Flexible: Swap implementations via dependency injection
-- SOLID: Single Responsibility, Dependency Inversion throughout
+Benefits: testable, flexible via dependency injection, follows SOLID principles.
 
-For comprehensive architecture details, see the root [README.md](../../README.md).
+See root [README.md](../../README.md) for details.

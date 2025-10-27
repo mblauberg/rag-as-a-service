@@ -18,14 +18,14 @@ tests/
 
 ### Python/Playwright Tests
 
-Browser-based tests using Playwright for frontend testing:
+Browser tests for frontend:
 
-- `test_webapp.py` - Basic webapp functionality and navigation
-- `test_documents_page.py` - Document listing and display
-- `test_upload_search.py` - Document upload and search workflow
-- `test_ai_summary_placement.py` - AI summary generation and placement
-- `test_summary_fix.py` - AI summary API integration test
-- `test_httpx_redirects.py` - HTTP redirect behavior validation
+- `test_webapp.py` - Basic functionality
+- `test_documents_page.py` - Document listing
+- `test_upload_search.py` - Upload and search
+- `test_ai_summary_placement.py` - AI summaries
+- `test_summary_fix.py` - Summary API
+- `test_httpx_redirects.py` - HTTP redirects
 
 **Running Playwright tests:**
 ```bash
@@ -42,11 +42,11 @@ pytest tests/integration/test_webapp.py -v
 
 ### Shell Script Tests
 
-End-to-end integration tests using curl and bash:
+End-to-end tests using curl:
 
-- `test_full_workflow.sh` - Complete RAAS workflow (upload, search, delete)
-- `test_generation_flow.sh` - AI generation and citation testing
-- `test_multi_provider.sh` - Multi-provider model testing
+- `test_full_workflow.sh` - Upload, search, delete
+- `test_generation_flow.sh` - AI generation with citations
+- `test_multi_provider.sh` - Multi-provider models
 
 **Running shell tests:**
 ```bash
@@ -95,9 +95,12 @@ curl http://localhost:3000
 ### Valid Models for Testing
 
 Use these model identifiers in tests:
-- `openai:gpt-5-mini` - Latest fast OpenAI model (requires API key)
-- `anthropic:claude-sonnet-4-5` - Anthropic model (requires API key)
-- `google:gemini-2.5-pro` - Google model (requires API key)
+- `openai:gpt-5-mini` - Latest fast OpenAI model (default, requires API key)
+- `openai:gpt-5` - Latest advanced OpenAI model (requires API key)
+- `anthropic:claude-sonnet-4-5` - Anthropic Sonnet model (requires API key)
+- `anthropic:claude-opus-4-1` - Anthropic Opus model (requires API key)
+- `google:gemini-2.5-flash` - Google Flash model (requires API key)
+- `google:gemini-2.5-pro` - Google Pro model (requires API key)
 
 **Note:** Always use cloud provider models with appropriate API keys configured for testing.
 
@@ -178,7 +181,7 @@ fi
 
 1. **Test Independence:** Each test should clean up after itself
 2. **Timeouts:** Use appropriate timeouts for async operations (default: 60s)
-3. **Model Selection:** Use `gpt-4o-mini` for speed, only use larger models when necessary
+3. **Model Selection:** Use `openai:gpt-5-mini` for speed, only use larger models when necessary
 4. **Error Messages:** Include descriptive output for debugging failures
 5. **Service Health:** Check service health before running tests
 

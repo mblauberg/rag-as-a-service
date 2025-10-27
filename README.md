@@ -22,7 +22,7 @@ Retrieval-Augmented Generation (RAG) systems. Key academic contributions include
 
 ## Overview
 
-RAAS enables intelligent document search through semantic understanding. Upload documents, and the system automatically chunks them, generates vector embeddings, and provides lightning-fast semantic search capabilities. Built with scalability, observability, and user experience in mind.
+Upload documents and search them semantically. The system chunks text, generates embeddings, and searches via vector similarity.
 
 ## Key Features
 
@@ -36,29 +36,29 @@ RAAS enables intelligent document search through semantic understanding. Upload 
 - **Multi-format Support**: Upload TXT, PDF, DOCX, and more
 - **Real-time Processing**: Asynchronous document processing with status tracking
 
-### Modern UI/UX
-- **Search-Centric Interface**: Single-page application focused on discovery
-- **Drag-and-Drop Upload**: Intuitive file upload with visual feedback
-- **Instant Results**: Real-time search as you type
-- **Responsive Design**: Optimized for desktop, tablet, and mobile
-- **Accessibility**: WCAG-compliant with semantic HTML and ARIA labels
-- **Dark Mode Ready**: Built with shadcn/ui components and Tailwind CSS
+### UI/UX
+- Single-page React application
+- Drag-and-drop file upload
+- Real-time search
+- Responsive design (desktop, tablet, mobile)
+- WCAG-compliant accessibility
+- Built with shadcn/ui and Tailwind CSS
 
-### Developer Experience
-- **Comprehensive Testing**: Unit, integration, and component tests
-- **Type Safety**: Full TypeScript coverage with strict mode
-- **Dependency Injection**: Clean architecture with testable services
-- **Error Handling**: Custom exceptions with proper HTTP status codes
-- **API Documentation**: Interactive OpenAPI (Swagger) docs for all endpoints
-- **Health Checks**: Liveness and readiness probes for Kubernetes
+### Developer Features
+- Unit, integration, and component tests
+- TypeScript with strict mode
+- Dependency injection for testable services
+- Custom exceptions with HTTP status codes
+- OpenAPI (Swagger) documentation
+- Kubernetes health probes
 
-### Production-Ready
-- **Horizontal Scaling**: Kubernetes HPA for API and embedder services
-- **High Availability**: PostgreSQL and Qdrant with persistent volumes
-- **Observability**: Structured JSON logging throughout
-- **CORS Support**: Configurable cross-origin resource sharing
-- **Resource Limits**: Memory and CPU constraints for stability
-- **Container Orchestration**: Docker Compose for local dev, Kubernetes for production
+### Production Features
+- Horizontal scaling with Kubernetes HPA
+- PostgreSQL and Qdrant with persistent volumes
+- Structured JSON logging
+- Configurable CORS
+- Resource limits (memory and CPU)
+- Docker Compose for local dev, Kubernetes for production
 
 ## Architecture
 
@@ -175,7 +175,7 @@ RAAS enables intelligent document search through semantic understanding. Upload 
 
 - Docker 24.0+ and Docker Compose 2.0+
 - Node.js 18+ (for local frontend development)
-- Python 3.11+ (for local backend development)
+- Python 3.13+ (for local backend development)
 - Poetry 1.5+ (Python dependency management)
 
 ### Local Development with Docker Compose

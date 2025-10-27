@@ -4,10 +4,10 @@ This directory contains Kubernetes manifests for deploying the RAAS (Retrieval-A
 
 ## Architecture
 
-- **Base manifests**: `base/` - Environment-agnostic configuration
-- **Overlays**: Environment-specific patches
-  - `overlays/local/` - Local development (Kind, Minikube)
-  - `overlays/production/` - Production deployment (GCP, AWS, Azure)
+- **Base**: Environment-agnostic manifests in `base/`
+- **Overlays**: Environment-specific configs
+  - `local/` - Kind/Minikube
+  - `production/` - Cloud (GCP, AWS, Azure)
 
 ## Services
 
@@ -50,20 +50,13 @@ brew install kustomize
 
 ### Local Deployment (Kind)
 
-**Option 1: Automated Setup (Recommended)**
+**Option 1: Automated (Recommended)**
 
 ```bash
-# From project root - creates cluster, builds images, and deploys everything
 ./infrastructure/scripts/setup-kind-full.sh
 ```
 
-The script will:
-- Create Kind cluster named `raas-cluster`
-- Build all Docker images
-- Load images into Kind
-- Install NGINX Ingress
-- Deploy all services to `raas` namespace
-- Display access instructions
+Creates cluster, builds images, installs ingress, deploys services.
 
 **Option 2: Manual Setup**
 
@@ -461,18 +454,18 @@ infrastructure/k8s/
 
 ### Current
 
-- Secrets for sensitive data (passwords, tokens)
-- Resource limits to prevent DoS
+- Secrets for passwords and tokens
+- Resource limits
 - Network isolation via ClusterIP
-- Health probes for reliability
+- Health probes
 
-### Future Enhancements
+### Future
 
-- NetworkPolicies for pod-to-pod restrictions
-- RBAC for least-privilege access
+- NetworkPolicies
+- RBAC
 - Pod Security Standards
-- Image vulnerability scanning
-- Encrypted secrets (Sealed Secrets, External Secrets Operator)
+- Image scanning
+- Encrypted secrets
 
 ## Type I Project Requirements
 

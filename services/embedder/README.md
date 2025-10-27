@@ -8,15 +8,15 @@ The embedder service generates 384-dimensional vector embeddings from text chunk
 
 ## Features
 
-- **Batch Embedding**: Process multiple text chunks efficiently in configurable batches
-- **Query Embedding**: Generate embeddings for search queries
-- **Qdrant Integration**: Automatic collection initialization and vector storage
-- **Health Checks**: Liveness and readiness probes for Kubernetes
-- **Async Architecture**: Non-blocking operations for better performance
+- Batch embedding with configurable batch size
+- Query embedding for search
+- Qdrant integration with automatic collection setup
+- Kubernetes health probes
+- Async operations
 
 ## Requirements
 
-- Python 3.11+
+- Python 3.13+
 - Qdrant vector database
 - ~500MB for the sentence-transformers model
 
@@ -210,7 +210,7 @@ The API service calls this embedder service:
 
 - Ensure sufficient disk space (~500MB)
 - Check internet connection for first-time model download
-- Verify Python version is 3.11+
+- Verify Python version is 3.13+
 
 ### Qdrant connection errors
 

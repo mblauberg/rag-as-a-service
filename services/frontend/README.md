@@ -4,15 +4,15 @@ React-based frontend for RAAS (Retrieval-Augmented Generation as a Service).
 
 ## Features
 
-- **Document Management**: Upload with drag-and-drop, progress tracking, and file validation
-- **Document Listing**: Paginated view with metadata display
-- **Document Details**: View full document with chunks
-- **Semantic Search**: Real-time search with relevance scoring
-- **RAG Summaries**: AI-generated summaries with citations using multiple LLM providers
-- **Model Selection**: Choose from OpenAI, Ollama, Anthropic, or Google models
-- **Responsive Design**: Mobile-friendly UI with Tailwind CSS
-- **shadcn/ui Components**: Pre-built accessible components with Radix UI
-- **State Management**: TanStack React Query for caching and optimistic updates
+- Drag-and-drop document upload with progress tracking
+- Document listing with pagination
+- Document viewer with chunks
+- Real-time semantic search
+- AI-generated summaries with citations
+- Multi-provider model selection (OpenAI, Anthropic, Google)
+- Responsive design with Tailwind CSS
+- shadcn/ui components (Radix UI)
+- React Query for state management
 
 ## Tech Stack
 
