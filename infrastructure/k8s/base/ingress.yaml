@@ -3,9 +3,6 @@ kind: Ingress
 metadata:
   name: raas-ingress
   namespace: raas
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
-    nginx.ingress.kubernetes.io/use-regex: "true"
   labels:
     app: raas
 spec:
@@ -14,16 +11,16 @@ spec:
   - http:
       paths:
       # API routes - match /api and /api/*
-      - path: /api(/|$)(.*)
-        pathType: ImplementationSpecific
+      - path: /api
+        pathType: Prefix
         backend:
           service:
             name: api
             port:
               number: 8000
-      # Frontend routes - match everything else
-      - path: /()(.*)
-        pathType: ImplementationSpecific
+      # Frontend routes - match everything else (must be last)
+      - path: /
+        pathType: Prefix
         backend:
           service:
             name: frontend

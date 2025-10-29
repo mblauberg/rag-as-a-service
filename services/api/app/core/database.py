@@ -60,5 +60,8 @@ async def init_db() -> None:
     Initialize database by creating all tables.
     Note: In production, use proper migrations instead.
     """
+    # Import models to register them with Base.metadata
+    from app.infrastructure.db import models  # noqa: F401
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

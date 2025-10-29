@@ -65,5 +65,6 @@ spec:
         persistentVolumeClaim:
           claimName: postgres-data
       - name: init-scripts
-        emptyDir: {}
+        configMap:
+          name: postgres-init-scripts
   volumeClaimTemplates: []

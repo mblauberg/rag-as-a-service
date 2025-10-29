@@ -18,6 +18,11 @@ echo "Step 2: Creating new Kind cluster with ingress port mappings..."
 kind create cluster --name $CLUSTER_NAME --config infrastructure/kind/kind-config.yaml
 
 echo ""
+echo "Step 2.5: Waiting for cluster node to be ready..."
+kubectl wait --for=condition=ready node --all --timeout=60s
+echo "Cluster node is ready!"
+
+echo ""
 echo "Step 3: Installing NGINX Ingress Controller..."
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 
@@ -25,7 +30,7 @@ echo "Waiting for NGINX Ingress Controller to be ready..."
 kubectl wait --namespace ingress-nginx \
   --for=condition=ready pod \
   --selector=app.kubernetes.io/component=controller \
-  --timeout=90s
+  --timeout=120s
 
 echo ""
 echo "Step 4: Installing metrics-server for HPA..."
@@ -36,10 +41,7 @@ kubectl patch deployment metrics-server -n kube-system --type='json' \
   -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--kubelet-insecure-tls"}]'
 
 echo "Waiting for metrics-server to be ready..."
-kubectl wait --namespace kube-system \
-  --for=condition=ready pod \
-  --selector=k8s-app=metrics-server \
-  --timeout=90s
+kubectl rollout status deployment/metrics-server -n kube-system --timeout=120s
 
 echo ""
 echo "Step 5: Creating RAAS namespace..."

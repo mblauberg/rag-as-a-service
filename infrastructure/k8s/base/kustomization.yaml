@@ -8,6 +8,7 @@ resources:
 - postgres/statefulset.yaml
 - postgres/service.yaml
 - postgres/configmap.yaml
+- postgres/init-configmap.yaml
 - postgres/secret.yaml
 - postgres/pvc.yaml
 - qdrant/statefulset.yaml
