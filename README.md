@@ -136,8 +136,7 @@ Built with a microservices architecture that scales compute-intensive operations
 1. **Clone and configure**
 
 ```bash
-# TODO: Replace YOUR_USERNAME with your GitHub username before publishing
-git clone https://github.com/YOUR_USERNAME/raas.git
+git clone https://github.com/mblauberg/raas.git
 cd raas
 
 # Set up environment variables
@@ -528,8 +527,6 @@ MIT License - See [LICENSE](LICENSE) for details.
 ---
 
 ## Contact & Links
-
-<!-- TODO: Update with your actual contact information before publishing -->
 
 **Author:** Michael Blauberg
 **Email:** mblauberg@outlook.com
