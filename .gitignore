@@ -38,9 +38,11 @@ dmypy.json
 .pyre/
 .ruff_cache/
 
-# Virtual environments
+# Virtual environments and environment files
 .env
-.env.local
+.env.*
+!.env.example
+!.env.template
 .venv/
 .venv*/
 venv/
@@ -65,6 +67,8 @@ secrets.env
 **/*secret*.yaml
 !**/*secret.example.yaml
 !**/*secrets.example.yaml
+!**/*secret.yaml.template
+!**/secret.yaml.template
 
 # IDE
 .idea/
