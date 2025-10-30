@@ -152,7 +152,7 @@ echo ""
 # Generate .env file
 echo -e "${BLUE}Generating configuration files...${NC}"
 
-cat > "$ENV_FILE" <<EOF
+if ! cat > "$ENV_FILE" <<EOF
 # ============================================
 # RaaS Environment Configuration
 # ============================================
@@ -186,11 +186,22 @@ TEMPERATURE=0.1
 MAX_TOKENS=2000
 TIMEOUT=30
 EOF
+then
+    echo -e "${RED}✗ Failed to create $ENV_FILE${NC}"
+    exit 1
+fi
 
 echo -e "${GREEN}✓ Created $ENV_FILE${NC}"
 
 # Generate Kubernetes secret.yaml
-cat > "$K8S_SECRET_FILE" <<EOF
+# First ensure the directory exists
+K8S_SECRET_DIR=$(dirname "$K8S_SECRET_FILE")
+if ! mkdir -p "$K8S_SECRET_DIR"; then
+    echo -e "${RED}✗ Failed to create directory $K8S_SECRET_DIR${NC}"
+    exit 1
+fi
+
+if ! cat > "$K8S_SECRET_FILE" <<EOF
 # ============================================
 # RaaS Generator API Keys (Kubernetes Secret)
 # ============================================
@@ -208,6 +219,10 @@ stringData:
   ANTHROPIC_API_KEY: "${ANTHROPIC_KEY}"
   GOOGLE_API_KEY: "${GOOGLE_KEY}"
 EOF
+then
+    echo -e "${RED}✗ Failed to create $K8S_SECRET_FILE${NC}"
+    exit 1
+fi
 
 echo -e "${GREEN}✓ Created $K8S_SECRET_FILE${NC}"
 echo ""
