@@ -1,6 +1,6 @@
 # RAaS – Retrieval-Augmented Generation as a Service
 
-> Microservices platform for semantic document search with AI-generated summaries
+> Search your documents using natural language and get AI-powered answers with sources
 
 ![Project Status](https://img.shields.io/badge/status-portfolio%20project-blue)
 [![Tech Stack](https://img.shields.io/badge/Python-3.13-blue)](https://www.python.org/)
@@ -28,9 +28,9 @@
 
 ## Overview
 
-RAaS is a document search platform that combines semantic understanding with AI-generated summaries. Upload documents, search using natural language, and receive contextual answers with citations.
+RAaS lets you upload documents and search them using natural language questions. Instead of just keyword matching, it understands what you're actually asking. Search for "contract breach" and it'll find mentions of "agreement violation."
 
-Built with a microservices architecture that scales compute-intensive operations independently.
+The platform generates AI summaries with inline citations showing exactly where each piece of information came from. It's built as separate microservices so the heavy lifting (embeddings, AI generation) can scale without affecting the rest of the system.
 
 ## Demo
 
@@ -42,12 +42,12 @@ Built with a microservices architecture that scales compute-intensive operations
 
 ### Key Features
 
-- **Semantic Search** – Understands meaning, not just keywords. Search for "contract breach" and find "agreement violation"
-- **Hybrid Retrieval** – Combines vector similarity with keyword matching using Reciprocal Rank Fusion (RRF)
-- **AI Summarisation** – Generate contextual answers with inline citations from OpenAI, Anthropic, or Google models
-- **Multi-Format Support** – Upload PDFs, DOCX, TXT, CSV, and Markdown files
-- **Cross-Encoder Reranking** – Improves result relevance with precision scoring
-- **Kubernetes Ready** – Deploy with auto-scaling, health checks, and rolling updates
+- **Semantic Search** – Understands meaning, not just keywords
+- **Hybrid Retrieval** – Combines vector similarity with keyword matching (using Reciprocal Rank Fusion)
+- **AI Summarisation** – Generates contextual answers with inline citations. Works with OpenAI, Anthropic, or Google models
+- **Multi-Format Support** – Handles PDFs, DOCX, TXT, CSV, and Markdown
+- **Cross-Encoder Reranking** – Re-scores the top results to surface the most relevant chunks
+- **Kubernetes Ready** – Auto-scaling, health checks, and rolling updates included
 
 ---
 
@@ -80,18 +80,18 @@ Built with a microservices architecture that scales compute-intensive operations
 
 | Service | Responsibility | Tech Stack |
 |---------|----------------|------------|
-| **API Gateway** | Request orchestration, document CRUD, business logic | FastAPI, SQLAlchemy, PostgreSQL |
-| **Search** | Hybrid retrieval (vector + keyword), cross-encoder reranking | FastAPI, Qdrant, sentence-transformers |
-| **Embedder** | 384-dimensional vector generation | sentence-transformers (all-MiniLM-L6-v2) |
-| **Generator** | AI summaries with citations | OpenAI/Anthropic/Google APIs |
-| **Frontend** | Real-time search UI | React 18, TypeScript, Tailwind CSS, shadcn/ui |
+| **API Gateway** | Handles requests, document storage, business logic | FastAPI, SQLAlchemy, PostgreSQL |
+| **Search** | Hybrid search (vector + keyword) and reranking | FastAPI, Qdrant, sentence-transformers |
+| **Embedder** | Converts text to 384-dimensional vectors | sentence-transformers (all-MiniLM-L6-v2) |
+| **Generator** | Creates AI summaries with citations | OpenAI/Anthropic/Google APIs |
+| **Frontend** | Real-time search interface | React 18, TypeScript, Tailwind CSS, shadcn/ui |
 
 ### Infrastructure
 
-- **PostgreSQL** – Document metadata and text chunks
-- **Qdrant** – Vector storage with HNSW indexing
-- **Docker Compose** – Local development
-- **Kubernetes** – Production deployment with HPA and rolling updates
+- **PostgreSQL** – Stores document metadata and text chunks
+- **Qdrant** – Vector database using HNSW indexing for fast similarity search
+- **Docker Compose** – For local development
+- **Kubernetes** – Production deployment (includes horizontal pod autoscaling)
 
 ---
 
@@ -142,11 +142,11 @@ Run the interactive setup script:
 ./scripts/setup-secrets.sh
 ```
 
-This will:
-- Prompt for your API keys with validation
-- Generate `.env` for Docker Compose
-- Generate `infrastructure/k8s/base/generator/secret.yaml` for Kubernetes
-- Provide clear error messages if keys are invalid
+The script will:
+- Ask for your API keys and validate them
+- Create a `.env` file for Docker Compose
+- Create `infrastructure/k8s/base/generator/secret.yaml` for Kubernetes
+- Show clear error messages if any keys are invalid
 
 #### Option B: Manual Setup
 
@@ -243,17 +243,17 @@ curl -X POST http://localhost:8000/api/v1/search \
 ### Troubleshooting Quick Start
 
 **"OPENAI_API_KEY is required" error:**
-- Run `./scripts/setup-secrets.sh` to configure API keys
-- Or manually check your `.env` file has a valid OpenAI key
+- Run `./scripts/setup-secrets.sh` to set up your API keys
+- Or check that your `.env` file has a valid OpenAI key
 
 **Generator service won't start:**
-- Check logs: `docker-compose -f infrastructure/docker-compose/docker-compose.yml logs generator` or `kubectl logs -n raas deploy/generator`
-- Verify API key format is correct (starts with `sk-proj-` or `sk-`)
-- Ensure `.env` file exists and is readable
+- Check the logs: `docker-compose -f infrastructure/docker-compose/docker-compose.yml logs generator` or `kubectl logs -n raas deploy/generator`
+- Make sure your API key format is correct (should start with `sk-proj-` or `sk-`)
+- Verify the `.env` file exists and can be read
 
 **Services timing out:**
-- First startup downloads ML models and may take 2-5 minutes
-- Check resource availability: `docker stats` or `kubectl top nodes`
+- The first startup takes 2-5 minutes because it downloads ML models
+- Check if you have enough resources: `docker stats` or `kubectl top nodes`
 
 ---
 
@@ -414,7 +414,7 @@ raas/
 │   │   ├── tests/
 │   │   └── pyproject.toml
 │   ├── embedder/         # Vector generation service
-│   ├── generator/        # LLM summarization service
+│   ├── generator/        # LLM summarisation service
 │   ├── search/           # Hybrid search service
 │   └── frontend/         # React SPA
 │       ├── src/
@@ -476,14 +476,14 @@ See [services/generator/README.md](services/generator/README.md) for detailed ex
 
 ### Benchmarks
 
-- **Search latency**: <100ms for hybrid search (p95)
-- **Embedding generation**: ~50ms per 512-token chunk
-- **AI summary generation**: 2-5s depending on provider and model
-- **Throughput**: 100+ concurrent search requests (with HPA)
+- **Search latency**: Under 100ms for hybrid search (95th percentile)
+- **Embedding generation**: About 50ms per 512-token chunk
+- **AI summary generation**: 2-5 seconds (depends on the model and provider)
+- **Throughput**: Handles 100+ concurrent searches with autoscaling enabled
 
 ### Horizontal Pod Autoscaler
 
-Services automatically scale based on resource utilization:
+The Kubernetes deployment scales services up and down based on CPU and memory usage:
 
 ```yaml
 # Example HPA configuration
@@ -549,34 +549,35 @@ kubectl describe pod <pod-name> -n raas
 
 ### Search Pipeline
 
-1. **Query Embedding** – Convert search query to 384-dimensional vector
-2. **Hybrid Retrieval** – Run vector search (Qdrant) and keyword search (PostgreSQL) in parallel
-3. **RRF Fusion** – Combine rankings using Reciprocal Rank Fusion
-4. **Cross-Encoder Reranking** – Score top-k results for relevance
-5. **AI Summarization** – Generate answer with inline citations
+1. **Query Embedding** – Your search gets converted to a 384-dimensional vector
+2. **Hybrid Retrieval** – Runs vector search (Qdrant) and keyword search (PostgreSQL) at the same time
+3. **RRF Fusion** – Merges both result sets using Reciprocal Rank Fusion
+4. **Cross-Encoder Reranking** – Scores the top results for relevance
+5. **AI Summarisation** – Generates an answer with inline citations
 
 ### Design Choices
 
-- **Microservices** – Scale compute-intensive services independently
-- **Async I/O** – Handle concurrent requests without blocking
-- **Repository Pattern** – Separate data access from business logic
-- **Type Safety** – Pydantic v2 + TypeScript catch errors at compile time
+- **Microservices** – The expensive operations (embeddings, AI) can scale separately
+- **Async I/O** – Handles many concurrent requests without waiting
+- **Repository Pattern** – Keeps data access code separate from business logic
+- **Type Safety** – Pydantic and TypeScript catch type errors before runtime
 
 ---
 
 ## Testing
 
-- **47 test files** across all services
-- **Unit tests** with pytest and Jest
-- **Integration tests** for end-to-end workflows
-- **Type checking** with mypy (strict mode)
-- **Linting** with Ruff and ESLint
+The project has 47 test files covering all services:
+
+- Unit tests using pytest (Python) and Jest (TypeScript)
+- Integration tests for the full upload-search-generate workflow
+- Type checking with mypy in strict mode
+- Code linting with Ruff and ESLint
 
 ```bash
 # Run all tests
 ./tests/integration/test_full_workflow.sh
 
-# With coverage
+# Run with coverage report
 cd services/api && poetry run pytest --cov=app --cov-report=html
 ```
 
@@ -584,18 +585,18 @@ cd services/api && poetry run pytest --cov=app --cov-report=html
 
 ## Contributing
 
-This is a portfolio and academic project. Contributions for bug fixes, documentation improvements, and educational enhancements are welcome.
+This started as a portfolio and academic project, but contributions are welcome! Bug fixes, documentation improvements, and educational enhancements are all appreciated.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Check out [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ### Quick Start for Contributors
 
-1. Fork the repository
+1. Fork the repo
 2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Make your changes and add tests
-4. Run tests: `poetry run pytest` (backend) or `npm test` (frontend)
-5. Commit changes: `git commit -am 'feat: add my feature'`
-6. Push to branch: `git push origin feature/my-feature`
+3. Make your changes and write tests
+4. Run the tests: `poetry run pytest` (backend) or `npm test` (frontend)
+5. Commit your changes: `git commit -am 'feat: add my feature'`
+6. Push to your branch: `git push origin feature/my-feature`
 7. Open a Pull Request
 
 ---
