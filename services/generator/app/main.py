@@ -45,6 +45,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     # Startup
     logger.info("Starting RAAS Generator service")
+
+    # Validate required API keys
+    try:
+        settings.validate_required_keys()
+    except ValueError as e:
+        logger.error(str(e))
+        raise  # Re-raise to fail startup
+
     logger.info(f"Default model: {settings.default_model}")
     logger.info(f"Max chunks: {settings.max_chunks}")
     logger.info(f"Temperature: {settings.temperature}")
