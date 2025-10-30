@@ -32,8 +32,6 @@ RAaS is a document search platform that combines semantic understanding with AI-
 
 Built with a microservices architecture that scales compute-intensive operations independently.
 
-**API Docs:** `http://localhost:8000/docs` (when running locally)
-
 ## Demo
 
 ![Main Page](docs/images/main-page-example.png)
@@ -46,7 +44,7 @@ Built with a microservices architecture that scales compute-intensive operations
 
 - **Semantic Search** – Understands meaning, not just keywords. Search for "contract breach" and find "agreement violation"
 - **Hybrid Retrieval** – Combines vector similarity with keyword matching using Reciprocal Rank Fusion (RRF)
-- **AI Summarization** – Generate contextual answers with inline citations from OpenAI, Anthropic, or Google models
+- **AI Summarisation** – Generate contextual answers with inline citations from OpenAI, Anthropic, or Google models
 - **Multi-Format Support** – Upload PDFs, DOCX, TXT, CSV, and Markdown files
 - **Cross-Encoder Reranking** – Improves result relevance with precision scoring
 - **Kubernetes Ready** – Deploy with auto-scaling, health checks, and rolling updates
@@ -171,14 +169,13 @@ cp infrastructure/k8s/base/generator/secret.yaml.template infrastructure/k8s/bas
 #### Docker Compose
 
 ```bash
-cd infrastructure/docker-compose
-docker-compose up -d
+docker-compose -f infrastructure/docker-compose/docker-compose.yml up -d
 ```
 
 Verify services are running:
 ```bash
-docker-compose ps
-docker-compose logs generator  # Should show no errors
+docker-compose -f infrastructure/docker-compose/docker-compose.yml ps
+docker-compose -f infrastructure/docker-compose/docker-compose.yml logs generator  # Should show no errors
 ```
 
 Access the application:
@@ -250,7 +247,7 @@ curl -X POST http://localhost:8000/api/v1/search \
 - Or manually check your `.env` file has a valid OpenAI key
 
 **Generator service won't start:**
-- Check logs: `docker-compose logs generator` or `kubectl logs -n raas deploy/generator`
+- Check logs: `docker-compose -f infrastructure/docker-compose/docker-compose.yml logs generator` or `kubectl logs -n raas deploy/generator`
 - Verify API key format is correct (starts with `sk-proj-` or `sk-`)
 - Ensure `.env` file exists and is readable
 
@@ -507,7 +504,7 @@ targetMemoryUtilizationPercentage: 80
 docker-compose -f infrastructure/docker-compose/docker-compose.yml logs -f
 
 # Restart individual service
-docker-compose restart api
+docker-compose -f infrastructure/docker-compose/docker-compose.yml restart api
 ```
 
 ### No search results
