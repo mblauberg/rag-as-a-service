@@ -1,6 +1,6 @@
 # RAaS – Retrieval-Augmented Generation as a Service
 
-> Production-grade microservices platform for semantic document search with AI-powered summarization
+> Microservices platform for semantic document search with AI-generated summaries
 
 ![Project Status](https://img.shields.io/badge/status-portfolio%20project-blue)
 [![Tech Stack](https://img.shields.io/badge/Python-3.13-blue)](https://www.python.org/)
@@ -28,7 +28,9 @@
 
 ## Overview
 
-RAaS is a cloud-native document search platform that combines semantic understanding with AI-generated summaries. Upload documents, search using natural language, and receive contextual answers with citations—all powered by a scalable microservices architecture.
+RAaS is a document search platform that combines semantic understanding with AI-generated summaries. Upload documents, search using natural language, and receive contextual answers with citations.
+
+Built with a microservices architecture that scales compute-intensive operations independently.
 
 **API Docs:** `http://localhost:8000/docs` (when running locally)
 
