@@ -467,17 +467,17 @@ infrastructure/k8s/
 - Image scanning
 - Encrypted secrets
 
-## Type I Project Requirements
+## Architecture Features
 
-This scaffolding satisfies INFS3208 Type I requirements:
+This deployment demonstrates production-grade cloud-native patterns:
 
-- ✅ Microservice architecture (7 services)
-- ✅ Containerization (all services in containers)
-- ✅ Scalability (HPA on API, Embedder, Generator)
-- ✅ Reliability (multiple replicas, health probes)
-- ✅ Load balancing (K8s Service + Ingress)
-- ✅ Orchestration (Kubernetes)
-- ✅ Rollout and rollback (RollingUpdate strategy)
+- ✅ Microservice architecture (7 independent services)
+- ✅ Containerization (all services in Docker containers)
+- ✅ Auto-scaling (HPA on API, Embedder, Generator services)
+- ✅ High availability (multiple replicas, health probes, self-healing)
+- ✅ Load balancing (Kubernetes Service + NGINX Ingress)
+- ✅ Orchestration (Kubernetes with Kustomize)
+- ✅ Zero-downtime deployments (RollingUpdate strategy with rollback)
 
 ## Support
 

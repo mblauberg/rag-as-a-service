@@ -56,7 +56,15 @@ venv.bak/
 secrets.env
 *.secret
 .secret
-*/secret.yaml
+
+# Kubernetes secrets - comprehensive patterns
+**/secret.yaml
+**/secrets.yaml
+**/base/*/secret.yaml
+**/overlays/*/secret.yaml
+**/*secret*.yaml
+!**/*secret.example.yaml
+!**/*secrets.example.yaml
 
 # IDE
 .idea/
@@ -93,7 +101,13 @@ node_modules/
 
 # Project specific
 data/
-docs/
 !data/uploads/.gitkeep
 .kind-cluster/
 .worktrees/
+uploads/
+!uploads/.gitkeep
+
+# Docs - ignore academic/proposal files but keep images and references
+docs/prd.md
+docs/PROPOSAL.md
+docs/plans/
