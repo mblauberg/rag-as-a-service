@@ -146,9 +146,9 @@ All models use qualified names with provider prefixes:
 
 The registry routes requests to the appropriate provider based on the prefix.
 
-### Graceful Degradation
+### Provider Configuration
 
-At least one provider must be configured (OpenAI recommended). Additional providers register when API keys are valid. Missing keys log warnings. Frontend discovers models via `/api/v1/models`.
+At least one provider must be configured (OpenAI recommended). Additional providers register when API keys are valid. Missing keys log warnings. The frontend discovers available models via `/api/v1/models`.
 
 ## Testing
 

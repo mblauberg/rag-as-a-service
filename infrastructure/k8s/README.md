@@ -469,7 +469,7 @@ infrastructure/k8s/
 
 ## Architecture Features
 
-This deployment demonstrates production-grade cloud-native patterns:
+This deployment demonstrates key Kubernetes patterns:
 
 - ✅ Microservice architecture (7 independent services)
 - ✅ Containerization (all services in Docker containers)

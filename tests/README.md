@@ -179,11 +179,11 @@ fi
 
 ## Best Practices
 
-1. **Test Independence:** Each test should clean up after itself
-2. **Timeouts:** Use appropriate timeouts for async operations (default: 60s)
-3. **Model Selection:** Use `openai:gpt-5-mini` for speed, only use larger models when necessary
-4. **Error Messages:** Include descriptive output for debugging failures
-5. **Service Health:** Check service health before running tests
+1. **Test Independence** – Each test should clean up after itself
+2. **Timeouts** – Use appropriate timeouts for async operations (default: 60s)
+3. **Model Selection** – Use `openai:gpt-5-mini` for speed, only use larger models when necessary
+4. **Error Messages** – Include descriptive output for debugging failures
+5. **Service Health** – Check service health before running tests
 
 ## Unit Tests
 

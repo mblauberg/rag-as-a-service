@@ -1,10 +1,10 @@
 # RAAS Embedder Service
 
-Vector embedding generation service using sentence-transformers for the RAAS platform.
+Generates vector embeddings using sentence-transformers for semantic search.
 
 ## Overview
 
-The embedder service generates 384-dimensional vector embeddings from text chunks and search queries using the `all-MiniLM-L6-v2` model from sentence-transformers. It stores the embeddings in Qdrant vector database for semantic search.
+Creates 384-dimensional vector embeddings from text chunks and search queries using the `all-MiniLM-L6-v2` model. Stores embeddings in Qdrant for semantic search.
 
 ## Features
 

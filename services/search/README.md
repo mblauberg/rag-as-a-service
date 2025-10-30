@@ -1,10 +1,10 @@
 # RAAS Search Service
 
-Intelligent search and retrieval service for RAG-as-a-Service.
+Hybrid search and retrieval service for RAG-as-a-Service.
 
 ## Overview
 
-Hybrid search combining vector similarity with keyword matching. Uses cross-encoder reranking to improve result precision.
+Combines vector similarity with keyword matching. Uses cross-encoder reranking to improve result precision.
 
 ## Features
 
@@ -186,13 +186,13 @@ Where:
 
 ### Cross-Encoder Reranking
 
-Cross-encoder scores query-document pairs:
+Scores query-document pairs directly:
 
 ```python
 scores = reranker.predict([(query, chunk.text) for chunk in chunks])
 ```
 
-More accurate than bi-encoder similarity alone.
+This provides better accuracy than bi-encoder similarity.
 
 ## Performance
 

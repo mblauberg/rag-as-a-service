@@ -49,7 +49,7 @@ Built with a microservices architecture that scales compute-intensive operations
 - **AI Summarization** – Generate contextual answers with inline citations from OpenAI, Anthropic, or Google models
 - **Multi-Format Support** – Upload PDFs, DOCX, TXT, CSV, and Markdown files
 - **Cross-Encoder Reranking** – Improves result relevance with precision scoring
-- **Production-Ready** – Kubernetes deployment with auto-scaling, health checks, and zero-downtime updates
+- **Kubernetes Ready** – Deploy with auto-scaling, health checks, and rolling updates
 
 ---
 
@@ -93,7 +93,7 @@ Built with a microservices architecture that scales compute-intensive operations
 - **PostgreSQL** – Document metadata and text chunks
 - **Qdrant** – Vector storage with HNSW indexing
 - **Docker Compose** – Local development
-- **Kubernetes** – Production deployment with HPA, rolling updates, health probes
+- **Kubernetes** – Production deployment with HPA and rolling updates
 
 ---
 
@@ -466,26 +466,22 @@ kubectl describe pod <pod-name> -n raas
 
 ---
 
-## Technical Highlights
+## How It Works
 
-### Architecture Decisions
+### Search Pipeline
 
-- **Microservices**: Independent scaling of compute-intensive services (embedder, search)
-- **Async/Await**: Non-blocking I/O throughout the stack for high concurrency
-- **Repository Pattern**: Clean separation of data access from business logic
-- **Type Safety**: Pydantic v2 + TypeScript for compile-time guarantees
-- **Health Probes**: Kubernetes liveness/readiness checks for automatic recovery
-- **Rolling Updates**: Zero-downtime deployments with automatic rollback
+1. **Query Embedding** – Convert search query to 384-dimensional vector
+2. **Hybrid Retrieval** – Run vector search (Qdrant) and keyword search (PostgreSQL) in parallel
+3. **RRF Fusion** – Combine rankings using Reciprocal Rank Fusion
+4. **Cross-Encoder Reranking** – Score top-k results for relevance
+5. **AI Summarization** – Generate answer with inline citations
 
-### Search Algorithm
+### Design Choices
 
-1. **Query Embedding**: Convert search query to 384-dimensional vector
-2. **Hybrid Retrieval**:
-   - Vector search (Qdrant HNSW index)
-   - Keyword search (PostgreSQL full-text)
-3. **RRF Fusion**: Combine rankings using Reciprocal Rank Fusion
-4. **Cross-Encoder Reranking**: Precision scoring for top-k results
-5. **AI Summarization**: Generate contextual answer with citations
+- **Microservices** – Scale compute-intensive services independently
+- **Async I/O** – Handle concurrent requests without blocking
+- **Repository Pattern** – Separate data access from business logic
+- **Type Safety** – Pydantic v2 + TypeScript catch errors at compile time
 
 ---
 
@@ -509,9 +505,9 @@ cd services/api && poetry run pytest --cov=app --cov-report=html
 
 ## Contributing
 
-This is a portfolio/academic project created as a final university assignment. While active development is not planned, contributions for bug fixes, documentation improvements, and educational enhancements are welcome!
+This is a portfolio and academic project. Contributions for bug fixes, documentation improvements, and educational enhancements are welcome.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ### Quick Start for Contributors
 
@@ -546,9 +542,9 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
-## Acknowledgments
+## Built With
 
-- Built with [FastAPI](https://fastapi.tiangolo.com/), [React](https://react.dev/), and [Kubernetes](https://kubernetes.io/)
-- Vector search powered by [Qdrant](https://qdrant.tech/)
-- Embeddings from [sentence-transformers](https://www.sbert.net/)
-- UI components from [shadcn/ui](https://ui.shadcn.com/)
+- [FastAPI](https://fastapi.tiangolo.com/), [React](https://react.dev/), and [Kubernetes](https://kubernetes.io/)
+- [Qdrant](https://qdrant.tech/) for vector search
+- [sentence-transformers](https://www.sbert.net/) for embeddings
+- [shadcn/ui](https://ui.shadcn.com/) for UI components

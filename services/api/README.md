@@ -134,14 +134,12 @@ Required variables:
 
 ## Architecture
 
-Uses Hexagonal Architecture (Ports and Adapters):
+Uses Hexagonal Architecture:
 
-- **Domain**: Core entities (Document, Chunk)
-- **Application**: Use cases (upload, search, list, delete)
-- **Infrastructure**: External adapters (PostgreSQL, Qdrant, HTTP clients)
-- **API**: HTTP routes and DTOs
-- **Ports**: Interface definitions
+- **Domain** – Core entities (Document, Chunk)
+- **Application** – Use cases (upload, search, list, delete)
+- **Infrastructure** – External adapters (PostgreSQL, Qdrant, HTTP clients)
+- **API** – HTTP routes and DTOs
+- **Ports** – Interface definitions
 
-Benefits: testable, flexible via dependency injection, follows SOLID principles.
-
-See root [README.md](../../README.md) for details.
+This structure enables testing, dependency injection, and clean separation of concerns.
