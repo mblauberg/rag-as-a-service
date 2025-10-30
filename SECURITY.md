@@ -2,7 +2,7 @@
 
 ## Project Status
 
-**Note**: This is a portfolio/academic project created as a final university project. While it demonstrates production-ready patterns and best practices, it is not actively maintained for production use.
+**Note**: This is a portfolio and academic project. It is not actively maintained for production use.
 
 ## Supported Versions
 
@@ -25,10 +25,10 @@ If you discover a security vulnerability in this project, please report it respo
 
 If you prefer to report security issues privately:
 
-1. Email: [your.email@example.com]
+1. Email: mblauberg@outlook.com
 2. Include "SECURITY" in the subject line
 3. Provide detailed information about the vulnerability
-4. Allow reasonable time for response (48-72 hours)
+4. Allow 48-72 hours for response
 
 ## Security Considerations
 
@@ -98,10 +98,9 @@ Dependencies are managed via:
 
 This project is open source and educational. If you find security issues:
 
-1. We appreciate responsible disclosure
+1. Responsible disclosure is appreciated
 2. Credit will be given for valid findings
-3. Please allow time for fixes before public disclosure
-4. Consider this a learning opportunity to discuss security practices
+3. Allow time for fixes before public disclosure
 
 ## Resources
 
@@ -111,4 +110,4 @@ This project is open source and educational. If you find security issues:
 
 ---
 
-**Disclaimer**: This is a demonstration project. Use at your own risk. The author(s) are not responsible for any security issues arising from deployment or use of this software.
+**Disclaimer**: This is a demonstration project. Use at your own risk.

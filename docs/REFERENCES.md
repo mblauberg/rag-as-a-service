@@ -1,6 +1,6 @@
 # Documentation References
 
-This file lists official documentation resources that may be consulted while developing the RAAS project.  Keep this file up to date with reliable external references. When searching for additional information, prefer official sources whenever possible.
+Official documentation resources for the RAAS project.
 
 ## Core technologies
 

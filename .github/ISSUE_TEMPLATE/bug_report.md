@@ -6,43 +6,43 @@ labels: bug
 assignees: ''
 ---
 
-## Description
+## What happened?
 
-A clear and concise description of the bug.
+Describe the bug.
 
 ## Steps to Reproduce
 
 1. Go to '...'
 2. Click on '...'
-3. Execute command '...'
+3. Run command '...'
 4. See error
 
-## Expected Behavior
+## Expected
 
-What you expected to happen.
+What should happen.
 
-## Actual Behavior
+## Actual
 
-What actually happened.
+What did happen.
 
 ## Environment
 
-- **Deployment Type**: [Docker Compose / Kubernetes / Local Development]
+- **Deployment**: [Docker Compose / Kubernetes / Local]
 - **OS**: [macOS / Linux / Windows]
-- **Browser** (if frontend issue): [Chrome / Firefox / Safari]
-- **Docker Version**: [e.g., 24.0.5]
-- **Python Version** (if backend issue): [e.g., 3.13]
+- **Browser**: [Chrome / Firefox / Safari] (if frontend)
+- **Docker**: [e.g., 24.0.5]
+- **Python**: [e.g., 3.13] (if backend)
 
 ## Logs
 
 ```
-Paste relevant logs here
+Paste logs here
 ```
 
 ## Screenshots
 
-If applicable, add screenshots to help explain the problem.
+Add if helpful.
 
 ## Additional Context
 
-Add any other context about the problem here (e.g., happens only with specific documents, intermittent issue, etc.).
+Other relevant details (e.g., happens only with PDFs, intermittent).

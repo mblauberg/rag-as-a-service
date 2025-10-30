@@ -6,40 +6,40 @@ labels: enhancement
 assignees: ''
 ---
 
-## Feature Description
+## What feature do you want?
 
-A clear and concise description of the feature you'd like to see.
+Describe the feature.
 
-## Problem Statement
+## Problem
 
-What problem does this feature solve? Is your feature request related to a problem?
+What problem does this solve?
 
 Example: "I'm frustrated when [...]"
 
 ## Proposed Solution
 
-Describe the solution you'd like to see implemented.
+How would this work?
 
-## Alternatives Considered
+## Alternatives
 
-Have you considered any alternative solutions or features? Describe them here.
+Other solutions considered?
 
 ## Use Case
 
-Describe a specific scenario where this feature would be valuable.
+When would you use this?
 
-## Implementation Notes
+## Implementation (Optional)
 
-(Optional) If you have technical suggestions or ideas about how to implement this:
+Technical suggestions:
 
-- Potential services affected:
-- API changes needed:
-- UI/UX considerations:
+- Services affected:
+- API changes:
+- UI/UX notes:
 
 ## Additional Context
 
-Add any other context, screenshots, or examples about the feature request.
+Context, screenshots, or examples.
 
 ---
 
-**Note**: This is a portfolio/academic project with no planned active development. Feature requests are welcome as learning opportunities, but implementation is not guaranteed.
+**Note**: This is a portfolio/academic project. Feature requests are welcome but implementation is not guaranteed.

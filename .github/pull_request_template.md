@@ -1,22 +1,20 @@
 # Pull Request
 
-## Description
+## What does this PR do?
 
-Brief description of what this PR accomplishes.
+Brief description of what this changes.
 
 ## Type of Change
 
-- [ ] Bug fix (non-breaking change that fixes an issue)
-- [ ] New feature (non-breaking change that adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Documentation update
-- [ ] Refactoring (no functional changes)
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation
+- [ ] Refactoring
 - [ ] Performance improvement
-- [ ] Infrastructure/deployment change
+- [ ] Infrastructure/deployment
 
-## Changes Made
-
-Detailed list of changes:
+## Changes
 
 - Change 1
 - Change 2
@@ -24,39 +22,34 @@ Detailed list of changes:
 
 ## Related Issues
 
-Closes #(issue number)
-Relates to #(issue number)
+Closes #
+Relates to #
 
 ## Testing
 
-### How Has This Been Tested?
-
 - [ ] Unit tests (pytest)
 - [ ] Integration tests
-- [ ] Manual testing in Docker Compose
-- [ ] Manual testing in Kubernetes
-- [ ] Frontend tests (Jest/React Testing Library)
+- [ ] Manual - Docker Compose
+- [ ] Manual - Kubernetes
+- [ ] Frontend tests
 
-### Test Coverage
-
-- New tests added: [ ] Yes / [ ] No
-- All tests passing: [ ] Yes / [ ] No
+**Test coverage:**
+- [ ] Added new tests
+- [ ] All tests pass
 
 ## Checklist
 
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings or errors
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published
+- [ ] Code follows project style
+- [ ] Self-reviewed
+- [ ] Added comments where needed
+- [ ] Updated documentation
+- [ ] No new warnings/errors
+- [ ] Tests added and passing
 
-## Screenshots (if applicable)
+## Screenshots
 
-Add screenshots to demonstrate UI changes or new features.
+Add if UI changes.
 
-## Additional Notes
+## Notes
 
-Any additional information reviewers should know.
+Additional context for reviewers.

@@ -1,12 +1,12 @@
 # Contributing to RAaS
 
-Thank you for your interest in contributing to RAaS (Retrieval-Augmented Generation as a Service)!
+Thanks for considering a contribution to RAaS (Retrieval-Augmented Generation as a Service).
 
 ## Project Status
 
-**Important**: This is a portfolio/academic project created as a final university assignment. While it demonstrates production-grade practices, **active development is not planned**.
+**Important**: This is a portfolio and academic project. Active development is not planned.
 
-However, contributions are welcome for:
+Contributions are welcome for:
 - Bug fixes
 - Documentation improvements
 - Security patches
@@ -42,7 +42,7 @@ Documentation improvements are always welcome:
 
 ### 4. Submitting Code
 
-Want to contribute code? Great! Please follow these guidelines.
+Contributing code? Follow these guidelines.
 
 ## Development Setup
 
@@ -320,8 +320,6 @@ Contributors will be recognized in:
 
 ---
 
-## Thank You!
+## Thank You
 
-Your contributions help make this project better for everyone learning about RAG systems, microservices architecture, and cloud-native development.
-
-Whether you're fixing a typo or implementing a new feature, every contribution is valuable.
+Your contributions help make this project better for everyone learning about RAG systems, microservices architecture, and Kubernetes deployment.
