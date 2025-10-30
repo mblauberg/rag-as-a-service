@@ -127,37 +127,105 @@ Built with a microservices architecture that scales compute-intensive operations
 
 ### Prerequisites
 
-- Docker 24.0+ with Docker Compose 2.0+
-- OpenAI API key ([get one here](https://platform.openai.com/api-keys))
-- Optional: Python 3.13+ + Poetry, Node.js 18+ for local development
+- Docker and Docker Compose OR Kubernetes cluster (kind, minikube, etc.)
+- OpenAI API key (required) - [Get one here](https://platform.openai.com/api-keys)
+- Anthropic API key (optional) - [Get one here](https://console.anthropic.com/)
+- Google API key (optional) - [Get one here](https://makersuite.google.com/app/apikey)
 
-### Setup
+### 1. Configure API Keys
 
-1. **Clone and configure**
+Choose one of the following methods:
 
-```bash
-git clone https://github.com/mblauberg/raas.git
-cd raas
+#### Option A: Automated Setup (Recommended)
 
-# Set up environment variables
-cp infrastructure/docker-compose/.env.example infrastructure/docker-compose/.env
-# Edit .env and add your API keys:
-# OPENAI_API_KEY=sk-your-key-here
-# Optional: ANTHROPIC_API_KEY, GOOGLE_API_KEY
-```
-
-2. **Start all services**
+Run the interactive setup script:
 
 ```bash
-docker-compose -f infrastructure/docker-compose/docker-compose.yml up -d
-
-# Wait ~30 seconds for services to initialize
-# Then visit:
-# Frontend: http://localhost:3000
-# API Docs: http://localhost:8000/docs
+./scripts/setup-secrets.sh
 ```
 
-3. **Upload a document and search**
+This will:
+- Prompt for your API keys with validation
+- Generate `.env` for Docker Compose
+- Generate `infrastructure/k8s/base/generator/secret.yaml` for Kubernetes
+- Provide clear error messages if keys are invalid
+
+#### Option B: Manual Setup
+
+**For Docker Compose:**
+
+```bash
+cp .env.template .env
+# Edit .env and replace placeholder values with your actual API keys
+```
+
+**For Kubernetes:**
+
+```bash
+cp infrastructure/k8s/base/generator/secret.yaml.template infrastructure/k8s/base/generator/secret.yaml
+# Edit secret.yaml and replace placeholder values with your actual API keys
+```
+
+### 2. Start the Services
+
+#### Docker Compose
+
+```bash
+cd infrastructure/docker-compose
+docker-compose up -d
+```
+
+Verify services are running:
+```bash
+docker-compose ps
+docker-compose logs generator  # Should show no errors
+```
+
+Access the application:
+- Frontend: http://localhost:3000
+- API: http://localhost:8000
+- Generator: http://localhost:8002
+
+#### Kubernetes (using kind)
+
+```bash
+# Create cluster if needed
+./infrastructure/scripts/setup-kind-full.sh
+
+# Apply configurations
+kubectl apply -f infrastructure/k8s/base/generator/secret.yaml
+kubectl apply -k infrastructure/k8s/overlays/local/
+
+# Wait for services to be ready
+kubectl wait --for=condition=ready pod -l app=generator -n raas --timeout=300s
+```
+
+Access the application:
+```bash
+kubectl port-forward -n raas svc/frontend 3000:3000
+kubectl port-forward -n raas svc/api 8000:8000
+```
+
+### 3. Verify Installation
+
+Test the health endpoint:
+
+**Docker Compose:**
+```bash
+curl http://localhost:8002/api/v1/health
+```
+
+**Kubernetes:**
+```bash
+kubectl exec -n raas deploy/generator -- curl localhost:8002/api/v1/health
+```
+
+Expected response:
+```json
+{"status": "healthy"}
+```
+
+### 4. Upload a Document and Search
 
 ```bash
 # Upload a document
@@ -174,6 +242,21 @@ curl -X POST http://localhost:8000/api/v1/search \
     "model": "openai:gpt-4o-mini"
   }'
 ```
+
+### Troubleshooting Quick Start
+
+**"OPENAI_API_KEY is required" error:**
+- Run `./scripts/setup-secrets.sh` to configure API keys
+- Or manually check your `.env` file has a valid OpenAI key
+
+**Generator service won't start:**
+- Check logs: `docker-compose logs generator` or `kubectl logs -n raas deploy/generator`
+- Verify API key format is correct (starts with `sk-proj-` or `sk-`)
+- Ensure `.env` file exists and is readable
+
+**Services timing out:**
+- First startup downloads ML models and may take 2-5 minutes
+- Check resource availability: `docker stats` or `kubectl top nodes`
 
 ---
 
@@ -529,7 +612,9 @@ MIT License - See [LICENSE](LICENSE) for details.
 ## Contact & Links
 
 **Author:** Michael Blauberg
+
 **Email:** mblauberg@outlook.com
+
 **LinkedIn:** [linkedin.com/in/mblauberg](https://linkedin.com/in/mblauberg)
 
 **Project Links:**
