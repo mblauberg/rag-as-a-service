@@ -44,3 +44,38 @@ echo -e "${BLUE}============================================${NC}"
 echo -e "${BLUE}🔐 RaaS Secret Configuration Setup${NC}"
 echo -e "${BLUE}============================================${NC}"
 echo ""
+
+# Check if files already exist
+ENV_FILE=".env"
+K8S_SECRET_FILE="infrastructure/k8s/base/generator/secret.yaml"
+
+if [[ -f "$ENV_FILE" ]] && [[ -f "$K8S_SECRET_FILE" ]]; then
+    echo -e "${YELLOW}⚠️  Warning: Secret files already exist:${NC}"
+    echo -e "  - $ENV_FILE"
+    echo -e "  - $K8S_SECRET_FILE"
+    echo ""
+    read -p "Overwrite existing files? (y/N): " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${BLUE}ℹ️  Setup cancelled. Existing files preserved.${NC}"
+        exit 0
+    fi
+elif [[ -f "$ENV_FILE" ]]; then
+    echo -e "${YELLOW}⚠️  Warning: $ENV_FILE already exists${NC}"
+    read -p "Overwrite? (y/N): " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${BLUE}ℹ️  Setup cancelled.${NC}"
+        exit 0
+    fi
+elif [[ -f "$K8S_SECRET_FILE" ]]; then
+    echo -e "${YELLOW}⚠️  Warning: $K8S_SECRET_FILE already exists${NC}"
+    read -p "Overwrite? (y/N): " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${BLUE}ℹ️  Setup cancelled.${NC}"
+        exit 0
+    fi
+fi
+
+echo ""
