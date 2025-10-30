@@ -36,10 +36,10 @@ Built with a microservices architecture that scales compute-intensive operations
 
 ## Demo
 
-![Search Interface](docs/images/search-interface.png)
-*Semantic search with AI-powered summaries and inline citations*
+![Main Page](docs/images/main-page-example.png)
+*Main page showing search bar and document list*
 
-![Search Demo](docs/images/search-demo.gif)
+![Search Demo](docs/images/search-example.gif)
 *Real-time document search and answer generation*
 
 ### Key Features
