@@ -79,3 +79,72 @@ elif [[ -f "$K8S_SECRET_FILE" ]]; then
 fi
 
 echo ""
+
+# Prompt for API keys
+echo -e "${BLUE}Enter your API keys:${NC}"
+echo -e "${BLUE}(Required keys must be filled, optional keys can be left empty)${NC}"
+echo ""
+
+# OpenAI (Required)
+while true; do
+    read -sp "OpenAI API Key (required): " OPENAI_KEY
+    echo ""
+
+    if [[ -z "$OPENAI_KEY" ]]; then
+        echo -e "${RED}✗ OpenAI API key is required${NC}"
+        continue
+    fi
+
+    if validate_openai_key "$OPENAI_KEY"; then
+        echo -e "${GREEN}✓ OpenAI key format valid${NC}"
+        break
+    else
+        echo -e "${RED}✗ Invalid OpenAI key format. Should start with 'sk-' or 'sk-proj-'${NC}"
+    fi
+done
+
+echo ""
+
+# Anthropic (Optional)
+while true; do
+    read -sp "Anthropic API Key (optional, press Enter to skip): " ANTHROPIC_KEY
+    echo ""
+
+    if [[ -z "$ANTHROPIC_KEY" ]]; then
+        echo -e "${YELLOW}⊘ Skipping Anthropic API key${NC}"
+        ENABLE_ANTHROPIC="false"
+        break
+    fi
+
+    if validate_anthropic_key "$ANTHROPIC_KEY"; then
+        echo -e "${GREEN}✓ Anthropic key format valid${NC}"
+        ENABLE_ANTHROPIC="true"
+        break
+    else
+        echo -e "${RED}✗ Invalid Anthropic key format. Should start with 'sk-ant-'${NC}"
+    fi
+done
+
+echo ""
+
+# Google (Optional)
+while true; do
+    read -sp "Google API Key (optional, press Enter to skip): " GOOGLE_KEY
+    echo ""
+
+    if [[ -z "$GOOGLE_KEY" ]]; then
+        echo -e "${YELLOW}⊘ Skipping Google API key${NC}"
+        ENABLE_GOOGLE="false"
+        break
+    fi
+
+    if validate_google_key "$GOOGLE_KEY"; then
+        echo -e "${GREEN}✓ Google key format valid${NC}"
+        ENABLE_GOOGLE="true"
+        break
+    else
+        echo -e "${RED}✗ Invalid Google key format${NC}"
+    fi
+done
+
+echo ""
