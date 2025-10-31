@@ -13,21 +13,21 @@ class AnthropicProvider(ModelProvider):
     # Predefined Claude models (2025)
     MODELS = [
         {
-            "name": "anthropic:claude-opus-4-1",
+            "name": "anthropic:claude-opus-4-1-20250805",
             "display_name": "Claude Opus 4.1",
             "size": "N/A",
             "description": "Most powerful Claude model, best reasoning",
             "capabilities": ["reasoning", "coding", "analysis", "multimodal"]
         },
         {
-            "name": "anthropic:claude-sonnet-4-5",
+            "name": "anthropic:claude-sonnet-4-5-20250929",
             "display_name": "Claude Sonnet 4.5",
             "size": "N/A",
             "description": "Best coding model in the world",
             "capabilities": ["coding", "reasoning", "fast"]
         },
         {
-            "name": "anthropic:claude-haiku-4-5",
+            "name": "anthropic:claude-haiku-4-5-20251001",
             "display_name": "Claude Haiku 4.5",
             "size": "N/A",
             "description": "Fast and cost-effective",

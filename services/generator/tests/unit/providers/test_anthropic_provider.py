@@ -42,10 +42,26 @@ async def test_list_models_returns_claude_models(anthropic_provider):
 
     # Assert
     assert len(models) >= 3  # Opus, Sonnet, Haiku
-    opus = next(m for m in models if m.name == "anthropic:claude-opus-4-1")
+    opus = next(m for m in models if m.name == "anthropic:claude-opus-4-1-20250805")
     assert opus.display_name == "Claude Opus 4.1"
     assert opus.provider == "anthropic"
     assert "powerful" in opus.description.lower()
+
+
+@pytest.mark.asyncio
+async def test_list_models_returns_versioned_api_names():
+    """Test that list_models returns actual API model names with version dates."""
+    from unittest.mock import MagicMock
+
+    provider = AnthropicProvider()
+    provider.client = MagicMock()  # Make it available
+
+    models = await provider.list_models()
+
+    model_names = [m.name for m in models]
+    assert "anthropic:claude-opus-4-1-20250805" in model_names
+    assert "anthropic:claude-sonnet-4-5-20250929" in model_names
+    assert "anthropic:claude-haiku-4-5-20251001" in model_names
 
 
 @pytest.mark.asyncio
