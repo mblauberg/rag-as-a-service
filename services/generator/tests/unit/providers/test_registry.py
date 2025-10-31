@@ -184,3 +184,42 @@ def test_resolve_model_name_returns_as_is_for_unknown():
     registry = ProviderRegistry()
 
     assert registry._resolve_model_name("some-model") == "some-model"
+
+
+@pytest.mark.asyncio
+async def test_generate_with_alias_routes_correctly():
+    """Test that aliases route to correct provider with resolved API name."""
+    from unittest.mock import AsyncMock, MagicMock
+
+    registry = ProviderRegistry()
+
+    # Mock provider
+    mock_provider = MagicMock()
+    mock_provider.generate = AsyncMock(return_value="Generated summary")
+    registry.providers["anthropic"] = mock_provider
+
+    # Generate with alias
+    summary, provider = await registry.generate("sonnet-4.5", "query", "context")
+
+    # Verify correct provider called with resolved API name
+    assert provider == "anthropic"
+    assert summary == "Generated summary"
+    mock_provider.generate.assert_called_once_with(
+        "anthropic:claude-sonnet-4-5-20250929", "query", "context"
+    )
+
+
+@pytest.mark.asyncio
+async def test_generate_raises_when_provider_unavailable():
+    """Test that generate raises ValueError with helpful message when provider unavailable."""
+    from unittest.mock import MagicMock
+
+    registry = ProviderRegistry()
+    registry.providers["openai"] = MagicMock()  # Only openai available
+
+    with pytest.raises(ValueError) as exc_info:
+        await registry.generate("sonnet-4.5", "query", "context")
+
+    assert "Provider 'anthropic' not available" in str(exc_info.value)
+    assert "no API key configured" in str(exc_info.value)
+    assert "Available providers" in str(exc_info.value)

@@ -56,7 +56,7 @@ class ProviderRegistry:
         Route generation request to appropriate provider.
 
         Args:
-            model_name: Full model identifier (e.g., "openai:gpt-5")
+            model_name: Model identifier (alias or provider:model)
             prompt: User query
             context: Retrieved context
 
@@ -64,14 +64,22 @@ class ProviderRegistry:
             Tuple of (generated_summary, provider_name)
 
         Raises:
-            ValueError: If provider not found
+            ValueError: If provider not found or not available
         """
         provider_name = self._extract_provider(model_name)
 
         if provider_name not in self.providers:
-            raise ValueError(f"Provider not found: {provider_name}")
+            available = list(self.providers.keys())
+            raise ValueError(
+                f"Provider '{provider_name}' not available (no API key configured). "
+                f"Available providers: {available if available else 'none'}"
+            )
 
-        summary = await self.providers[provider_name].generate(model_name, prompt, context)
+        # Resolve to actual API model name
+        api_model_name = self._resolve_model_name(model_name)
+        full_model = f"{provider_name}:{api_model_name}"
+
+        summary = await self.providers[provider_name].generate(full_model, prompt, context)
         return summary, provider_name
 
     def _extract_provider(self, model_name: str) -> str:
