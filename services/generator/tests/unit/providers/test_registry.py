@@ -100,7 +100,7 @@ async def test_generate_raises_on_unknown_provider():
     """generate raises ValueError for unknown provider"""
     registry = ProviderRegistry()
 
-    with pytest.raises(ValueError, match="Provider not found"):
+    with pytest.raises(ValueError, match="Cannot determine provider"):
         await registry.generate("unknown:model", "prompt", "context")
 
 
@@ -120,3 +120,38 @@ def test_model_aliases_contains_all_new_models():
 
     assert hasattr(ProviderRegistry, 'MODEL_ALIASES')
     assert ProviderRegistry.MODEL_ALIASES == expected_aliases
+
+
+def test_extract_provider_from_standalone_alias():
+    """Test that standalone aliases map to correct provider."""
+    registry = ProviderRegistry()
+
+    # Test each alias
+    assert registry._extract_provider("gpt-5") == "openai"
+    assert registry._extract_provider("gpt-5-mini") == "openai"
+    assert registry._extract_provider("sonnet-4.5") == "anthropic"
+    assert registry._extract_provider("opus-4.1") == "anthropic"
+    assert registry._extract_provider("haiku-4.5") == "anthropic"
+    assert registry._extract_provider("gemini-flash-2.5") == "google"
+    assert registry._extract_provider("gemini-pro-2.5") == "google"
+
+
+def test_extract_provider_from_prefixed_format():
+    """Test that provider:model format still works."""
+    registry = ProviderRegistry()
+
+    assert registry._extract_provider("openai:gpt-4o") == "openai"
+    assert registry._extract_provider("anthropic:claude-3") == "anthropic"
+    assert registry._extract_provider("google:gemini-1.5") == "google"
+
+
+def test_extract_provider_raises_on_unknown_model():
+    """Test that unknown model raises ValueError."""
+    registry = ProviderRegistry()
+
+    with pytest.raises(ValueError) as exc_info:
+        registry._extract_provider("unknown-model")
+
+    assert "Cannot determine provider" in str(exc_info.value)
+    assert "unknown-model" in str(exc_info.value)
+    assert "supported aliases" in str(exc_info.value)

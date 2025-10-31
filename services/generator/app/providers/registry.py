@@ -79,14 +79,19 @@ class ProviderRegistry:
         Extract provider name from model identifier.
 
         Args:
-            model_name: Full model name (e.g., "openai:gpt-5", "anthropic:claude-3")
+            model_name: Model name (alias, provider:model, or direct name)
 
         Returns:
-            Provider name (defaults to "openai" if no prefix)
+            Provider name
 
         Raises:
             ValueError: If provider cannot be determined
         """
+        # First, check if it's a standalone alias
+        if model_name in self.MODEL_ALIASES:
+            return self.MODEL_ALIASES[model_name][0]
+
+        # Then check provider:model format
         if ":" in model_name:
             parts = model_name.split(":")
             # Check if first part is a registered provider name
@@ -96,5 +101,9 @@ class ProviderRegistry:
             if parts[0] in ["openai", "anthropic", "google"]:
                 return parts[0]
 
-        # Default to openai for unprefixed models (for backward compatibility)
-        return "openai"
+        # No default - raise error with helpful message
+        raise ValueError(
+            f"Cannot determine provider for model '{model_name}'. "
+            f"Use format 'provider:model' or one of the supported aliases: "
+            f"{list(self.MODEL_ALIASES.keys())}"
+        )
