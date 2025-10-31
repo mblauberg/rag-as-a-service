@@ -21,7 +21,7 @@ The generator service supports user-friendly model aliases that automatically ma
 ### Using Aliases
 
 ```bash
-curl -X POST http://localhost:8002/generate \
+curl -X POST http://localhost:8002/api/v1/generate \
   -H "Content-Type: application/json" \
   -d '{
     "query": "your query",
@@ -33,7 +33,7 @@ curl -X POST http://localhost:8002/generate \
 ### Using Provider:Model Format (Backward Compatible)
 
 ```bash
-curl -X POST http://localhost:8002/generate \
+curl -X POST http://localhost:8002/api/v1/generate \
   -H "Content-Type: application/json" \
   -d '{
     "query": "your query",
@@ -46,7 +46,7 @@ curl -X POST http://localhost:8002/generate \
 
 At least **one** provider API key must be configured:
 
-- `OPENAI_API_KEY` - for gpt-5, gpt-5-mini, gpt-4o models
+- `OPENAI_API_KEY` - for gpt-5, gpt-5-mini aliases, plus gpt-4o and gpt-4o-mini (using provider:model format)
 - `ANTHROPIC_API_KEY` - for sonnet-4.5, opus-4.1, haiku-4.5 models
 - `GOOGLE_API_KEY` - for gemini-flash-2.5, gemini-pro-2.5 models
 

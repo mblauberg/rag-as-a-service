@@ -44,7 +44,7 @@ The platform generates AI summaries with inline citations showing exactly where 
 
 - **Semantic Search** – Understands meaning, not just keywords
 - **Hybrid Retrieval** – Combines vector similarity with keyword matching (using Reciprocal Rank Fusion)
-- **AI Summarisation** – Generates contextual answers with inline citations. Works with OpenAI, Anthropic, or Google models
+- **AI Summarisation** – Generates contextual answers with inline citations. Works with OpenAI (GPT-5, GPT-5 Mini), Anthropic (Claude Sonnet 4.5, Claude Opus 4.1, Claude Haiku 4.5), or Google (Gemini Flash 2.5, Gemini Pro 2.5) models
 - **Multi-Format Support** – Handles PDFs, DOCX, TXT, CSV, and Markdown
 - **Cross-Encoder Reranking** – Re-scores the top results to surface the most relevant chunks
 - **Kubernetes Ready** – Auto-scaling, health checks, and rolling updates included
