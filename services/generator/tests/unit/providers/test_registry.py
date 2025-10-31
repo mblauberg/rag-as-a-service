@@ -102,3 +102,21 @@ async def test_generate_raises_on_unknown_provider():
 
     with pytest.raises(ValueError, match="Provider not found"):
         await registry.generate("unknown:model", "prompt", "context")
+
+
+def test_model_aliases_contains_all_new_models():
+    """Test that MODEL_ALIASES includes all new friendly model names."""
+    from app.providers.registry import ProviderRegistry
+
+    expected_aliases = {
+        "gpt-5": ("openai", "gpt-5"),
+        "gpt-5-mini": ("openai", "gpt-5-mini"),
+        "sonnet-4.5": ("anthropic", "claude-sonnet-4-5-20250929"),
+        "opus-4.1": ("anthropic", "claude-opus-4-1-20250805"),
+        "haiku-4.5": ("anthropic", "claude-haiku-4-5-20251001"),
+        "gemini-flash-2.5": ("google", "gemini-2.5-flash"),
+        "gemini-pro-2.5": ("google", "gemini-2.5-pro"),
+    }
+
+    assert hasattr(ProviderRegistry, 'MODEL_ALIASES')
+    assert ProviderRegistry.MODEL_ALIASES == expected_aliases

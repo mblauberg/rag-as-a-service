@@ -7,6 +7,22 @@ from app.models.schemas import Model
 class ProviderRegistry:
     """Registry for managing and routing between model providers."""
 
+    # Model alias mappings: friendly_name -> (provider, api_model_name)
+    MODEL_ALIASES = {
+        # OpenAI models
+        "gpt-5": ("openai", "gpt-5"),
+        "gpt-5-mini": ("openai", "gpt-5-mini"),
+
+        # Anthropic models
+        "sonnet-4.5": ("anthropic", "claude-sonnet-4-5-20250929"),
+        "opus-4.1": ("anthropic", "claude-opus-4-1-20250805"),
+        "haiku-4.5": ("anthropic", "claude-haiku-4-5-20251001"),
+
+        # Google models
+        "gemini-flash-2.5": ("google", "gemini-2.5-flash"),
+        "gemini-pro-2.5": ("google", "gemini-2.5-pro"),
+    }
+
     def __init__(self) -> None:
         """Initialize empty registry."""
         self.providers: Dict[str, ModelProvider] = {}
