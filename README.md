@@ -226,17 +226,16 @@ Expected response:
 
 ```bash
 # Upload a document
-curl -X POST http://localhost:8000/api/v1/documents \
+curl -X POST http://localhost:8000/api/v1/documents/upload \
   -F "file=@example.pdf" \
   -F "title=Example Document"
 
-# Search with AI summary
+# Search for relevant chunks
 curl -X POST http://localhost:8000/api/v1/search \
   -H "Content-Type: application/json" \
   -d '{
     "query": "What are the key findings?",
-    "limit": 10,
-    "model": "openai:gpt-4o-mini"
+    "top_k": 10
   }'
 ```
 
@@ -343,41 +342,60 @@ See [infrastructure/k8s/README.md](infrastructure/k8s/README.md) for production 
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/v1/documents` | Upload PDF/DOCX/TXT/CSV/MD file |
+| `POST` | `/api/v1/documents/upload` | Upload PDF/DOCX/TXT/CSV/MD file |
 | `GET` | `/api/v1/documents` | List all documents |
 | `GET` | `/api/v1/documents/{id}` | Get document details |
 | `DELETE` | `/api/v1/documents/{id}` | Delete document and vectors |
-| `POST` | `/api/v1/search` | Search with optional AI summary |
+| `POST` | `/api/v1/search` | Hybrid semantic search returning chunks |
+| `POST` | `/api/v1/generate/summary` | Generate AI summary from chunk IDs |
 | `GET` | `/api/v1/models` | List available LLM models |
-| `GET` | `/health` | Health check endpoint |
+| `GET` | `/api/v1/health` | Health check endpoint |
 
-### Example: Search with AI Summary
+### Example 1: Search for Relevant Chunks
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/search \
   -H "Content-Type: application/json" \
   -d '{
     "query": "What is machine learning?",
-    "limit": 10,
-    "model": "openai:gpt-4o-mini",
-    "include_summary": true
+    "top_k": 10
   }'
 ```
 
 Response:
 ```json
 {
-  "chunks": [
+  "query": "What is machine learning?",
+  "results": [
     {
-      "id": "chunk-123",
-      "document_id": "doc-456",
-      "text": "Machine learning is a subset of AI...",
+      "chunk_id": "660e8400-e29b-41d4-a716-446655440111",
+      "document_id": "550e8400-e29b-41d4-a716-446655440000",
+      "content": "Machine learning is a subset of AI that enables computers to learn from data...",
       "score": 0.89,
-      "metadata": {"page": 1, "section": "Introduction"}
+      "tokens": 512
     }
   ],
-  "summary": "Machine learning is an AI approach... [1] [2]",
-  "total": 42
+  "total_results": 42
+}
+```
+
+### Example 2: Generate AI Summary from Chunks
+
+```bash
+curl -X POST http://localhost:8000/api/v1/generate/summary \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What is machine learning?",
+    "chunk_ids": ["660e8400-e29b-41d4-a716-446655440111", "660e8400-e29b-41d4-a716-446655440222"],
+    "model": "gpt-5-mini"
+  }'
+```
+
+Response:
+```json
+{
+  "summary": "Machine learning is an AI approach that enables computers to learn from data without explicit programming [1]. It includes techniques like supervised learning for labeled datasets [2].",
+  "model_used": "gpt-5-mini"
 }
 ```
 
@@ -392,9 +410,21 @@ Response:
 | `OPENAI_API_KEY` | Yes | - | OpenAI API key for GPT models |
 | `ANTHROPIC_API_KEY` | No | - | Anthropic API key for Claude models |
 | `GOOGLE_API_KEY` | No | - | Google API key for Gemini models |
-| `DEFAULT_MODEL` | No | `openai:gpt-4o-mini` | Default model for summaries |
+| `DEFAULT_MODEL` | No | `gpt-5-mini` | Default model for summaries |
 | `DATABASE_URL` | No | Auto-generated | PostgreSQL connection string |
 | `QDRANT_URL` | No | `http://qdrant:6333` | Qdrant vector database URL |
+
+### Generator Service Configuration
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `ENABLE_OPENAI` | No | `true` | Enable OpenAI provider |
+| `ENABLE_ANTHROPIC` | No | `false` | Enable Anthropic provider |
+| `ENABLE_GOOGLE` | No | `false` | Enable Google provider |
+| `MAX_CHUNKS` | No | `5` | Maximum chunks for generation context |
+| `TEMPERATURE` | No | `0.1` | LLM temperature (0.0-1.0) |
+| `MAX_TOKENS` | No | `2000` | Maximum tokens in generated response |
+| `TIMEOUT` | No | `30` | API request timeout in seconds |
 
 See individual service `.env.example` files for complete configuration options.
 
