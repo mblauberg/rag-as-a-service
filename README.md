@@ -205,39 +205,34 @@ kubectl port-forward -n raas svc/api 8000:8000
 
 ### 3. Verify Installation
 
-Test the health endpoint:
-
 **Docker Compose:**
 ```bash
-curl http://localhost:8002/api/v1/health
+docker-compose -f infrastructure/docker-compose/docker-compose.yml ps
 ```
+All services should show as "Up" or "healthy".
 
 **Kubernetes:**
 ```bash
-kubectl exec -n raas deploy/generator -- curl localhost:8002/api/v1/health
+kubectl get pods -n raas
 ```
+All pods should show "Running" with "1/1" ready.
 
-Expected response:
-```json
-{"status": "healthy"}
-```
+Then open the frontend in your browser:
+- **Frontend:** http://localhost:3000
+- **API Docs:** http://localhost:8000/docs (interactive Swagger UI)
 
-### 4. Upload a Document and Search
+### 4. Upload and Search Documents
 
-```bash
-# Upload a document
-curl -X POST http://localhost:8000/api/v1/documents/upload \
-  -F "file=@example.pdf" \
-  -F "title=Example Document"
+Open the frontend at http://localhost:3000 and:
 
-# Search for relevant chunks
-curl -X POST http://localhost:8000/api/v1/search \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "What are the key findings?",
-    "top_k": 10
-  }'
-```
+1. **Upload a document** - Click "Upload Document" and select a PDF, DOCX, or TXT file
+2. **Wait for processing** - The document will be chunked and embedded (takes a few seconds)
+3. **Search** - Type a natural language question in the search bar
+4. **Get AI answers** - Toggle "Generate Summary" to get an AI-powered answer with citations
+
+![Document Upload and Search](docs/images/search-example.gif)
+
+> **For API examples:** See the [API Reference](#api-reference) section below for curl commands and programmatic access.
 
 ### Troubleshooting Quick Start
 
