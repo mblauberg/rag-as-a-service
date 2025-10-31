@@ -116,6 +116,23 @@ Environment variables:
 | `MAX_TOKENS` | `2000` | Maximum tokens in generated response |
 | `TIMEOUT` | `30` | Request timeout in seconds |
 
+## Model Aliases
+
+The generator service supports user-friendly model aliases. See [docs/MODEL_ALIASES.md](docs/MODEL_ALIASES.md) for:
+
+- Complete list of supported aliases
+- Usage examples
+- How to add new aliases
+
+Example:
+```bash
+# Use friendly alias
+curl -X POST /generate -d '{"model": "sonnet-4.5", ...}'
+
+# Or use full provider:model format
+curl -X POST /generate -d '{"model": "anthropic:claude-sonnet-4-5-20250929", ...}'
+```
+
 ## Architecture
 
 ### Provider Abstraction
