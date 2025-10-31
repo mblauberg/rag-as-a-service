@@ -155,3 +155,32 @@ def test_extract_provider_raises_on_unknown_model():
     assert "Cannot determine provider" in str(exc_info.value)
     assert "unknown-model" in str(exc_info.value)
     assert "supported aliases" in str(exc_info.value)
+
+
+def test_resolve_model_name_from_alias():
+    """Test that aliases resolve to actual API model names."""
+    registry = ProviderRegistry()
+
+    assert registry._resolve_model_name("gpt-5") == "gpt-5"
+    assert registry._resolve_model_name("gpt-5-mini") == "gpt-5-mini"
+    assert registry._resolve_model_name("sonnet-4.5") == "claude-sonnet-4-5-20250929"
+    assert registry._resolve_model_name("opus-4.1") == "claude-opus-4-1-20250805"
+    assert registry._resolve_model_name("haiku-4.5") == "claude-haiku-4-5-20251001"
+    assert registry._resolve_model_name("gemini-flash-2.5") == "gemini-2.5-flash"
+    assert registry._resolve_model_name("gemini-pro-2.5") == "gemini-2.5-pro"
+
+
+def test_resolve_model_name_from_prefixed_format():
+    """Test that provider:model format extracts model part."""
+    registry = ProviderRegistry()
+
+    assert registry._resolve_model_name("openai:gpt-4o") == "gpt-4o"
+    assert registry._resolve_model_name("anthropic:claude-3-5-sonnet") == "claude-3-5-sonnet"
+    assert registry._resolve_model_name("google:gemini-1.5-flash") == "gemini-1.5-flash"
+
+
+def test_resolve_model_name_returns_as_is_for_unknown():
+    """Test that unknown models are returned as-is."""
+    registry = ProviderRegistry()
+
+    assert registry._resolve_model_name("some-model") == "some-model"

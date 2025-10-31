@@ -107,3 +107,24 @@ class ProviderRegistry:
             f"Use format 'provider:model' or one of the supported aliases: "
             f"{list(self.MODEL_ALIASES.keys())}"
         )
+
+    def _resolve_model_name(self, model_name: str) -> str:
+        """
+        Resolve user-provided model name to actual API model name.
+
+        Args:
+            model_name: User's model identifier
+
+        Returns:
+            Actual API model name
+        """
+        # Check if it's an alias
+        if model_name in self.MODEL_ALIASES:
+            return self.MODEL_ALIASES[model_name][1]
+
+        # Check if provider:model format
+        if ":" in model_name:
+            return model_name.split(":", 1)[1]
+
+        # Return as-is (for backward compatibility)
+        return model_name
