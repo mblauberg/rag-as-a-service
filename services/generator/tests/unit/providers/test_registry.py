@@ -223,3 +223,75 @@ async def test_generate_raises_when_provider_unavailable():
     assert "Provider 'anthropic' not available" in str(exc_info.value)
     assert "no API key configured" in str(exc_info.value)
     assert "Available providers" in str(exc_info.value)
+
+
+@pytest.mark.asyncio
+async def test_registry_works_with_only_openai():
+    """Test that registry works with only OpenAI provider configured."""
+    from unittest.mock import AsyncMock, MagicMock
+
+    registry = ProviderRegistry()
+
+    # Only OpenAI available
+    mock_openai = MagicMock()
+    mock_openai.generate = AsyncMock(return_value="OpenAI response")
+    registry.providers["openai"] = mock_openai
+
+    # Should work with OpenAI models
+    summary, provider = await registry.generate("gpt-5", "query", "context")
+    assert provider == "openai"
+    assert summary == "OpenAI response"
+
+    # Should fail for other providers
+    with pytest.raises(ValueError) as exc_info:
+        await registry.generate("sonnet-4.5", "query", "context")
+    assert "anthropic" in str(exc_info.value)
+    assert "not available" in str(exc_info.value)
+
+
+@pytest.mark.asyncio
+async def test_registry_works_with_only_anthropic():
+    """Test that registry works with only Anthropic provider configured."""
+    from unittest.mock import AsyncMock, MagicMock
+
+    registry = ProviderRegistry()
+
+    # Only Anthropic available
+    mock_anthropic = MagicMock()
+    mock_anthropic.generate = AsyncMock(return_value="Anthropic response")
+    registry.providers["anthropic"] = mock_anthropic
+
+    # Should work with Anthropic models
+    summary, provider = await registry.generate("sonnet-4.5", "query", "context")
+    assert provider == "anthropic"
+    assert summary == "Anthropic response"
+
+    # Should fail for other providers
+    with pytest.raises(ValueError) as exc_info:
+        await registry.generate("gpt-5", "query", "context")
+    assert "openai" in str(exc_info.value)
+    assert "not available" in str(exc_info.value)
+
+
+@pytest.mark.asyncio
+async def test_registry_works_with_only_google():
+    """Test that registry works with only Google provider configured."""
+    from unittest.mock import AsyncMock, MagicMock
+
+    registry = ProviderRegistry()
+
+    # Only Google available
+    mock_google = MagicMock()
+    mock_google.generate = AsyncMock(return_value="Google response")
+    registry.providers["google"] = mock_google
+
+    # Should work with Google models
+    summary, provider = await registry.generate("gemini-flash-2.5", "query", "context")
+    assert provider == "google"
+    assert summary == "Google response"
+
+    # Should fail for other providers
+    with pytest.raises(ValueError) as exc_info:
+        await registry.generate("gpt-5", "query", "context")
+    assert "openai" in str(exc_info.value)
+    assert "not available" in str(exc_info.value)
