@@ -42,7 +42,7 @@ async def test_list_models_returns_gemini_models(google_provider):
 
     # Assert
     assert len(models) >= 2  # Pro, Flash
-    pro = next(m for m in models if m.name == "google:gemini-2-5-pro")
+    pro = next(m for m in models if m.name == "google:gemini-2.5-pro")
     assert pro.display_name == "Gemini 2.5 Pro"
     assert pro.provider == "google"
     assert "2M context" in pro.description
@@ -59,8 +59,21 @@ async def test_generate_calls_gemini_api(google_provider):
 
     # Act
     with patch('google.generativeai.GenerativeModel', return_value=mock_model):
-        result = await google_provider.generate("google:gemini-2-5-flash", "query", "context")
+        result = await google_provider.generate("google:gemini-2.5-flash", "query", "context")
 
         # Assert
         assert result == "Generated summary"
         mock_model.generate_content_async.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_list_models_returns_2_5_series_names():
+    """Test that list_models returns Gemini 2.5 series API names."""
+    provider = GoogleProvider()
+    provider.api_key = "test-key"  # Make it available
+
+    models = await provider.list_models()
+
+    model_names = [m.name for m in models]
+    assert "google:gemini-2.5-pro" in model_names
+    assert "google:gemini-2.5-flash" in model_names

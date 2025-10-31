@@ -12,14 +12,14 @@ class GoogleProvider(ModelProvider):
     # Predefined Gemini models (2025)
     MODELS = [
         {
-            "name": "google:gemini-2-5-pro",
+            "name": "google:gemini-2.5-pro",
             "display_name": "Gemini 2.5 Pro",
             "size": "N/A",
             "description": "2M context, adaptive thinking capabilities",
             "capabilities": ["reasoning", "long-context", "multimodal"]
         },
         {
-            "name": "google:gemini-2-5-flash",
+            "name": "google:gemini-2.5-flash",
             "display_name": "Gemini 2.5 Flash",
             "size": "N/A",
             "description": "Efficient, improved tool use, 54% SWE-Bench",
