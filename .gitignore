@@ -45,6 +45,7 @@ dmypy.json
 !.env.template
 .venv/
 .venv*/
+.venv-*/
 venv/
 venv*/
 env/

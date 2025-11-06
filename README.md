@@ -1,123 +1,33 @@
 # RAaS – Retrieval-Augmented Generation as a Service
 
-> Search your documents using natural language and get AI-powered answers with sources
+Search documents with natural language and get AI-powered answers with source citations.
 
-![Project Status](https://img.shields.io/badge/status-portfolio%20project-blue)
-[![Tech Stack](https://img.shields.io/badge/Python-3.13-blue)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.13-blue)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.119-green)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18-blue)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## Table of Contents
+![RAaS Demo](docs/images/main-page-example.png)
+*Upload documents, ask questions, get AI summaries with citations*
 
-- [Overview](#overview)
-- [Demo](#demo)
-- [Key Features](#key-features)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Quick Start](#quick-start)
-- [Development](#development)
-- [Kubernetes Deployment](#kubernetes-deployment)
-- [API Reference](#api-reference)
-- [Configuration](#configuration)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact--links)
-
-## Overview
-
-RAaS lets you upload documents and search them using natural language questions. Instead of just keyword matching, it understands what you're actually asking. Search for "contract breach" and it'll find mentions of "agreement violation."
-
-The platform generates AI summaries with inline citations showing exactly where each piece of information came from. It's built as separate microservices so the heavy lifting (embeddings, AI generation) can scale without affecting the rest of the system.
-
-## Demo
-
-![Main Page](docs/images/main-page-example.png)
-*Main page showing search bar and document list*
-
-![Search Demo](docs/images/search-example.gif)
-*Real-time document search and answer generation*
-
-### Key Features
-
-- **Semantic Search** – Understands meaning, not just keywords
-- **Hybrid Retrieval** – Combines vector similarity with keyword matching (using Reciprocal Rank Fusion)
-- **AI Summarisation** – Generates contextual answers with inline citations. Works with OpenAI, Anthropic, or Google models
-- **Multi-Format Support** – Handles PDFs, DOCX, TXT, CSV, and Markdown
-- **Cross-Encoder Reranking** – Re-scores the top results to surface the most relevant chunks
-- **Kubernetes Ready** – Auto-scaling, health checks, and rolling updates included
+![RAaS Search Demo](docs/images/search-example.gif)
+*Retrieve document summaries plus the retrieved, ranked document chunks*
 
 ---
 
-## Architecture
+## What It Does
 
-```
-        ┌──────────┐
-        │ Frontend │ :3000
-        └─────┬────┘
-              │
-        ┌─────▼─────┐
-        │    API    │  ←─ Gateway & Orchestration
-        │   :8000   │
-        └─────┬─────┘
-              │
-    ┌─────────┼─────────┬──────────┐
-    │         │         │          │
-┌───▼────┐ ┌─▼────┐ ┌──▼─────-┐ ┌──▼──────┐
-│Embedder│ │Search│ │Generator│ │Postgres │
-│ :8001  │ │:8003 │ │ :8002   │ │ :5432   │
-└───┬────┘ └─┬────┘ └─────────┘ └─────────┘
-    │        │
-    │   ┌────▼────┐
-    └───► Qdrant  │
-        │  :6333  │  ←─ Vector Database
-        └─────────┘
-```
+Upload PDFs, DOCX, or text files and query them using plain English. RAaS combines vector similarity search with keyword matching, then generates contextual answers with inline citations showing exactly where information came from.
 
-### Microservices
+**Example:** Search "contract violations" → Finds "breach of agreement", "non-compliance", etc. → Generates summary: *"The agreement was violated on three occasions [1][2]..."*
 
-| Service | Responsibility | Tech Stack |
-|---------|----------------|------------|
-| **API Gateway** | Handles requests, document storage, business logic | FastAPI, SQLAlchemy, PostgreSQL |
-| **Search** | Hybrid search (vector + keyword) and reranking | FastAPI, Qdrant, sentence-transformers |
-| **Embedder** | Converts text to 384-dimensional vectors | sentence-transformers (all-MiniLM-L6-v2) |
-| **Generator** | Creates AI summaries with citations | OpenAI/Anthropic/Google APIs |
-| **Frontend** | Real-time search interface | React 18, TypeScript, Tailwind CSS, shadcn/ui |
+### Features
 
-### Infrastructure
-
-- **PostgreSQL** – Stores document metadata and text chunks
-- **Qdrant** – Vector database using HNSW indexing for fast similarity search
-- **Docker Compose** – For local development
-- **Kubernetes** – Production deployment (includes horizontal pod autoscaling)
-
----
-
-## Tech Stack
-
-**Backend:**
-- Python 3.13 with async/await patterns
-- FastAPI 0.119 for high-performance APIs
-- SQLAlchemy 2.0 with asyncpg
-- Pydantic v2 for data validation
-- sentence-transformers for embeddings
-- Qdrant vector database
-
-**Frontend:**
-- React 18 with TypeScript
-- Vite for fast builds
-- React Query for server state
-- Tailwind CSS + shadcn/ui components
-- Radix UI primitives
-
-**Infrastructure:**
-- Docker 24.0+ with multi-stage builds
-- Kubernetes with Kustomize
-- NGINX Ingress Controller
-- Horizontal Pod Autoscaler (HPA)
-- Persistent Volumes for stateful services
+- Semantic search understanding meaning beyond keywords
+- Multi-provider LLM support (OpenAI, Anthropic, Google)
+- Hybrid retrieval with cross-encoder reranking
+- Document format support: PDF, DOCX, TXT, CSV, Markdown
+- Kubernetes deployment with autoscaling
 
 ---
 
@@ -125,263 +35,115 @@ The platform generates AI summaries with inline citations showing exactly where 
 
 ### Prerequisites
 
-- Docker and Docker Compose OR Kubernetes cluster (kind, minikube, etc.)
-- OpenAI API key (required) - [Get one here](https://platform.openai.com/api-keys)
-- Anthropic API key (optional) - [Get one here](https://console.anthropic.com/)
-- Google API key (optional) - [Get one here](https://makersuite.google.com/app/apikey)
+- Docker & Docker Compose
+- OpenAI API key ([get one here](https://platform.openai.com/api-keys))
 
-### 1. Configure API Keys
+### 1. Set Up API Keys
 
-Choose one of the following methods:
-
-#### Option A: Automated Setup (Recommended)
-
-Run the interactive setup script:
-
+Run the setup script:
 ```bash
 ./scripts/setup-secrets.sh
 ```
 
-The script will:
-- Ask for your API keys and validate them
-- Create a `.env` file for Docker Compose
-- Create `infrastructure/k8s/base/generator/secret.yaml` for Kubernetes
-- Show clear error messages if any keys are invalid
-
-#### Option B: Manual Setup
-
-**For Docker Compose:**
-
+Or manually create `.env`:
 ```bash
 cp .env.template .env
-# Edit .env and replace placeholder values with your actual API keys
+# Edit .env and add your OPENAI_API_KEY
 ```
 
-**For Kubernetes:**
-
-```bash
-cp infrastructure/k8s/base/generator/secret.yaml.template infrastructure/k8s/base/generator/secret.yaml
-# Edit secret.yaml and replace placeholder values with your actual API keys
-```
-
-### 2. Start the Services
-
-#### Docker Compose
+### 2. Start Services
 
 ```bash
 docker-compose -f infrastructure/docker-compose/docker-compose.yml up -d
 ```
 
-Verify services are running:
-```bash
-docker-compose -f infrastructure/docker-compose/docker-compose.yml ps
-docker-compose -f infrastructure/docker-compose/docker-compose.yml logs generator  # Should show no errors
-```
+Wait 2-3 minutes for services to initialize (downloads ML models on first run).
 
-Access the application:
+### 3. Use the Application
+
+Open http://localhost:3000
+
+1. Click "Upload Document" and select a file
+2. Wait for processing (a few seconds)
+3. Type a question in the search bar
+4. Toggle "Generate Summary" for AI answers with citations
+
+**Access points:**
 - Frontend: http://localhost:3000
+- API docs: http://localhost:8000/docs
 - API: http://localhost:8000
-- Generator: http://localhost:8002
-
-#### Kubernetes (using kind)
-
-```bash
-# Create cluster if needed
-./infrastructure/scripts/setup-kind-full.sh
-
-# Apply configurations
-kubectl apply -f infrastructure/k8s/base/generator/secret.yaml
-kubectl apply -k infrastructure/k8s/overlays/local/
-
-# Wait for services to be ready
-kubectl wait --for=condition=ready pod -l app=generator -n raas --timeout=300s
-```
-
-Access the application:
-```bash
-kubectl port-forward -n raas svc/frontend 3000:3000
-kubectl port-forward -n raas svc/api 8000:8000
-```
-
-### 3. Verify Installation
-
-**Docker Compose:**
-```bash
-docker-compose -f infrastructure/docker-compose/docker-compose.yml ps
-```
-All services should show as "Up" or "healthy".
-
-**Kubernetes:**
-```bash
-kubectl get pods -n raas
-```
-All pods should show "Running" with "1/1" ready.
-
-Then open the frontend in your browser:
-- **Frontend:** http://localhost:3000
-- **API Docs:** http://localhost:8000/docs (interactive Swagger UI)
-
-### 4. Upload and Search Documents
-
-Open the frontend at http://localhost:3000 and:
-
-1. **Upload a document** - Click "Upload Document" and select a PDF, DOCX, or TXT file
-2. **Wait for processing** - The document will be chunked and embedded (takes a few seconds)
-3. **Search** - Type a natural language question in the search bar
-4. **Get AI answers** - Toggle "Generate Summary" to get an AI-powered answer with citations
-
-![Document Upload and Search](docs/images/search-example.gif)
-
-> **For API examples:** See the [API Reference](#api-reference) section below for curl commands and programmatic access.
-
-### Troubleshooting Quick Start
-
-**"OPENAI_API_KEY is required" error:**
-- Run `./scripts/setup-secrets.sh` to set up your API keys
-- Or check that your `.env` file has a valid OpenAI key
-
-**Generator service won't start:**
-- Check the logs: `docker-compose -f infrastructure/docker-compose/docker-compose.yml logs generator` or `kubectl logs -n raas deploy/generator`
-- Make sure your API key format is correct (should start with `sk-proj-` or `sk-`)
-- Verify the `.env` file exists and can be read
-
-**Services timing out:**
-- The first startup takes 2-5 minutes because it downloads ML models
-- Check if you have enough resources: `docker stats` or `kubectl top nodes`
 
 ---
 
-## Development
+## Architecture
 
-### Local Development Setup
-
-```bash
-# Backend (API service)
-cd services/api
-poetry install
-poetry run uvicorn app.main:app --reload --port 8000
-
-# Frontend
-cd services/frontend
-npm install
-npm run dev  # Runs on http://localhost:3000
+```
+┌──────────┐
+│ Frontend │ React + TypeScript
+│  :3000   │
+└────┬─────┘
+     │
+┌────▼─────┐
+│   API    │ Request orchestration
+│  :8000   │
+└────┬─────┘
+     │
+     ├─────► Embedder :8001   (Text → Vectors)
+     ├─────► Search :8003     (Hybrid search + reranking)
+     ├─────► Generator :8002  (AI summaries)
+     ├─────► Postgres :5432   (Metadata + chunks)
+     └─────► Qdrant :6333     (Vector database)
 ```
 
-### Running Tests
+### Services
 
-```bash
-# Unit tests per service
-cd services/api && poetry run pytest
-cd services/embedder && poetry run pytest
-cd services/generator && poetry run pytest
-cd services/search && poetry run pytest
-cd services/frontend && npm test
+| Service | Purpose | Key Tech |
+|---------|---------|----------|
+| **API** | Gateway & orchestration | FastAPI, SQLAlchemy, PostgreSQL |
+| **Search** | Hybrid search + reranking | Qdrant, sentence-transformers, cross-encoder |
+| **Embedder** | Text embedding generation | all-MiniLM-L6-v2 (384-dim vectors) |
+| **Generator** | AI summary generation | OpenAI/Anthropic/Google APIs |
+| **Frontend** | User interface | React 18, TypeScript, Tailwind, shadcn/ui |
 
-# Integration test (full workflow)
-./tests/integration/test_full_workflow.sh
-```
+### Search Pipeline
 
-### Code Quality
-
-```bash
-# Type checking
-cd services/api && poetry run mypy app/
-
-# Linting
-cd services/api && poetry run ruff check app/
-
-# Frontend type checking
-cd services/frontend && npx tsc --noEmit
-```
+1. **Query embedding** → 384-dimensional vector
+2. **Hybrid retrieval** → Vector search (Qdrant) + keyword search (Postgres)
+3. **RRF fusion** → Merge results using Reciprocal Rank Fusion
+4. **Cross-encoder reranking** → Score top results for relevance
+5. **AI generation** → Summary with inline citations [1][2][3]
 
 ---
 
-## Kubernetes Deployment
+## API Usage
 
-Deploy to a local Kubernetes cluster using [kind](https://kind.sigs.k8s.io/):
-
-```bash
-# Automated setup (creates cluster, builds images, deploys)
-./infrastructure/scripts/setup-kind-full.sh
-
-# Access services
-kubectl port-forward svc/frontend 3000:80 -n raas
-kubectl port-forward svc/api 8000:8000 -n raas
-```
-
-### Manual Deployment
-
-```bash
-# Create kind cluster
-kind create cluster --config infrastructure/kind/kind-config.yaml
-
-# Build and load images
-docker build -t raas-api:latest -f services/api/Dockerfile services/api
-kind load docker-image raas-api:latest
-
-# Deploy with Kustomize
-kubectl apply -k infrastructure/k8s/overlays/local/
-
-# Verify deployment
-kubectl get pods -n raas
-kubectl logs -f deployment/api -n raas
-```
-
-See [infrastructure/k8s/README.md](infrastructure/k8s/README.md) for production deployment instructions.
-
----
-
-## API Reference
-
-### Core Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/documents/upload` | Upload PDF/DOCX/TXT/CSV/MD file |
-| `GET` | `/api/v1/documents` | List all documents |
-| `GET` | `/api/v1/documents/{id}` | Get document details |
-| `DELETE` | `/api/v1/documents/{id}` | Delete document and vectors |
-| `POST` | `/api/v1/search` | Hybrid semantic search returning chunks |
-| `POST` | `/api/v1/generate/summary` | Generate AI summary from chunk IDs |
-| `GET` | `/api/v1/models` | List available LLM models |
-| `GET` | `/api/v1/health` | Health check endpoint |
-
-### Example 1: Search for Relevant Chunks
+### Search Documents
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/search \
   -H "Content-Type: application/json" \
-  -d '{
-    "query": "What is machine learning?",
-    "top_k": 10
-  }'
+  -d '{"query": "What is machine learning?", "top_k": 10}'
 ```
 
 Response:
 ```json
 {
-  "query": "What is machine learning?",
-  "results": [
-    {
-      "chunk_id": "660e8400-e29b-41d4-a716-446655440111",
-      "document_id": "550e8400-e29b-41d4-a716-446655440000",
-      "content": "Machine learning is a subset of AI that enables computers to learn from data...",
-      "score": 0.89,
-      "tokens": 512
-    }
-  ],
-  "total_results": 42
+  "results": [{
+    "chunk_id": "abc-123",
+    "content": "Machine learning is a subset of AI...",
+    "score": 0.89
+  }]
 }
 ```
 
-### Example 2: Generate AI Summary from Chunks
+### Generate AI Summary
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/generate/summary \
   -H "Content-Type: application/json" \
   -d '{
     "query": "What is machine learning?",
-    "chunk_ids": ["660e8400-e29b-41d4-a716-446655440111", "660e8400-e29b-41d4-a716-446655440222"],
+    "chunk_ids": ["abc-123", "def-456"],
     "model": "gpt-5-mini"
   }'
 ```
@@ -389,9 +151,99 @@ curl -X POST http://localhost:8000/api/v1/generate/summary \
 Response:
 ```json
 {
-  "summary": "Machine learning is an AI approach that enables computers to learn from data without explicit programming [1]. It includes techniques like supervised learning for labeled datasets [2].",
+  "summary": "Machine learning enables computers to learn from data [1]...",
   "model_used": "gpt-5-mini"
 }
+```
+
+See full API reference at http://localhost:8000/docs
+
+---
+
+## Deployment
+
+### Docker Compose (Development)
+
+```bash
+# Start
+docker-compose -f infrastructure/docker-compose/docker-compose.yml up -d
+
+# Stop
+docker-compose -f infrastructure/docker-compose/docker-compose.yml down
+
+# View logs
+docker-compose -f infrastructure/docker-compose/docker-compose.yml logs -f
+```
+
+### Kubernetes (Production)
+
+```bash
+# Automated setup (creates kind cluster, builds images, deploys)
+./infrastructure/scripts/setup-kind-full.sh
+
+# Manual deployment
+kind create cluster --config infrastructure/kind/kind-config.yaml
+docker build -t raas-api:latest -f services/api/Dockerfile services/api
+kind load docker-image raas-api:latest
+kubectl apply -k infrastructure/k8s/overlays/local/
+
+# Access services
+kubectl port-forward svc/frontend 3000:3000 -n raas
+kubectl port-forward svc/api 8000:8000 -n raas
+```
+
+**Note:** Services use ClusterIP by default. Use `kubectl port-forward` or setup an ingress controller for external access.
+
+See [infrastructure/k8s/README.md](infrastructure/k8s/README.md) for production deployment.
+
+---
+
+## Development
+
+### Local Setup
+
+```bash
+# Backend
+cd services/api
+poetry install
+poetry run uvicorn app.main:app --reload
+
+# Frontend
+cd services/frontend
+npm install
+npm run dev
+```
+
+### Testing
+
+```bash
+# Unit tests
+cd services/api && poetry run pytest
+cd services/frontend && npm test
+
+# Integration test (full workflow)
+./tests/integration/test_full_workflow.sh
+
+# Type checking
+cd services/api && poetry run mypy app/
+cd services/frontend && npx tsc --noEmit
+```
+
+### Project Structure
+
+```
+raas/
+├── services/
+│   ├── api/          FastAPI gateway
+│   ├── embedder/     Vector generation
+│   ├── generator/    LLM summaries
+│   ├── search/       Hybrid search
+│   └── frontend/     React UI
+├── infrastructure/
+│   ├── docker-compose/
+│   └── k8s/          Kubernetes manifests
+└── tests/
+    └── integration/
 ```
 
 ---
@@ -402,227 +254,125 @@ Response:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `OPENAI_API_KEY` | Yes | - | OpenAI API key for GPT models |
-| `ANTHROPIC_API_KEY` | No | - | Anthropic API key for Claude models |
-| `GOOGLE_API_KEY` | No | - | Google API key for Gemini models |
-| `DEFAULT_MODEL` | No | `gpt-5-mini` | Default model for summaries |
-| `DATABASE_URL` | No | Auto-generated | PostgreSQL connection string |
-| `QDRANT_URL` | No | `http://qdrant:6333` | Qdrant vector database URL |
+| `OPENAI_API_KEY` | Yes | - | OpenAI API key |
+| `ANTHROPIC_API_KEY` | No | - | Anthropic API key |
+| `GOOGLE_API_KEY` | No | - | Google API key |
+| `DEFAULT_MODEL` | No | `gpt-5-mini` | Default LLM model |
+| `DATABASE_URL` | No | Auto | PostgreSQL connection |
+| `QDRANT_URL` | No | `http://qdrant:6333` | Vector DB URL |
 
-### Generator Service Configuration
+### Generator Configuration
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `ENABLE_OPENAI` | No | `true` | Enable OpenAI provider |
-| `ENABLE_ANTHROPIC` | No | `false` | Enable Anthropic provider |
-| `ENABLE_GOOGLE` | No | `false` | Enable Google provider |
-| `MAX_CHUNKS` | No | `5` | Maximum chunks for generation context |
-| `TEMPERATURE` | No | `0.1` | LLM temperature (0.0-1.0) |
-| `MAX_TOKENS` | No | `2000` | Maximum tokens in generated response |
-| `TIMEOUT` | No | `30` | API request timeout in seconds |
-
-See individual service `.env.example` files for complete configuration options.
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MAX_CHUNKS` | `5` | Max chunks for context |
+| `TEMPERATURE` | `0.1` | LLM temperature (0.0-1.0) |
+| `MAX_TOKENS` | `2000` | Max response tokens |
+| `TIMEOUT` | `30` | API timeout (seconds) |
 
 ---
 
-## Project Structure
+## Troubleshooting
 
+**Services won't start**
+```bash
+# Check logs
+docker-compose -f infrastructure/docker-compose/docker-compose.yml logs -f
+
+# Verify .env file exists and has valid keys
+cat .env
 ```
-raas/
-├── services/
-│   ├── api/              # FastAPI gateway service
-│   │   ├── app/
-│   │   │   ├── api/      # Route handlers
-│   │   │   ├── domain/   # Business logic
-│   │   │   ├── models/   # SQLAlchemy models
-│   │   │   └── repositories/  # Data access layer
-│   │   ├── tests/
-│   │   └── pyproject.toml
-│   ├── embedder/         # Vector generation service
-│   ├── generator/        # LLM summarisation service
-│   ├── search/           # Hybrid search service
-│   └── frontend/         # React SPA
-│       ├── src/
-│       │   ├── components/
-│       │   ├── hooks/
-│       │   └── services/
-│       └── package.json
-├── infrastructure/
-│   ├── docker-compose/   # Local development
-│   │   ├── docker-compose.yml
-│   │   └── .env.example
-│   ├── k8s/              # Kubernetes manifests
-│   │   ├── base/
-│   │   └── overlays/
-│   ├── kind/             # Local Kubernetes setup
-│   └── scripts/
-└── tests/
-    └── integration/
+
+**"OPENAI_API_KEY is required" error**
+```bash
+# Run setup script
+./scripts/setup-secrets.sh
+
+# Or manually check .env file
+grep OPENAI_API_KEY .env
+```
+
+**No search results**
+```bash
+# Verify documents uploaded
+curl http://localhost:8000/api/v1/documents | jq
+
+# Check Qdrant collection
+curl http://localhost:6333/collections/documents | jq
+```
+
+**Kubernetes pod crashes**
+```bash
+kubectl get pods -n raas
+kubectl logs -f deployment/api -n raas
+kubectl describe pod <pod-name> -n raas
 ```
 
 ---
 
-## Extending the Platform
+## Performance
 
-### Adding a New LLM Provider
+- **Search latency:** <100ms (95th percentile)
+- **Embedding:** ~50ms per 512-token chunk
+- **AI generation:** 2-5 seconds (model dependent)
+- **Throughput:** 100+ concurrent searches with autoscaling
 
-1. Create a provider class in `services/generator/app/providers/`:
+Kubernetes deployment includes Horizontal Pod Autoscalers for API, embedder, generator, and search services.
+
+---
+
+## Extending
+
+### Add a New LLM Provider
+
+1. Create provider class in `services/generator/app/providers/`:
 
 ```python
 from app.providers.base import ModelProvider
 
 class MyProvider(ModelProvider):
     async def generate(self, prompt: str, **kwargs) -> str:
-        # Implementation here
+        # Implementation
         pass
 ```
 
 2. Register in `services/generator/app/main.py`:
 
 ```python
-from app.providers.my_provider import MyProvider
-
 providers = {
-    "my-provider": MyProvider(api_key=os.getenv("MY_PROVIDER_API_KEY"))
+    "my-provider": MyProvider(api_key=os.getenv("MY_PROVIDER_KEY"))
 }
 ```
 
 3. Add credentials to `.env`:
 
 ```bash
-MY_PROVIDER_API_KEY=your-key-here
+MY_PROVIDER_KEY=your-key-here
 ```
 
-See [services/generator/README.md](services/generator/README.md) for detailed examples.
-
----
-
-## Performance & Scaling
-
-### Benchmarks
-
-- **Search latency**: Under 100ms for hybrid search (95th percentile)
-- **Embedding generation**: About 50ms per 512-token chunk
-- **AI summary generation**: 2-5 seconds (depends on the model and provider)
-- **Throughput**: Handles 100+ concurrent searches with autoscaling enabled
-
-### Horizontal Pod Autoscaler
-
-The Kubernetes deployment scales services up and down based on CPU and memory usage:
-
-```yaml
-# Example HPA configuration
-minReplicas: 2
-maxReplicas: 5
-targetCPUUtilizationPercentage: 70
-targetMemoryUtilizationPercentage: 80
-```
-
----
-
-## Troubleshooting
-
-### Services won't start
-
-```bash
-# Check logs
-docker-compose -f infrastructure/docker-compose/docker-compose.yml logs -f
-
-# Restart individual service
-docker-compose -f infrastructure/docker-compose/docker-compose.yml restart api
-```
-
-### No search results
-
-```bash
-# Verify documents were uploaded
-curl http://localhost:8000/api/v1/documents | jq
-
-# Check Qdrant collection
-curl http://localhost:6333/collections/documents | jq '.result'
-```
-
-### Database connection issues
-
-```bash
-# Access PostgreSQL
-docker exec -it raas-postgres psql -U raasuser -d raasdb
-
-# List tables
-\dt
-
-# Check documents
-SELECT id, title, status FROM documents;
-```
-
-### Kubernetes pod crashes
-
-```bash
-# Check pod status
-kubectl get pods -n raas
-
-# View logs
-kubectl logs -f deployment/api -n raas
-
-# Describe pod for events
-kubectl describe pod <pod-name> -n raas
-```
-
----
-
-## How It Works
-
-### Search Pipeline
-
-1. **Query Embedding** – Your search gets converted to a 384-dimensional vector
-2. **Hybrid Retrieval** – Runs vector search (Qdrant) and keyword search (PostgreSQL) at the same time
-3. **RRF Fusion** – Merges both result sets using Reciprocal Rank Fusion
-4. **Cross-Encoder Reranking** – Scores the top results for relevance
-5. **AI Summarisation** – Generates an answer with inline citations
-
-### Design Choices
-
-- **Microservices** – The expensive operations (embeddings, AI) can scale separately
-- **Async I/O** – Handles many concurrent requests without waiting
-- **Repository Pattern** – Keeps data access code separate from business logic
-- **Type Safety** – Pydantic and TypeScript catch type errors before runtime
-
----
-
-## Testing
-
-The project has 47 test files covering all services:
-
-- Unit tests using pytest (Python) and Jest (TypeScript)
-- Integration tests for the full upload-search-generate workflow
-- Type checking with mypy in strict mode
-- Code linting with Ruff and ESLint
-
-```bash
-# Run all tests
-./tests/integration/test_full_workflow.sh
-
-# Run with coverage report
-cd services/api && poetry run pytest --cov=app --cov-report=html
-```
+See [services/generator/README.md](services/generator/README.md) for details.
 
 ---
 
 ## Contributing
 
-This started as a portfolio and academic project, but contributions are welcome! Bug fixes, documentation improvements, and educational enhancements are all appreciated.
+This is a portfolio and academic project, but contributions are welcome. Focus areas:
 
-Check out [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+- Bug fixes
+- Documentation improvements
+- Educational enhancements
 
-### Quick Start for Contributors
+### Steps
 
-1. Fork the repo
+1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Make your changes and write tests
-4. Run the tests: `poetry run pytest` (backend) or `npm test` (frontend)
-5. Commit your changes: `git commit -am 'feat: add my feature'`
-6. Push to your branch: `git push origin feature/my-feature`
+3. Write tests for changes
+4. Run tests: `poetry run pytest` or `npm test`
+5. Commit: `git commit -am 'Add feature'`
+6. Push: `git push origin feature/my-feature`
 7. Open a Pull Request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
@@ -632,24 +382,12 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
-## Contact & Links
+## Contact
 
-**Author:** Michael Blauberg
+**Michael Blauberg**
+- Email: mblauberg@outlook.com
+- LinkedIn: [linkedin.com/in/mblauberg](https://linkedin.com/in/mblauberg)
 
-**Email:** mblauberg@outlook.com
-
-**LinkedIn:** [linkedin.com/in/mblauberg](https://linkedin.com/in/mblauberg)
-
-**Project Links:**
+**Project Links**
 - [Report Issues](../../issues)
 - [Security Policy](SECURITY.md)
-- [Contributing Guidelines](CONTRIBUTING.md)
-
----
-
-## Built With
-
-- [FastAPI](https://fastapi.tiangolo.com/), [React](https://react.dev/), and [Kubernetes](https://kubernetes.io/)
-- [Qdrant](https://qdrant.tech/) for vector search
-- [sentence-transformers](https://www.sbert.net/) for embeddings
-- [shadcn/ui](https://ui.shadcn.com/) for UI components
