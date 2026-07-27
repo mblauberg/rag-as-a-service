@@ -2,7 +2,7 @@
 name = "raas-embedder"
 version = "0.1.0"
 description = "Embedding generation service for RAAS using sentence-transformers"
-authors = ["RAAS Team"]
+authors = ["Michael Blauberg <mblauberg@outlook.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

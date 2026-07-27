@@ -13,7 +13,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 ENV PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
 
 # Install Poetry
-RUN pip install poetry==1.7.1
+RUN pip install poetry==2.2.1
 
 # Copy dependency files
 COPY pyproject.toml poetry.lock* ./

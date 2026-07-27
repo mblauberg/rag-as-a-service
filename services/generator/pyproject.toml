@@ -2,7 +2,7 @@
 name = "raas-generator"
 version = "0.1.0"
 description = "LLM generation service for RAAS"
-authors = ["RAAS Team"]
+authors = ["Michael Blauberg <mblauberg@outlook.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

@@ -3,14 +3,14 @@ FROM python:3.13-slim
 WORKDIR /app
 
 # Install Poetry
-RUN pip install poetry==1.6.1
+RUN pip install poetry==2.2.1
 
 # Copy dependency files
 COPY pyproject.toml ./
 
 # Install dependencies
 RUN poetry config virtualenvs.create false \
-    && poetry install --only main --no-interaction --no-ansi
+    && poetry install --only main --no-interaction --no-ansi --no-root
 
 # Copy application code
 COPY app/ ./app/
