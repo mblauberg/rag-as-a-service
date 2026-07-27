@@ -2,7 +2,7 @@
 name = "raas-search"
 version = "0.1.0"
 description = "Search and retrieval service for RAAS"
-authors = ["RAAS Team"]
+authors = ["Michael Blauberg <mblauberg@outlook.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
@@ -25,6 +25,7 @@ pytest-cov = "^6.0.0"
 pytest-mock = "^3.14.0"
 mypy = "^1.13.0"
 ruff = "^0.8.0"
+greenlet = "^3.2.4"
 
 [build-system]
 requires = ["poetry-core"]

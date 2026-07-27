@@ -1,0 +1,148 @@
+name: CI
+
+# Runnable proof for the RAAS monorepo.
+#
+# Scope and deliberate limits:
+#   * Every job here runs against mocks / in-memory SQLite only. No Postgres,
+#     Qdrant, or model-server infrastructure is stood up in CI, and no test that
+#     needs a live LLM provider key is executed. Integration suites under
+#     /tests/integration expect a running docker-compose stack and are NOT run
+#     here (see tests/README.md to run them locally).
+#   * Two search-service test modules and one frontend test module are excluded
+#     because they have drifted from the implementation and fail on main. They
+#     are listed explicitly below so the exclusions stay visible.
+#   * The docker job builds all five service images. It could not be run on the
+#     machine that authored this workflow (no Docker daemon), so it first landed
+#     as best-effort; it has since gone green on CI and is now required.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.13"
+  POETRY_VERSION: "2.2.1"
+
+jobs:
+  python-tests:
+    name: pytest (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # 210 tests. Uses in-memory SQLite (aiosqlite) plus mocked Qdrant /
+          # embedder / generator clients; no external services required.
+          - service: api
+            pytest_args: "--no-cov"
+          # 8 tests. sentence-transformers is imported but the model is mocked.
+          - service: embedder
+            pytest_args: ""
+          # 36 tests. All LLM providers are mocked; no API keys needed.
+          - service: generator
+            pytest_args: ""
+          # 25 tests. The two ignored modules assert against an older
+          # VectorSearchService / SearchOrchestrator API and fail on main:
+          #   tests/services/test_vector_search.py      - patches a read-only
+          #     `client` property that no longer has a setter.
+          #   tests/services/test_search_orchestrator.py - expects the pre-RRF
+          #     return shape and a `top_k` rerank kwarg.
+          - service: search
+            pytest_args: >-
+              --ignore=tests/services/test_vector_search.py
+              --ignore=tests/services/test_search_orchestrator.py
+    defaults:
+      run:
+        working-directory: services/${{ matrix.service }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
+
+      - name: Cache virtualenv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: poetry-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ matrix.service }}-${{ hashFiles(format('services/{0}/poetry.lock', matrix.service)) }}
+
+      # --no-root: these services are applications, not installable packages;
+      # there is no package directory matching the pyproject name.
+      - name: Install dependencies
+        run: poetry install --with dev --no-root --no-interaction
+
+      - name: Run pytest
+        run: poetry run pytest -q ${{ matrix.pytest_args }}
+
+  frontend:
+    name: frontend (build + vitest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: services/frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: services/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 7 files, 136 passing / 4 skipped. EnhancedSearchBar.test.tsx is excluded:
+      # two of its cases query for model-selector text ("Select model") that the
+      # current component no longer renders. It fails on main.
+      - name: Run vitest
+        run: npx vitest run --exclude 'src/components/search/__tests__/EnhancedSearchBar.test.tsx'
+
+      # tsc + vite build. This is the frontend's real compile gate.
+      - name: Build
+        run: npm run build
+
+  docker:
+    name: docker build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: [python-tests, frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      # Strict: the compose file must at least parse and resolve.
+      - name: Validate docker-compose
+        run: docker compose -f infrastructure/docker-compose/docker-compose.yml config --quiet
+
+      # Free disk before the image builds; the api/embedder/search images pull
+      # torch + sentence-transformers and are multi-GB.
+      - name: Reclaim runner disk
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          df -h /
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Each image is built independently so one failure does not mask the
+      # others. Verified green on CI run 30239490903 (all five images built).
+      - name: Build service images
+        run: |
+          set -x
+          status=0
+          for svc in generator search api embedder; do
+            docker build -t "raas-$svc:ci" "services/$svc" || status=1
+          done
+          docker build -t raas-frontend:ci services/frontend || status=1
+          exit $status

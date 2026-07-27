@@ -2,6 +2,8 @@
   "name": "raas-frontend",
   "version": "1.0.0",
   "description": "React frontend for RAAS (Retrieval-Augmented Generation as a Service)",
+  "author": "Michael Blauberg <mblauberg@outlook.com>",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
