@@ -11,9 +11,9 @@ name: CI
 #   * Two search-service test modules and one frontend test module are excluded
 #     because they have drifted from the implementation and fail on main. They
 #     are listed explicitly below so the exclusions stay visible.
-#   * The docker job is best-effort (continue-on-error) because it could not be
-#     validated on the machine that authored this workflow (no Docker daemon).
-#     Promote it to a required job once it has gone green.
+#   * The docker job builds all five service images. It could not be run on the
+#     machine that authored this workflow (no Docker daemon), so it first landed
+#     as best-effort; it has since gone green on CI and is now required.
 
 on:
   push:
@@ -115,7 +115,7 @@ jobs:
         run: npm run build
 
   docker:
-    name: docker build (best-effort)
+    name: docker build
     runs-on: ubuntu-latest
     timeout-minutes: 60
     needs: [python-tests, frontend]
@@ -135,11 +135,9 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
-      # Best-effort: not verified locally (no Docker daemon available when this
-      # workflow was written). Each image is built independently so one failure
-      # does not mask the others. Make this job required once it is green.
+      # Each image is built independently so one failure does not mask the
+      # others. Verified green on CI run 30239490903 (all five images built).
       - name: Build service images
-        continue-on-error: true
         run: |
           set -x
           status=0
