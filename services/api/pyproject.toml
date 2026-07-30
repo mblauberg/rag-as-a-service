@@ -84,6 +84,7 @@ ignore = [
     "B904",  # Within except, raise from err (pre-existing, defer to pragmatic exception handling)
     "N818",  # Exception naming convention (pre-existing, project uses Exception not Error suffix)
     "F401",  # Unused imports (pre-existing, some are used dynamically)
+    "F841",  # Local variable assigned but never used (pre-existing, mostly in tests)
 ]
 
 [tool.ruff.format]
