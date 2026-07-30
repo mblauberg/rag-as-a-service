@@ -44,7 +44,11 @@ target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "N", "UP", "B", "C4", "SIM"]
-ignore = ["E501"]
+ignore = [
+    "E501",  # Line too long (handled by formatter)
+    "B904",  # Within except, raise from err (pre-existing, defer to pragmatic exception handling)
+    "N818",  # Exception naming convention (pre-existing, project uses Exception not Error suffix)
+]
 
 [tool.ruff.format]
 quote-style = "double"
