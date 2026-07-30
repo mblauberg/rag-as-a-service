@@ -30,6 +30,72 @@ env:
   POETRY_VERSION: "2.2.1"
 
 jobs:
+  python-lint:
+    name: ruff lint (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [api, embedder, generator, search]
+    defaults:
+      run:
+        working-directory: services/${{ matrix.service }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
+
+      - name: Cache virtualenv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: poetry-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ matrix.service }}-${{ hashFiles(format('services/{0}/poetry.lock', matrix.service)) }}
+
+      - name: Install dependencies
+        run: poetry install --with dev --no-root --no-interaction
+
+      - name: Run ruff check
+        run: poetry run ruff check app/ tests/
+
+  python-types:
+    name: mypy check (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [api, embedder, generator, search]
+    defaults:
+      run:
+        working-directory: services/${{ matrix.service }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
+
+      - name: Cache virtualenv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: poetry-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ matrix.service }}-${{ hashFiles(format('services/{0}/poetry.lock', matrix.service)) }}
+
+      - name: Install dependencies
+        run: poetry install --with dev --no-root --no-interaction
+
+      - name: Run mypy
+        run: poetry run mypy app/
+
   python-tests:
     name: pytest (${{ matrix.service }})
     runs-on: ubuntu-latest
@@ -85,6 +151,28 @@ jobs:
       - name: Run pytest
         run: poetry run pytest -q ${{ matrix.pytest_args }}
 
+  frontend-lint:
+    name: eslint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: services/frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: services/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run eslint
+        run: npm run lint
+
   frontend:
     name: frontend (build + vitest)
     runs-on: ubuntu-latest
@@ -118,7 +206,7 @@ jobs:
     name: docker build
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    needs: [python-tests, frontend]
+    needs: [python-lint, python-types, python-tests, frontend-lint, frontend]
     steps:
       - uses: actions/checkout@v4
 

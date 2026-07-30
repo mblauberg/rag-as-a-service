@@ -6,6 +6,7 @@ and adapted for search service architecture.
 import asyncio
 import logging
 from concurrent.futures import ThreadPoolExecutor
+
 import numpy as np
 from sentence_transformers import CrossEncoder
 

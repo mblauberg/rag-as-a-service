@@ -1,5 +1,6 @@
 """Test Pydantic schemas for generation service."""
 import pytest
+
 from app.models.schemas import GenerateRequest, GenerateResponse, Model
 
 

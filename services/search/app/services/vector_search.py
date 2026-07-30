@@ -1,8 +1,9 @@
 """Vector search service using Qdrant."""
 import logging
 from uuid import UUID
+
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.models import Filter, FieldCondition, MatchValue
+from qdrant_client.models import FieldCondition, Filter, MatchValue
 
 from app.models.domain import Chunk
 

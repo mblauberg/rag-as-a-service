@@ -1,23 +1,24 @@
 """FastAPI application entrypoint for the embedder service."""
 import logging
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Dict, Any
+from typing import Any, AsyncGenerator, Dict
+
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.exceptions import RaasException
-from app.services.embedding_service import embedding_service
 from app.models.schemas import (
-    EmbedRequest,
-    EmbedResponse,
     EmbedQueryRequest,
     EmbedQueryResponse,
+    EmbedRequest,
+    EmbedResponse,
     GenerateEmbeddingsRequest,
     GenerateEmbeddingsResponse,
     HealthResponse,
-    ReadinessResponse
+    ReadinessResponse,
 )
+from app.services.embedding_service import embedding_service
 
 # Configure logging
 logging.basicConfig(

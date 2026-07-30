@@ -1,9 +1,11 @@
 """Tests for vector search service."""
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
-from app.services.vector_search import VectorSearchService
+
+import pytest
+
 from app.models.domain import Chunk
+from app.services.vector_search import VectorSearchService
 
 
 @pytest.fixture

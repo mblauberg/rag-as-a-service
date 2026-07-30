@@ -4,8 +4,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from app.core.exceptions import GenerationServiceError
-from app.infrastructure.generation.llm_query_augmenter import \
-    LLMQueryAugmenterImpl
+from app.infrastructure.generation.llm_query_augmenter import LLMQueryAugmenterImpl
 
 
 @pytest.fixture

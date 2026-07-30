@@ -1,14 +1,15 @@
 """Dependency injection for FastAPI."""
 import threading
 from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import settings
-from app.services.vector_search import VectorSearchService
-from app.services.keyword_search import KeywordSearchService
 from app.services.fusion import RRFFusionService
+from app.services.keyword_search import KeywordSearchService
 from app.services.reranker import CrossEncoderReranker
-from app.services.search_orchestrator import SearchOrchestrator, EmbedderClient
+from app.services.search_orchestrator import EmbedderClient, SearchOrchestrator
+from app.services.vector_search import VectorSearchService
 
 # Database engine
 engine = create_async_engine(settings.database_url, echo=False)

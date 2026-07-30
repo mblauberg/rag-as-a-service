@@ -1,9 +1,11 @@
 """Google Gemini provider implementation."""
 import os
 from typing import List
+
 import google.generativeai as genai
-from app.providers.base import ModelProvider
+
 from app.models.schemas import Model
+from app.providers.base import ModelProvider
 
 
 class GoogleProvider(ModelProvider):

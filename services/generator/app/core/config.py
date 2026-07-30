@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # Model Configuration
-    default_model: str = "openai:gpt-5-mini"
+    default_model: str = "openai:gpt-4o-mini"
     max_chunks: int = 5
     temperature: float = 0.1
 

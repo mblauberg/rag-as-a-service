@@ -1,8 +1,10 @@
 """Test generation service integration."""
-import pytest
 from unittest.mock import AsyncMock, patch
-from app.services.generation_service import GenerationService
+
+import pytest
+
 from app.models.schemas import ChunkInput, Model
+from app.services.generation_service import GenerationService
 
 
 @pytest.mark.asyncio

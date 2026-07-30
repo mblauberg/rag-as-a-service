@@ -1,6 +1,7 @@
 """Pydantic schemas for search service API."""
 from enum import Enum
 from uuid import UUID
+
 from pydantic import BaseModel, Field, field_validator
 
 

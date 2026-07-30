@@ -1,9 +1,11 @@
 """OpenAI provider implementation."""
 import os
 from typing import List
+
 from openai import AsyncOpenAI
-from app.providers.base import ModelProvider
+
 from app.models.schemas import Model
+from app.providers.base import ModelProvider
 
 
 class OpenAIProvider(ModelProvider):

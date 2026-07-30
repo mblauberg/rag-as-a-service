@@ -1,11 +1,12 @@
 """Tests for cross-encoder reranker."""
-import pytest
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
-import numpy as np
 
-from app.services.reranker import CrossEncoderReranker
+import numpy as np
+import pytest
+
 from app.models.domain import Chunk
+from app.services.reranker import CrossEncoderReranker
 
 
 @pytest.fixture

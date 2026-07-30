@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
-from app.providers.openai_provider import OpenAIProvider
+
 from app.models.schemas import Model
+from app.providers.openai_provider import OpenAIProvider
 
 
 def test_is_available_with_api_key():

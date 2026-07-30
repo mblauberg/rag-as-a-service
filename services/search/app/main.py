@@ -2,21 +2,22 @@
 import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Dict, List
-from fastapi import FastAPI, HTTPException, Depends, Request, status
+
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.exceptions import RaasException
+from app.dependencies import get_db, get_reranker, get_search_orchestrator
 from app.models.schemas import (
-    SearchRequest,
-    SearchResponse,
     ChunkResult,
     HealthResponse,
     ReadinessResponse,
+    SearchRequest,
+    SearchResponse,
 )
 from app.services.search_orchestrator import SearchOrchestrator
-from app.dependencies import get_db, get_search_orchestrator, get_reranker
 
 # Configure logging
 logging.basicConfig(

@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 from anthropic.types import TextBlock
-from app.providers.anthropic_provider import AnthropicProvider
+
 from app.models.schemas import Model
+from app.providers.anthropic_provider import AnthropicProvider
 
 
 def test_is_available_with_api_key():

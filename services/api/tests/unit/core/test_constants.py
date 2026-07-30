@@ -1,9 +1,15 @@
 """Test application constants"""
-from app.core.constants import (DEFAULT_CHUNK_MAX_SIZE, DEFAULT_CHUNK_MIN_SIZE,
-                                DEFAULT_SEARCH_LIMIT, EMBEDDER_TIMEOUT_SECONDS,
-                                EMBEDDING_DIMENSION, GENERATOR_TIMEOUT_SECONDS,
-                                MAX_SEARCH_LIMIT, MAX_UPLOAD_SIZE_MB,
-                                SEMANTIC_BREAKPOINT_PERCENTILE)
+from app.core.constants import (
+    DEFAULT_CHUNK_MAX_SIZE,
+    DEFAULT_CHUNK_MIN_SIZE,
+    DEFAULT_SEARCH_LIMIT,
+    EMBEDDER_TIMEOUT_SECONDS,
+    EMBEDDING_DIMENSION,
+    GENERATOR_TIMEOUT_SECONDS,
+    MAX_SEARCH_LIMIT,
+    MAX_UPLOAD_SIZE_MB,
+    SEMANTIC_BREAKPOINT_PERCENTILE,
+)
 
 
 def test_embedding_dimension():

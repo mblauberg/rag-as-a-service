@@ -1,6 +1,7 @@
 """Integration tests for summary generation flow."""
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock
 
 
 @pytest.mark.asyncio

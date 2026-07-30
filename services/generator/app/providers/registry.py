@@ -1,7 +1,8 @@
 """Provider registry for managing multiple model providers."""
 from typing import Dict, List, Tuple
-from app.providers.base import ModelProvider
+
 from app.models.schemas import Model
+from app.providers.base import ModelProvider
 
 
 class ProviderRegistry:
