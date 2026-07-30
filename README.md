@@ -144,7 +144,7 @@ curl -X POST http://localhost:8000/api/v1/generate/summary \
   -d '{
     "query": "What is machine learning?",
     "chunk_ids": ["abc-123", "def-456"],
-    "model": "gpt-5-mini"
+    "model": "openai:gpt-4o-mini"
   }'
 ```
 
@@ -152,7 +152,7 @@ Response:
 ```json
 {
   "summary": "Machine learning enables computers to learn from data [1]...",
-  "model_used": "gpt-5-mini"
+  "model_used": "openai:gpt-4o-mini"
 }
 ```
 
@@ -221,6 +221,10 @@ npm run dev
 cd services/api && poetry run pytest
 cd services/frontend && npm test
 
+# Linting and type checking
+cd services/api && poetry run ruff check app/ && poetry run mypy app/
+cd services/frontend && npm run lint
+
 # Integration test (full workflow)
 ./tests/integration/test_full_workflow.sh
 
@@ -257,7 +261,7 @@ raas/
 | `OPENAI_API_KEY` | Yes | - | OpenAI API key |
 | `ANTHROPIC_API_KEY` | No | - | Anthropic API key |
 | `GOOGLE_API_KEY` | No | - | Google API key |
-| `DEFAULT_MODEL` | No | `gpt-5-mini` | Default LLM model |
+| `DEFAULT_MODEL` | No | `openai:gpt-4o-mini` | Default LLM model |
 | `DATABASE_URL` | No | Auto | PostgreSQL connection |
 | `QDRANT_URL` | No | `http://qdrant:6333` | Vector DB URL |
 
@@ -321,6 +325,19 @@ Kubernetes deployment includes Horizontal Pod Autoscalers for API, embedder, gen
 
 ---
 
+## Limitations
+
+RAaS is a portfolio/educational project with known constraints:
+
+- **Retrieval quality** – Search ranking depends on embedding model choice and query formulation. Semantic retrieval can miss non-obvious synonyms or domain-specific language; hybrid search helps but is not bulletproof.
+- **Latency** – End-to-end search + generation typically takes 2-5 seconds; embedding and LLM inference dominate. This is not suitable for sub-second SLA requirements.
+- **Cost** – Queries against external LLM providers (OpenAI, Anthropic, Google) incur API costs proportional to token usage. Local models are not integrated.
+- **Provider dependency** – Generator service depends on external API availability. Service interruptions or rate limits cascade to users.
+- **Data handling** – Uploaded documents are stored in PostgreSQL and vector embeddings in Qdrant with no built-in encryption at rest. Ensure compliance with data governance policies before processing sensitive material.
+- **Scale limits** – Docker Compose setup is designed for development; production Kubernetes deployment adds infrastructure complexity. Vector DB (Qdrant) and relational DB (PostgreSQL) may require tuning for large corpora.
+
+---
+
 ## Extending
 
 ### Add a New LLM Provider
@@ -379,6 +396,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ## License
 
 MIT License - See [LICENSE](LICENSE) for details.
+
+---
+
+## About
+
+**RAaS** is a solo personal project by Michael Blauberg, combining retrieval-augmented generation, multi-service orchestration, and frontend/backend integration for educational purposes.
 
 ---
 
