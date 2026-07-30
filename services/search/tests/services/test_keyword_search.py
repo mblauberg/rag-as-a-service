@@ -1,9 +1,11 @@
 """Tests for keyword search service."""
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
-from app.services.keyword_search import KeywordSearchService
+
+import pytest
+
 from app.models.domain import Chunk
+from app.services.keyword_search import KeywordSearchService
 
 
 @pytest.fixture

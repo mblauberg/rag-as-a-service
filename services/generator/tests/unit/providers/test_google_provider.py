@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
-from app.providers.google_provider import GoogleProvider
+
 from app.models.schemas import Model
+from app.providers.google_provider import GoogleProvider
 
 
 def test_is_available_with_api_key():

@@ -4,8 +4,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from app.core.exceptions import GenerationServiceError
-from app.infrastructure.services.generation_service import \
-    HTTPGenerationService
+from app.infrastructure.services.generation_service import HTTPGenerationService
 
 
 @pytest.fixture

@@ -1,8 +1,10 @@
 """Tests for search service schemas."""
-import pytest
 from uuid import uuid4
+
+import pytest
+
 from app.models.domain import Chunk
-from app.models.schemas import SearchRequest, SearchResponse, SearchMode
+from app.models.schemas import SearchMode, SearchRequest, SearchResponse
 
 
 class TestChunk:

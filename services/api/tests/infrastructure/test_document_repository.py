@@ -7,14 +7,12 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
-from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
-                                    create_async_engine)
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.database import Base
 from app.core.enums import UploadStatus
 from app.domain.entities.document import Document
-from app.infrastructure.db.repositories.document_repository_impl import \
-    DocumentRepositoryImpl
+from app.infrastructure.db.repositories.document_repository_impl import DocumentRepositoryImpl
 
 
 @pytest.fixture

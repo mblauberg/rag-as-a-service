@@ -1,7 +1,8 @@
 """Test prompt service for RAG synthesis."""
 import pytest
-from app.services.prompt_service import PromptService
+
 from app.models.schemas import ChunkInput
+from app.services.prompt_service import PromptService
 
 
 def test_build_rag_prompt_single_chunk():

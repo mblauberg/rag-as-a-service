@@ -2,8 +2,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.core.config import (ChunkingConfig, EmbedderConfig, GeneratorConfig,
-                             SearchConfig, Settings)
+from app.core.config import ChunkingConfig, EmbedderConfig, GeneratorConfig, SearchConfig, Settings
 
 
 def test_chunking_config_defaults():

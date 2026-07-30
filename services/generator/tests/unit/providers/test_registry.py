@@ -1,7 +1,8 @@
 import pytest
-from app.providers.registry import ProviderRegistry
-from app.providers.base import ModelProvider
+
 from app.models.schemas import Model
+from app.providers.base import ModelProvider
+from app.providers.registry import ProviderRegistry
 
 
 class MockProvider(ModelProvider):

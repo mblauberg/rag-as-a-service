@@ -1,4 +1,5 @@
 import pytest
+
 from app.providers.base import ModelProvider
 
 

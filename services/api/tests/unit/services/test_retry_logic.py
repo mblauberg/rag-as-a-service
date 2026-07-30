@@ -1,11 +1,17 @@
 """Tests for retry logic in HTTP services."""
 
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import httpx
+import pytest
 from tenacity import RetryError
 
-from app.core.exceptions import ServiceUnavailableError, EmbeddingServiceError, GenerationServiceError, ValidationError
+from app.core.exceptions import (
+    EmbeddingServiceError,
+    GenerationServiceError,
+    ServiceUnavailableError,
+    ValidationError,
+)
 from app.infrastructure.services.embedding_service import HTTPEmbeddingService
 from app.services.generator_client import GeneratorClient
 

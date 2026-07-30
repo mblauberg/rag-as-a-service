@@ -1,11 +1,12 @@
 """Tests for search orchestrator."""
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
-from app.services.search_orchestrator import SearchOrchestrator
+import pytest
+
 from app.models.domain import Chunk
 from app.models.schemas import SearchMode
+from app.services.search_orchestrator import SearchOrchestrator
 
 
 @pytest.fixture

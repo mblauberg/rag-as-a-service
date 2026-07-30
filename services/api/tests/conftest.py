@@ -16,15 +16,14 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
-                                    create_async_engine)
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
 from app.api.dependencies import get_qdrant_client
 from app.core.database import Base, get_db
 from app.core.qdrant_client import QdrantClientWrapper
+from app.infrastructure.db.models import ChunkModel, DocumentModel
 from app.main import app
-from app.infrastructure.db.models import DocumentModel, ChunkModel
 
 # Test database URL - use PostgreSQL if DATABASE_URL env var is set, otherwise SQLite
 TEST_DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
@@ -212,12 +211,12 @@ async def async_client(db_session, mock_qdrant_client, mock_embedder_client, moc
     """
     from app.api.dependencies import get_upload_document_use_case
     from app.application.use_cases.upload_document import UploadDocumentUseCase
+    from app.core.config import settings
     from app.infrastructure.db.repositories.chunk_repository_impl import ChunkRepositoryImpl
     from app.infrastructure.db.repositories.document_repository_impl import DocumentRepositoryImpl
     from app.infrastructure.processing.file_processor import FileProcessorImpl
     from app.infrastructure.processing.semantic_chunker import SemanticChunkerImpl
     from app.infrastructure.vector_store.qdrant_store import QdrantVectorStoreImpl
-    from app.core.config import settings
 
     # Override dependencies
     async def override_get_db():
@@ -295,7 +294,7 @@ async def sample_document_with_chunks(db_session) -> DocumentModel:
 
     Returns a DocumentModel instance with associated chunks for testing.
     """
-    from datetime import datetime, UTC
+    from datetime import UTC, datetime
 
     document = DocumentModel(
         id=uuid4(),

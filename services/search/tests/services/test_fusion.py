@@ -1,8 +1,10 @@
 """Tests for RRF fusion service."""
-import pytest
 from uuid import uuid4
-from app.services.fusion import RRFFusionService
+
+import pytest
+
 from app.models.domain import Chunk
+from app.services.fusion import RRFFusionService
 
 
 @pytest.fixture

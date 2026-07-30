@@ -50,6 +50,7 @@ async def test_readiness_check_all_services_healthy(
     """
     # Patch httpx.AsyncClient to return our mock
     import httpx
+
     from app.core.qdrant_client import qdrant_client
 
     monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: mock_embedder_client)

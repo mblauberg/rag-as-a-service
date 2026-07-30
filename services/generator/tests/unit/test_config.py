@@ -1,5 +1,6 @@
 """Tests for configuration settings."""
 import os
+
 from app.core.config import settings
 
 

@@ -5,14 +5,12 @@ from uuid import uuid4
 
 import pytest
 
-from app.application.use_cases.upload_document import (UploadDocumentCommand,
-                                                       UploadDocumentUseCase)
+from app.application.use_cases.upload_document import UploadDocumentCommand, UploadDocumentUseCase
 from app.core.enums import UploadStatus
 from app.domain.entities.chunk import Chunk
 from app.domain.entities.document import Document
 from app.ports.repositories import ChunkRepository, DocumentRepository
-from app.ports.services import (EmbeddingService, FileProcessor, TextChunker,
-                                VectorStore)
+from app.ports.services import EmbeddingService, FileProcessor, TextChunker, VectorStore
 
 
 @pytest.mark.asyncio
