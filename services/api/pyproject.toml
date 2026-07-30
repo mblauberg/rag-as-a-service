@@ -82,6 +82,7 @@ select = [
 
 ignore = [
     "E501",  # Line too long (handled by formatter)
+    "B008",  # FastAPI Depends(...) in defaults
     "B904",  # Within except, raise from err (pre-existing, defer to pragmatic exception handling)
     "N818",  # Exception naming convention (pre-existing, project uses Exception not Error suffix)
 ]
