@@ -2,18 +2,19 @@
 import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Dict
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+import app.services.generation_service as gen_service
+from app.api.routes import generate, health, models
 from app.core.config import settings
 from app.core.exceptions import RaasException
-from app.api.routes import generate, models, health
-from app.providers.registry import ProviderRegistry
-from app.providers.openai_provider import OpenAIProvider
 from app.providers.anthropic_provider import AnthropicProvider
 from app.providers.google_provider import GoogleProvider
-import app.services.generation_service as gen_service
+from app.providers.openai_provider import OpenAIProvider
+from app.providers.registry import ProviderRegistry
 
 # Configure logging
 logging.basicConfig(

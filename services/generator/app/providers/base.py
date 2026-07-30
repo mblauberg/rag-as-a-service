@@ -1,6 +1,7 @@
 """Abstract base class for model providers."""
 from abc import ABC, abstractmethod
 from typing import List
+
 from app.models.schemas import Model
 
 

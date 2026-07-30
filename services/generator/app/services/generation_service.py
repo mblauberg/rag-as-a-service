@@ -1,14 +1,15 @@
 """High-level generation service using provider registry."""
 import logging
 from typing import List, Optional
+
+from app.core.config import settings
 from app.models.schemas import (
     ChunkInput,
     GenerateResponse,
     ModelsResponse,
 )
-from app.services.prompt_service import PromptService
-from app.core.config import settings
 from app.providers.registry import ProviderRegistry
+from app.services.prompt_service import PromptService
 
 logger = logging.getLogger(__name__)
 

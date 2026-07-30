@@ -1,6 +1,8 @@
 """Generation endpoints."""
 import logging
+
 from fastapi import APIRouter, HTTPException
+
 from app.models.schemas import GenerateRequest, GenerateResponse
 from app.services.prompt_service import PromptService
 

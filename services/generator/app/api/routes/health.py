@@ -1,8 +1,10 @@
 """Health and readiness check endpoints."""
 import logging
+
 from fastapi import APIRouter
-from app.models.schemas import HealthResponse, ReadinessResponse
+
 import app.services.generation_service as gen_service
+from app.models.schemas import HealthResponse, ReadinessResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

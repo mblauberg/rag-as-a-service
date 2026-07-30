@@ -1,6 +1,8 @@
 """Model listing endpoints."""
 import logging
+
 from fastapi import APIRouter, HTTPException
+
 from app.models.schemas import ModelsResponse
 
 logger = logging.getLogger(__name__)

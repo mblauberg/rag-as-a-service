@@ -1,11 +1,12 @@
 """Embedding service for generating and storing vector embeddings."""
 import logging
 from typing import Any, List
-from sentence_transformers import SentenceTransformer
+from uuid import UUID
+
 import numpy as np
 import numpy.typing as npt
 from qdrant_client.models import PointStruct
-from uuid import UUID
+from sentence_transformers import SentenceTransformer
 
 from app.core.config import settings
 from app.core.qdrant_client import get_qdrant_client

@@ -3,17 +3,18 @@
 Extracted from services/api/app/application/use_cases/search_documents.py
 and adapted for search service architecture (removed hexagonal architecture patterns).
 """
-import httpx
 import logging
 from uuid import UUID
+
+import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.domain import Chunk
 from app.models.schemas import SearchMode
-from app.services.vector_search import VectorSearchService
-from app.services.keyword_search import KeywordSearchService
 from app.services.fusion import RRFFusionService
+from app.services.keyword_search import KeywordSearchService
 from app.services.reranker import CrossEncoderReranker
+from app.services.vector_search import VectorSearchService
 
 logger = logging.getLogger(__name__)
 

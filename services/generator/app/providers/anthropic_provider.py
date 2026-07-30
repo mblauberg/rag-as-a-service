@@ -1,10 +1,12 @@
 """Anthropic Claude provider implementation."""
 import os
 from typing import List
+
 from anthropic import AsyncAnthropic
 from anthropic.types import TextBlock
-from app.providers.base import ModelProvider
+
 from app.models.schemas import Model
+from app.providers.base import ModelProvider
 
 
 class AnthropicProvider(ModelProvider):

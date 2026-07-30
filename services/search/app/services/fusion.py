@@ -1,6 +1,7 @@
 """Reciprocal Rank Fusion service for combining search results."""
 import logging
 from collections import defaultdict
+
 from app.models.domain import Chunk
 
 logger = logging.getLogger(__name__)

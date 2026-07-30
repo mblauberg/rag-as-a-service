@@ -1,6 +1,7 @@
 """Prompt engineering service for RAG synthesis."""
 import logging
 from typing import List
+
 from app.models.schemas import ChunkInput
 
 logger = logging.getLogger(__name__)

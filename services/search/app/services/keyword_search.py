@@ -1,6 +1,7 @@
 """Keyword search service using PostgreSQL Full-Text Search."""
 import logging
 from uuid import UUID
+
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 

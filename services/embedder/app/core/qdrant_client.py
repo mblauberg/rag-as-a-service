@@ -1,9 +1,10 @@
 """Qdrant client wrapper for collection management and vector operations."""
 import logging
 import time
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
 from typing import List
+
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, PointStruct, VectorParams
 
 from app.core.config import settings
 
